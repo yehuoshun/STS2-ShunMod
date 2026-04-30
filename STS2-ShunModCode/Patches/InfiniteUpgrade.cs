@@ -34,7 +34,7 @@ internal static class UpgradeEnergyStore
 /// <summary>
 /// 0费卡升级 → 累积 +1 能量。
 /// </summary>
-[HarmonyPatch(typeof(CardModel), nameof(CardModel.Upgrade))]
+[HarmonyPatch(typeof(CardModel), nameof(CardModel.Upgraded))]
 public static class InfiniteUpgrade_GainEnergy
 {
     static void Prefix(CardModel __instance)
