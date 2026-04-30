@@ -4,6 +4,7 @@ using MegaCrit.Sts2.Core.Events;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Runs;
+using STS2_ShunMod.Utils;
 
 namespace STS2_ShunMod.Events;
 
@@ -27,22 +28,33 @@ public sealed class RelicExchangeEvent : EventModel
         ];
     }
 
-    // ── 选项1：随机能力卡（所有颜色） ──
+    // ── 选项1：随机1遗物 → 随机能力卡（所有颜色） ──
     private async Task Option1()
     {
+        var relics = Owner!.Relics.ToList();
+        if (relics.Count == 0) { Finish("NO_RELICS"); return; }
+
+        RelicHelper.RemoveRelic(Owner, relics[Rng.NextInt(relics.Count)]);
+
         var card = GetRandomPowerCard();
         if (card == null) { Finish("NO_CARD"); return; }
 
-        var newCard = Owner!.RunState.CreateCard(card, Owner);
+        var newCard = Owner.RunState.CreateCard(card, Owner);
         await CardPileCmd.Add(newCard, PileType.Deck);
         Finish("OPT1_DONE");
     }
 
-    // ── 选项2：有注能附魔的能力卡 ──
+    // ── 选项2：随机2遗物 → 有注能附魔的能力卡 ──
     private async Task Option2()
     {
-        var card = GetRandomPowerCard();
-        if (card == null) { Finish("NO_CARD"); return; }
+        var relics = Owner!.Relics.ToList();
+        if (relics.Count < 2) { Finish("NO_RELICS"); return; }
+
+        var r1 = relics[Rng.NextInt(relics.Count)];
+        relics.Remove(r1);
+        var r2 = relics[Rng.NextInt(relics.Count)];
+        RelicHelper.RemoveRelic(Owner, r1);
+        RelicHelper.RemoveRelic(Owner, r2);
 
         var newCard = Owner!.RunState.CreateCard(card, Owner);
         var infuse = ModelDb.GetById<EnchantmentModel>("Infuse");
