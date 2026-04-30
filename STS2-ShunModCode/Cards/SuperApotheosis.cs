@@ -1,17 +1,19 @@
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Nodes.CommonUi;
 using STS2_ShunMod.Utils;
 
 namespace STS2_ShunMod.Cards;
 
 /// <summary>
-/// 超级神化 (Super Apotheosis) — 升级手牌 + 牌组中所有卡牌。
+/// 超级神化 (Super Apotheosis) — 升级所有局内卡牌 + 牌组中所有卡牌。
 /// </summary>
 public class SuperApotheosis : ShunCard
 {
     public SuperApotheosis()
-        : base(baseCost: 2, type: CardType.Skill, rarity: CardRarity.Rare, target: TargetType.Self)
+        : base(baseCost: 2, type: CardType.Skill, rarity: CardRarity.Event, target: TargetType.Self)
     {
         WithKeywords(CardKeyword.Exhaust);
         WithTip(CardKeyword.Exhaust);
@@ -22,16 +24,17 @@ public class SuperApotheosis : ShunCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        // 升级手牌
-        var handCards = PileType.Hand.GetPile(Owner).Cards
-            .Where(c => c is not null && c.IsUpgradable)
-            .ToList();
-        foreach (var card in handCards)
-            CardCmd.Upgrade(card);
+        foreach (CardModel allCard in base.Owner.PlayerCombatState.AllCards)
+        {
+            if (allCard != this && allCard.IsUpgradable)
+            {
+                CardCmd.Upgrade(allCard);
+            }
+        }
 
         // 升级牌组
         var deckCards = PileType.Deck.GetPile(Owner).Cards
-            .Where(c => c is not null && c.IsUpgradable)
+            .Where(c => c.IsUpgradable)
             .ToList();
         foreach (var card in deckCards)
             CardCmd.Upgrade(card, CardPreviewStyle.None);
