@@ -27,42 +27,24 @@ public sealed class RelicExchangeEvent : EventModel
         ];
     }
 
-    // ── 选项1：随机1遗物 → 随机能力卡 ──
+    // ── 选项1：随机能力卡（所有颜色） ──
     private async Task Option1()
     {
-        var relics = Owner!.Relics.ToList();
-        if (relics.Count == 0) { Finish("NO_RELICS"); return; }
-
-        // 随机移除1个遗物
-        var relic = relics[Rng.NextInt(relics.Count)];
-        Owner.Relics.Remove(relic);
-
-        // 随机能力卡（所有颜色）
         var card = GetRandomPowerCard();
         if (card == null) { Finish("NO_CARD"); return; }
 
-        var newCard = Owner.RunState.CreateCard(card, Owner);
+        var newCard = Owner!.RunState.CreateCard(card, Owner);
         await CardPileCmd.Add(newCard, PileType.Deck);
         Finish("OPT1_DONE");
     }
 
-    // ── 选项2：随机2遗物 → 有注能附魔的能力卡 ──
+    // ── 选项2：有注能附魔的能力卡 ──
     private async Task Option2()
     {
-        var relics = Owner!.Relics.ToList();
-        if (relics.Count < 2) { Finish("NO_RELICS"); return; }
-
-        for (int i = 0; i < 2; i++)
-        {
-            var r = relics[Rng.NextInt(relics.Count)];
-            Owner.Relics.Remove(r);
-            relics.Remove(r);
-        }
-
         var card = GetRandomPowerCard();
         if (card == null) { Finish("NO_CARD"); return; }
 
-        var newCard = Owner.RunState.CreateCard(card, Owner);
+        var newCard = Owner!.RunState.CreateCard(card, Owner);
         var infuse = ModelDb.GetById<EnchantmentModel>("Infuse");
         if (infuse != null) newCard.Enchantments.Add(infuse);
 
