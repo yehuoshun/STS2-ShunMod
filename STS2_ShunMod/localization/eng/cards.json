@@ -1,4 +1,4 @@
 {
-  "STS2_SHUNMOD-SUPER_APOTHEOSIS.title": "Super Apotheosis",
-  "STS2_SHUNMOD-SUPER_APOTHEOSIS.description": "Upgrade all cards in your deck for the rest of combat. Also upgrade all cards in your deck.{Exhaust:showExhaustTooltip}"
+  "SUPER_APOTHEOSIS.title": "Super Apotheosis",
+  "SUPER_APOTHEOSIS.description": "Upgrade all cards in your hand for the rest of combat. Also upgrade all cards in your deck.{Exhaust:showExhaustTooltip}"
 }
