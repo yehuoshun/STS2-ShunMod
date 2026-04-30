@@ -10,6 +10,7 @@ namespace STS2_ShunMod.Patches;
 public static class EventRegistry
 {
     private static readonly List<EventModel> Events = [];
+    public static IReadOnlyList<EventModel> RegisteredEvents => Events;
     private static bool _registered;
 
     public static void Register(EventModel eventModel)
@@ -24,6 +25,6 @@ public static class AllSharedEvents_Inject
 {
     static IEnumerable<EventModel> Postfix(IEnumerable<EventModel> __result)
     {
-        return [.. __result, .. EventRegistry.Events];
+        return [.. __result, .. EventRegistry.RegisteredEvents];
     }
 }
