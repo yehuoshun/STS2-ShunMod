@@ -2,7 +2,7 @@ using HarmonyLib;
 using MegaCrit.Sts2.Core.Modding;
 using MegaCrit.Sts2.Core.Models.CardPools;
 using MegaCrit.Sts2.Core.Nodes.Screens.MainMenu;
-using STS2_ShunMod.STS2_ShunModCode.Cards;
+using STS2_ShunMod.Cards;
 
 namespace STS2_ShunMod;
 
