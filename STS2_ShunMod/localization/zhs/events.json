@@ -1,1 +1,16 @@
-{}
+{
+  "SHUNMOD_RELIC_EXCHANGE.title": "遗物交易所",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.description": "你走进一间烟雾缭绕的小屋。\n柜台后面，一个神秘商人微笑着看着你：\n\"欢迎光临！用你的遗物换点好东西怎么样？\"",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT1.title": "交出1个遗物",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT1.description": "随机失去 [red]1[/red] 个遗物，获得一张随机能力卡。",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT2.title": "交出2个遗物",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT2.description": "随机失去 [red]2[/red] 个遗物，获得一张带有 [blue]注能[/blue] 附魔的能力卡。",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT3.title": "获取本Mod卡牌",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT3.description": "获得一张本 Mod 的随机卡牌。",
+  "SHUNMOD_RELIC_EXCHANGE.pages.OPT1_DONE.description": "商人接过你的遗物，递给你一张闪闪发光的能力卡。\n\"物超所值！\"",
+  "SHUNMOD_RELIC_EXCHANGE.pages.OPT2_DONE.description": "商人仔细收好两个遗物，拿出一张带有魔力纹路的卡片。\n\"这可是注能附魔的好东西！\"",
+  "SHUNMOD_RELIC_EXCHANGE.pages.OPT3_DONE.description": "商人从抽屉里翻出一张特别的卡片递给你。\n\"这是独家货，别处可找不到～\"",
+  "SHUNMOD_RELIC_EXCHANGE.pages.NO_RELICS.description": "商人摇摇头：\"你没有足够的遗物来交易。\"",
+  "SHUNMOD_RELIC_EXCHANGE.pages.NO_CARD.description": "商人翻了翻货架：\"抱歉，今天能力卡卖完了。\"",
+  "SHUNMOD_RELIC_EXCHANGE.pages.NO_MOD_CARD.description": "商人找了半天：\"奇怪，独家货好像不见了……\""
+}
