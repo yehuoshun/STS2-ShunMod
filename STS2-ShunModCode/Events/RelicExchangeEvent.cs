@@ -60,8 +60,8 @@ public sealed class RelicExchangeEvent : EventModel
         if (card == null) { Finish("NO_CARD"); return; }
 
         var newCard = Owner.RunState.CreateCard(card, Owner);
-        var infuse = ModelDb.Enchantment<Infuse>();
-        if (infuse != null) CardCmd.Enchant(infuse.ToMutable(), newCard, 1);
+        var imbued = ModelDb.Enchantment<Imbued>();
+        if (imbued != null) CardCmd.Enchant(imbued.ToMutable(), newCard, 1);
 
         await CardPileCmd.Add(newCard, PileType.Deck);
         Finish("OPT2_DONE");

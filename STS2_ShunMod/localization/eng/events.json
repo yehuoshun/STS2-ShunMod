@@ -4,7 +4,7 @@
   "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT1.title": "Trade 1 Relic",
   "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT1.description": "Lose [red]1[/red] random relic. Gain a random Power card.",
   "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT2.title": "Trade 2 Relics",
-  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT2.description": "Lose [red]2[/red] random relics. Gain a random Power card with [blue]Infuse[/blue] enchantment.",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT2.description": "Lose [red]2[/red] random relics. Gain a random Power card with [blue]Imbued[/blue] enchantment.",
   "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT3.title": "Get a Mod Card",
   "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT3.description": "Gain a random card from this mod.",
   "SHUNMOD_RELIC_EXCHANGE.pages.OPT1_DONE.description": "The merchant takes your relic and hands you a gleaming Power card.\n\"A bargain!\"",
