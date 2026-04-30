@@ -62,7 +62,7 @@ public sealed class RelicExchangeEvent : EventModel
 
         var newCard = Owner.RunState.CreateCard(card, Owner);
         var imbued = ModelDb.Enchantment<Imbued>();
-        if (imbued != null) CardCmd.Enchant(imbued.ToMutable(), newCard, 1);
+        if (imbued != null) CardCmd.Enchant(imbued.ToMutable(), newCard, 1m);
 
         await CardPileCmd.Add(newCard, PileType.Deck);
         Finish("OPT2_DONE");
