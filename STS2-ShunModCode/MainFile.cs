@@ -1,21 +1,18 @@
-using Godot;
 using HarmonyLib;
-using MegaCrit.Sts2.Core.Modding;
 
 namespace STS2_ShunMod.STS2_ShunModCode;
 
-//You're recommended but not required to keep all your code in this package and all your assets in the STS2_ShunMod folder.
-[ModInitializer(nameof(Initialize))]
-public partial class MainFile : Node
+/// <summary>
+/// STS2-ShunMod — Native mod entry point (no BaseLib).
+/// </summary>
+public static class MainFile
 {
-    public const string ModId = "STS2_ShunMod"; //At the moment, this is used only for the Logger and harmony names.
+    public const string ModId = "STS2_ShunMod";
 
-    public static MegaCrit.Sts2.Core.Logging.Logger Logger { get; } = new(ModId, MegaCrit.Sts2.Core.Logging.LogType.Generic);
+    private static readonly Harmony Harmony = new(ModId);
 
-    public static void Initialize()
+    static MainFile()
     {
-        Harmony harmony = new(ModId);
-
-        harmony.PatchAll();
+        Harmony.PatchAll();
     }
 }
