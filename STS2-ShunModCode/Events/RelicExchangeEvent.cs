@@ -56,9 +56,12 @@ public sealed class RelicExchangeEvent : EventModel
         RelicHelper.RemoveRelic(Owner, r1);
         RelicHelper.RemoveRelic(Owner, r2);
 
-        var newCard = Owner!.RunState.CreateCard(card, Owner);
-        var infuse = ModelDb.GetById<EnchantmentModel>("Infuse");
-        if (infuse != null) newCard.Enchantments.Add(infuse);
+        var card = GetRandomPowerCard();
+        if (card == null) { Finish("NO_CARD"); return; }
+
+        var newCard = Owner.RunState.CreateCard(card, Owner);
+        var infuse = ModelDb.Enchantment<Infuse>();
+        if (infuse != null) CardCmd.Enchant(infuse.ToMutable(), newCard, 1);
 
         await CardPileCmd.Add(newCard, PileType.Deck);
         Finish("OPT2_DONE");
