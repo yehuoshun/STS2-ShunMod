@@ -12,7 +12,6 @@ namespace STS2_ShunMod.Events;
 /// </summary>
 public sealed class RelicExchangeEvent : EventModel
 {
-    public override ActModel[] Acts => [];
 
     public override bool IsAllowed(IRunState runState)
     {
