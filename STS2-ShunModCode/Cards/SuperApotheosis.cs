@@ -1,3 +1,4 @@
+using System.Linq;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
@@ -24,7 +25,7 @@ public class SuperApotheosis : ShunCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        foreach (CardModel allCard in base.Owner!.PlayerCombatState.AllCards)
+        foreach (CardModel allCard in base.Owner!.PlayerCombatState.AllCards.ToList())
         {
             if (allCard != this && allCard.IsUpgradable)
             {

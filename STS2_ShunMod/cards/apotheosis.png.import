@@ -10,7 +10,7 @@ metadata={
 
 [deps]
 
-source_file="res://images/packed/card_portraits/event/apotheosis.png"
+source_file="res://cards/apotheosis.png"
 dest_files=["res://.godot/imported/apotheosis.png-624ce61e8caf883add24f8f7f187e117.ctex"]
 
 [params]
