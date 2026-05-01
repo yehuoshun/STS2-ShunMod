@@ -19,5 +19,6 @@ public static class MainFile
     {
         Harmony.PatchAll();
         ModHelper.AddModelToPool(typeof(ColorlessCardPool), typeof(SuperApotheosis));
+        EventRegistry.Register(new RelicExchangeEvent());
     }
 }
