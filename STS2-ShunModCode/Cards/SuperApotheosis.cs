@@ -13,7 +13,7 @@ namespace STS2_ShunMod.Cards;
 public class SuperApotheosis : ShunCard
 {
     public SuperApotheosis()
-        : base(baseCost: 2, type: CardType.Skill, rarity: CardRarity.Event, target: TargetType.Self)
+        : base(baseCost: 2, type: CardType.Skill, rarity: CardRarity.Rare, target: TargetType.Self)
     {
         WithKeywords(CardKeyword.Exhaust);
         WithTip(CardKeyword.Exhaust);
