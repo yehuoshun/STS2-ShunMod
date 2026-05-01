@@ -1,4 +1,6 @@
 {
   "SUPER_APOTHEOSIS.title": "Super Apotheosis",
-  "SUPER_APOTHEOSIS.description": "Upgrade all cards in your hand for the rest of combat. Also upgrade all cards in your deck.{Exhaust:showExhaustTooltip}"
+  "SUPER_APOTHEOSIS.description": "Upgrade all cards in your hand for the rest of combat. Also upgrade all cards in your deck.{Exhaust:showExhaustTooltip}",
+  "FLEXIBLE_POWER.title": "Blank Ability Card",
+  "FLEXIBLE_POWER.description": "Execute all stored abilities from local save data.{Innate:showInnateTooltip}"
 }

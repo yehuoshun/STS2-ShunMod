@@ -1,0 +1,7 @@
+{
+  "damage": { "name": "造成伤害", "desc": "造成 {0} 点伤害", "per_stack": 5 },
+  "aoe":    { "name": "全体攻击", "desc": "对所有敌人造成 {0} 点伤害", "per_stack": 3 },
+  "block":  { "name": "获得格挡", "desc": "获得 {0} 点格挡", "per_stack": 4 },
+  "draw":   { "name": "抽牌",     "desc": "抽 {0} 张牌", "per_stack": 1 },
+  "heal":   { "name": "治疗",     "desc": "回复 {0} 点生命", "per_stack": 2 }
+}
