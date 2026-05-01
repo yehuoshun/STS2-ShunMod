@@ -3,7 +3,6 @@ using MegaCrit.Sts2.Core.Modding;
 using MegaCrit.Sts2.Core.Models.CardPools;
 using MegaCrit.Sts2.Core.Nodes.Screens.MainMenu;
 using STS2_ShunMod.Cards;
-using STS2_ShunMod.Events;
 using STS2_ShunMod.Patches;
 
 namespace STS2_ShunMod;
@@ -19,7 +18,5 @@ public static class MainFile
     {
         Harmony.PatchAll();
         ModHelper.AddModelToPool(typeof(ColorlessCardPool), typeof(SuperApotheosis));
-        ModHelper.AddModelToPool(typeof(ColorlessCardPool), typeof(FlexiblePower));
-        EventRegistry.Register(new RelicExchangeEvent());
     }
 }

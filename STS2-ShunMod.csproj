@@ -48,6 +48,8 @@
         <EmbeddedResource Remove="images/**" />
         <Compile Remove="STS2-ShunModCode\patch\**" />
         <EmbeddedResource Remove="STS2-ShunModCode\patch\**" />
+        <Compile Remove="STS2-ShunModCode\Abilities\**" />
+        <EmbeddedResource Remove="STS2-ShunModCode\Abilities\**" />
     </ItemGroup>
 
     <ItemGroup>
@@ -81,6 +83,10 @@
     <ItemGroup>
         <GodotResourceFiles Include="STS2_ShunMod/**"/>
         <GodotResourceFiles Include="cards/**"/>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Folder Include="STS2-ShunModCode\Events\" />
     </ItemGroup>
 
     <Target Name="GodotPublish" AfterTargets="Publish" Condition="'$(GodotPath)' != '' and Exists('$(GodotPath)') and '$(IsInnerGodotExport)' != 'true'" Inputs="@(GodotResourceFiles)" Outputs="$(ModsPath)$(MSBuildProjectName)/$(MSBuildProjectName).pck">
