@@ -11,8 +11,6 @@ public static class EventRegistry
 {
     private static readonly List<EventModel> Events = [];
     public static IReadOnlyList<EventModel> RegisteredEvents => Events;
-    private static bool _registered;
-
     public static void Register(EventModel eventModel)
     {
         if (!Events.Contains(eventModel))

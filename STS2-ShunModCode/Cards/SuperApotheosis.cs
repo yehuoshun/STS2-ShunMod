@@ -24,7 +24,7 @@ public class SuperApotheosis : ShunCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        foreach (CardModel allCard in base.Owner.PlayerCombatState.AllCards)
+        foreach (CardModel allCard in base.Owner!.PlayerCombatState.AllCards)
         {
             if (allCard != this && allCard.IsUpgradable)
             {
@@ -33,7 +33,7 @@ public class SuperApotheosis : ShunCard
         }
 
         // 升级牌组
-        var deckCards = PileType.Deck.GetPile(Owner).Cards
+        var deckCards = PileType.Deck.GetPile(Owner!).Cards
             .Where(c => c.IsUpgradable)
             .ToList();
         foreach (var card in deckCards)
