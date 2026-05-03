@@ -1,4 +1,5 @@
 using HarmonyLib;
+using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
 using MegaCrit.Sts2.Core.Models.CardPools;
 using MegaCrit.Sts2.Core.Nodes.Screens.MainMenu;
@@ -16,7 +17,17 @@ public static class MainFile
 
     public static void Initialize()
     {
-        Harmony.PatchAll();
-        ModHelper.AddModelToPool(typeof(ColorlessCardPool), typeof(SuperApotheosis));
+        try
+        {
+            ModHelper.AddModelToPool(typeof(ColorlessCardPool), typeof(SuperApotheosis));
+            Harmony.PatchAll();
+        }
+        catch (Exception e)
+        {
+            Log.Error(ModId + " - 加载失败");
+            Log.Error(e.Message);
+            return;
+        }
+        Log.Info(ModId + " - 加载成功!");
     }
 }
