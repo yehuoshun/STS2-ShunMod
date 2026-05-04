@@ -125,10 +125,10 @@ MIT
 
 ## 发布
 
-首次使用前运行一次（游戏更新后也需重新运行）：
+首次使用前，在 PowerShell 中运行一次（游戏更新后也需重新运行）：
 
-```bash
-./build.sh --sync-deps     # 上传游戏 DLL 到 GitHub（CI 构建用）
+```powershell
+.\build.ps1 -SyncDeps    # 上传游戏 DLL 到 GitHub（CI 构建用）
 ```
 
 之后每次发布只需打 tag：
@@ -137,8 +137,6 @@ MIT
 git tag v0.1.0
 git push --tags           # CI 自动构建 → 打包 → 发布 Release
 ```
-
-也可本地发布：`./build.sh --release v0.1.0`
 
 ---
 
