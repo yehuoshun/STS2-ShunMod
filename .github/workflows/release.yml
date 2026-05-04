@@ -57,14 +57,10 @@ jobs:
       - name: Package
         run: |
           BUILD_DIR=.godot/mono/temp/bin/Release
-          echo "=== 查找 .pck ==="
-          find . -name "*.pck" -type f 2>/dev/null || true
           mkdir -p publish
           cp "$BUILD_DIR/STS2-ShunMod.dll" publish/
           cp STS2_ShunMod.json publish/
-          # 找 .pck，可能在多个位置
-          PCK=$(find . -name "*.pck" -type f 2>/dev/null | head -1)
-          if [ -n "$PCK" ]; then cp "$PCK" publish/; else echo "⚠️ 无 .pck，尝试用 PckPacker 生成..."; dotnet build -c Release -p:Sts2DataDir="$(realpath deps)" -t:PackPck 2>/dev/null || echo "⚠️ PckPacker 失败"; fi
+          cp -r STS2_ShunMod publish/ 2>/dev/null || echo "⚠️ 无资源目录"
           ls -la publish/
           cd publish && zip -r ../STS2-ShunMod.zip .
 
