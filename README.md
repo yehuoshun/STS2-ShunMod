@@ -102,49 +102,48 @@ public static class MyPatch
 ### 环境要求
 
 - .NET 9.0 SDK
-- Godot 4.5（.NET 版）
 - 已安装 Slay the Spire 2
 
-### 步骤
+### 本地构建
 
 ```bash
-# 1. 编辑 Sts2PathDiscovery.props，设置 Sts2DataDir 指向 STS2 安装目录
-
-# 2. 构建
+# 编辑 Sts2PathDiscovery.props，设置 Sts2Path 指向 STS2 安装目录
 dotnet build
-
-# 构建产物自动复制到 Mods 目录：
-#   STS2-ShunMod.dll / .json / .pck
 ```
+
+产物输出到 `.godot/mono/temp/bin/Release/`。
 
 ---
 
 ## 安装
 
-将 `STS2-ShunMod` 文件夹放入 Slay the Spire 2 的 `Mods/` 目录，启动游戏自动加载。
+下载 Release 中的 `STS2-ShunMod.zip`，解压到 Slay the Spire 2 的 `Mods/STS2-ShunMod/` 目录，启动游戏自动加载。
 
 ---
 
 ## 发布
 
-### 本地发布
+### 首次：上传游戏依赖
 
-```powershell
-.\build.ps1 -Publish v0.1.0   # 构建 + tag + push + Release
+在 GitHub Releases 创建 tag 为 `deps` 的 release，上传游戏目录下的：
+
+```
+data_sts2_windows_x86_64/sts2.dll
+data_sts2_windows_x86_64/0Harmony.dll
 ```
 
-### CI 发布
+只做一次，之后 CI 自动拉取。
+
+### CI 自动发布
+
+打 tag 推送，GitHub Actions 自动构建、导出 .pck、打包发布：
 
 ```bash
 git tag v0.1.0
-git push --tags   # CI 自动构建 → 打包 → 发布 Release
+git push origin v0.1.0
 ```
 
-首次使用前需同步游戏 DLL（游戏更新后也需重跑）：
-
-```powershell
-.\build.ps1 -SyncDeps
-```
+或手动：仓库 → Actions → Build & Release → Run workflow → 填版本号。
 
 ---
 
