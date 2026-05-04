@@ -55,7 +55,7 @@
     <ItemGroup>
         <None Condition="Exists('Directory.Build.props')" Include="Directory.Build.props"/>
         <None Include=".gitignore" />
-        <None Include="STS2_ShunMod.json" />
+        <None Include="STS2-ShunMod.json" />
         <None Include="project.godot"/>
         <None Include="STS2_ShunMod/**" />
     </ItemGroup>
