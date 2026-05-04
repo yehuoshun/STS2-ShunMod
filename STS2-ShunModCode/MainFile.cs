@@ -23,7 +23,7 @@ public static class MainFile
     /// <summary>
     /// Mod 唯一标识符，与模组清单中 id 字段一致。
     /// </summary>
-    public const string ModId = "STS2_ShunMod";
+    public const string ModId = "STS2-ShunMod";
 
     /// <summary>
     /// Harmony 补丁实例，用于 IL 运行时注入。
