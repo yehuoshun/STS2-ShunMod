@@ -125,17 +125,25 @@ MIT
 
 ## 发布
 
-首次使用前，在 PowerShell 中运行一次（游戏更新后也需重新运行）：
+### 一键发布（推荐）
 
 ```powershell
-.\build.ps1 -SyncDeps    # 上传游戏 DLL 到 GitHub（CI 构建用）
+.\build.ps1 -Publish v0.1.0   # 构建 + 打tag + 推送 + 创建Release + 上传
 ```
 
-之后每次发布只需打 tag：
+### CI 自动发布
+
+首次使用前同步一次游戏 DLL（游戏更新后也需重新运行）：
+
+```powershell
+.\build.ps1 -SyncDeps         # 上传游戏 DLL 到 GitHub
+```
+
+之后每次发布：
 
 ```bash
 git tag v0.1.0
-git push --tags           # CI 自动构建 → 打包 → 发布 Release
+git push --tags               # CI 自动构建 → 打包 → 发布 Release
 ```
 
 ---
