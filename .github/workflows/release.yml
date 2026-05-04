@@ -50,17 +50,28 @@ jobs:
           }
           ls -la deps/
 
-      - name: Build
+      - name: Build & Find .pck
         run: |
           dotnet build -c Release -p:Sts2DataDir="$(realpath deps)"
+          echo "=== 搜寻 .pck ==="
+          find . -name "*.pck" -type f -exec ls -la {} \; 2>/dev/null || echo "❌ 未找到任何 .pck"
+          echo "=== 搜寻 STS2-ShunMod.* ==="
+          find . -name "STS2-ShunMod.*" -type f -exec ls -la {} \; 2>/dev/null
 
       - name: Package
         run: |
           BUILD_DIR=.godot/mono/temp/bin/Release
+          PCK=$(find . -name "STS2-ShunMod.pck" -type f 2>/dev/null | head -1)
           mkdir -p publish
           cp "$BUILD_DIR/STS2-ShunMod.dll" publish/
           cp STS2_ShunMod.json publish/
-          cp -r STS2_ShunMod publish/ 2>/dev/null || echo "⚠️ 无资源目录"
+          if [ -n "$PCK" ]; then
+            cp "$PCK" publish/
+            echo "✅ .pck: $PCK"
+          else
+            echo "⚠️ 无 .pck，直接打包资源目录"
+            cp -r STS2_ShunMod publish/
+          fi
           ls -la publish/
           cd publish && zip -r ../STS2-ShunMod.zip .
 
