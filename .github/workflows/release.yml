@@ -50,27 +50,31 @@ jobs:
           }
           ls -la deps/
 
-      - name: Build & Find .pck
+      - name: Build & Export .pck
         run: |
           dotnet build -c Release -p:Sts2DataDir="$(realpath deps)"
-          echo "=== 搜寻 .pck ==="
-          find . -name "*.pck" -type f -exec ls -la {} \; 2>/dev/null || echo "❌ 未找到任何 .pck"
-          echo "=== 搜寻 STS2-ShunMod.* ==="
-          find . -name "STS2-ShunMod.*" -type f -exec ls -la {} \; 2>/dev/null
+          echo "=== 下载 Godot 4.5.1 Mono ==="
+          GODOT_URL="https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_mono_linux_x86_64.zip"
+          curl -sL "$GODOT_URL" -o godot.zip || { echo "❌ 下载失败，回退到资源目录"; exit 0; }
+          unzip -q godot.zip -d godot 2>/dev/null
+          GODOT=$(find godot -name "Godot*" -type f | head -1)
+          [ -z "$GODOT" ] && { echo "❌ 未找到 Godot 可执行文件"; exit 0; }
+          chmod +x "$GODOT"
+          echo "=== 导出 .pck ==="
+          "$GODOT" --headless --export-pack "BasicExport" STS2-ShunMod.pck
+          ls -la STS2-ShunMod.pck 2>/dev/null || echo "⚠️ 导出失败"
 
       - name: Package
         run: |
           BUILD_DIR=.godot/mono/temp/bin/Release
-          PCK=$(find . -name "STS2-ShunMod.pck" -type f 2>/dev/null | head -1)
           mkdir -p publish
           cp "$BUILD_DIR/STS2-ShunMod.dll" publish/
           cp STS2_ShunMod.json publish/
+          PCK=$(find . -maxdepth 1 -name "STS2-ShunMod.pck" -type f 2>/dev/null | head -1)
           if [ -n "$PCK" ]; then
             cp "$PCK" publish/
-            echo "✅ .pck: $PCK"
           else
-            echo "⚠️ 无 .pck，直接打包资源目录"
-            cp -r STS2_ShunMod publish/
+            echo "⚠️ 无 .pck"
           fi
           ls -la publish/
           cd publish && zip -r ../STS2-ShunMod.zip .
