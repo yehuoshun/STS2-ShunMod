@@ -1,0 +1,35 @@
+name: CI Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 9.0
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Download game references
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p deps
+          gh release download deps \
+            --dir deps \
+            --pattern "*.dll" \
+            --repo "${{ github.repository }}" \
+            --clobber 2>/dev/null || {
+            echo "⚠️ 缺少游戏 DLL，CI 仅验证语法"
+            exit 0
+          }
+
+      - name: Build
+        run: dotnet build -c Release -p:Sts2DataDir="$(realpath deps)" --no-restore 2>/dev/null || dotnet build -c Release -p:Sts2DataDir="$(realpath deps)"
