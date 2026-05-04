@@ -125,28 +125,21 @@ MIT
 
 ## 发布
 
-### 本地构建
+### 发布流程
 
 ```bash
-./build.sh              # 自动找游戏目录 → 构建
-./build.sh --sync       # 构建 + 同步 DLL 到 CI（游戏更新后跑一次）
-```
+# 1. 本地构建
+./build.sh
 
-### 自动发布
-
-```bash
+# 2. 创建 Release（CI 自动生成更新日志）
 git tag v0.1.0
-git push --tags        # GitHub Actions 自动构建 + Release
+git push --tags
+
+# 3. 上传构建产物
+./build.sh --release v0.1.0
 ```
 
-手动触发：Actions → Build & Release → Run workflow
-
-### 构建产物
-
-每次 Release 自动打包 `STS2-ShunMod.zip`：
-- `STS2-ShunMod.dll` — 程序集
-- `STS2_ShunMod.json` — 模组清单
-- `STS2-ShunMod.pck` — 资源包 (PckPacker 自动生成)
+也可手动触发：Actions → Create Release → 填版本号
 
 ---
 

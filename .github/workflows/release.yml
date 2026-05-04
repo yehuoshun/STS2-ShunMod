@@ -1,4 +1,4 @@
-name: Build & Release
+name: Create Release
 
 on:
   push:
@@ -17,45 +17,51 @@ on:
         type: boolean
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup .NET 9.0
-        uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v4
         with:
-          dotnet-version: 9.0.x
+          fetch-depth: 0
 
-      - name: Build
+      - name: Set variables
+        id: vars
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "TAG=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+            echo "PRERELEASE=${{ github.event.inputs.prerelease }}" >> $GITHUB_OUTPUT
+            echo "TITLE=Release ${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "TAG=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "PRERELEASE=false" >> $GITHUB_OUTPUT
+            echo "TITLE=Release ${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate release notes
+        run: |
+          PREV=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          {
+            echo "## 更新内容"
+            echo ""
+            if [ -n "$PREV" ]; then
+              echo "自 $PREV 以来的更改："
+              echo ""
+              git log ${PREV}..HEAD --pretty=format:"- %s ([%h](https://github.com/${{ github.repository }}/commit/%H))" --reverse
+            else
+              git log --pretty=format:"- %s ([%h](https://github.com/${{ github.repository }}/commit/%H))" --reverse
+            fi
+            echo ""
+            echo ""
+            echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV:-HEAD}...${{ steps.vars.outputs.TAG }}"
+          } > release_notes.md
+
+      - name: Create Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          chmod +x build.sh
-          ./build.sh --ci
-
-      - name: Package
-        run: |
-          mkdir -p publish/STS2-ShunMod
-          cp STS2-ShunMod/bin/Release/net9.0/STS2-ShunMod.dll publish/STS2-ShunMod/
-          cp STS2_ShunMod.json publish/STS2-ShunMod/
-          cp STS2-ShunMod/bin/Release/net9.0/STS2-ShunMod.pck publish/STS2-ShunMod/ 2>/dev/null || echo "⚠️ 无 .pck"
-          cd publish && zip -r ../STS2-ShunMod.zip STS2-ShunMod/
-          unzip -l ../STS2-ShunMod.zip
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: STS2-ShunMod
-          path: STS2-ShunMod.zip
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.event.inputs.version || github.ref_name }}
-          files: STS2-ShunMod.zip
-          prerelease: ${{ github.event.inputs.prerelease || false }}
-          generate_release_notes: true
+          ARGS="--repo \"${{ github.repository }}\" --title \"${{ steps.vars.outputs.TITLE }}\" --notes-file release_notes.md"
+          [ "${{ steps.vars.outputs.PRERELEASE }}" = "true" ] && ARGS="$ARGS --prerelease"
+          eval "gh release create \"${{ steps.vars.outputs.TAG }}\" $ARGS"
+          echo "✅ Release ${{ steps.vars.outputs.TAG }} 创建成功"
