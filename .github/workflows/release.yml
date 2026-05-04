@@ -56,7 +56,7 @@ jobs:
 
       - name: Package
         run: |
-          BUILD_DIR=STS2-ShunMod/bin/Release/net9.0
+          BUILD_DIR=.godot/mono/temp/bin/Release
           mkdir -p publish
           cp "$BUILD_DIR/STS2-ShunMod.dll" publish/
           cp STS2_ShunMod.json publish/
