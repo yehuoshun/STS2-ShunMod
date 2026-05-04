@@ -52,7 +52,10 @@ jobs:
 
       - name: Build
         run: |
-          dotnet build -c Release -p:Sts2DataDir="$(realpath deps)"
+          dotnet --info
+          echo ""
+          echo "Sts2DataDir 设为: $(realpath deps)"
+          dotnet build -c Release -p:Sts2DataDir="$(realpath deps)" -v n 2>&1 | grep -E "(Reference|Assembly|error|考虑|Considered)" | head -30
 
       - name: Package
         run: |
