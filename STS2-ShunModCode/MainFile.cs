@@ -1,6 +1,7 @@
 using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
+using MegaCrit.Sts2.Core.Modding;
 using STS2_ShunMod.Core.Registration;
 using STS2_ShunMod.Patches;
 
