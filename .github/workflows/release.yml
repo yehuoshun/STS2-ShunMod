@@ -52,15 +52,6 @@ jobs:
 
       - name: Build
         run: |
-          echo "=== 诊断 ==="
-          echo "Sts2DataDir: $(realpath deps)"
-          ls -la deps/
-          file deps/sts2.dll
-          echo ""
-          echo "=== 检查 sts2.dll 类型 ==="
-          dotnet build -c Release -p:Sts2DataDir="$(realpath deps)" -v diag 2>&1 | grep -i "ModInitializer\|HardenedShell\|CardModel\|Reference.*sts2" | head -10 || true
-          echo ""
-          echo "=== 构建 ==="
           dotnet build -c Release -p:Sts2DataDir="$(realpath deps)"
 
       - name: Package
