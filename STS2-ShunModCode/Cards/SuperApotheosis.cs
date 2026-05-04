@@ -24,7 +24,7 @@ public class SuperApotheosis : ShunCard
         WithCostUpgradeBy(-1);
     }
 
-    public override string PortraitPath => "res://cards/apotheosis.png";
+    public override string PortraitPath => "res://STS2_ShunMod/cards/apotheosis.png";
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {

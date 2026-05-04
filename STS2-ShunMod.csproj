@@ -55,7 +55,7 @@
     <ItemGroup>
         <None Condition="Exists('Directory.Build.props')" Include="Directory.Build.props"/>
         <None Include=".gitignore" />
-        <None Include="mod_manifest.json" />
+        <None Include="STS2_ShunMod.json" />
         <None Include="project.godot"/>
         <None Include="STS2_ShunMod/**" />
     </ItemGroup>
@@ -67,7 +67,7 @@
     <Target Name="CopyToModsFolderOnBuild" AfterTargets="PostBuildEvent">
         <Message Text="Copying .dll and manifest to mods folder." Importance="high" />
         <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModsPath)$(MSBuildProjectName)/" />
-        <Copy SourceFiles="mod_manifest.json" DestinationFolder="$(ModsPath)$(MSBuildProjectName)/" />
+        <Copy SourceFiles="STS2_ShunMod.json" DestinationFolder="$(ModsPath)$(MSBuildProjectName)/" />
     </Target>
 
     <Target Name="CopyQuickPck" AfterTargets="PackPck" Condition="Exists('$(PckPackerOutputPath)') And '$(PckPackerSkipped)' != 'true'">
@@ -82,7 +82,6 @@
     
     <ItemGroup>
         <GodotResourceFiles Include="STS2_ShunMod/**"/>
-        <GodotResourceFiles Include="cards/**"/>
     </ItemGroup>
     
     <ItemGroup>
