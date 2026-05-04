@@ -125,21 +125,20 @@ MIT
 
 ## 发布
 
-### 发布流程
+首次使用前运行一次（游戏更新后也需重新运行）：
 
 ```bash
-# 1. 本地构建
-./build.sh
-
-# 2. 创建 Release（CI 自动生成更新日志）
-git tag v0.1.0
-git push --tags
-
-# 3. 上传构建产物
-./build.sh --release v0.1.0
+./build.sh --sync-deps     # 上传游戏 DLL 到 GitHub（CI 构建用）
 ```
 
-也可手动触发：Actions → Create Release → 填版本号
+之后每次发布只需打 tag：
+
+```bash
+git tag v0.1.0
+git push --tags           # CI 自动构建 → 打包 → 发布 Release
+```
+
+也可本地发布：`./build.sh --release v0.1.0`
 
 ---
 

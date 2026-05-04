@@ -1,4 +1,4 @@
-name: Create Release
+name: Build & Release
 
 on:
   push:
@@ -17,7 +17,7 @@ on:
         type: boolean
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -26,17 +26,51 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set variables
-        id: vars
+      - name: Setup .NET 9.0
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Download game references
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p deps
+          gh release download deps \
+            --dir deps \
+            --pattern "*.dll" \
+            --repo "${{ github.repository }}" \
+            --clobber 2>/dev/null || {
+            echo ""
+            echo "=============================================="
+            echo "  缺少 CI 构建依赖！请在本地运行一次："
+            echo "    ./build.sh --sync-deps"
+            echo "=============================================="
+            exit 1
+          }
+          ls -la deps/
+
+      - name: Build
+        run: |
+          dotnet build -c Release -p:Sts2DataDir="$PWD/deps"
+
+      - name: Package
+        run: |
+          BUILD_DIR=STS2-ShunMod/bin/Release/net9.0
+          mkdir -p publish
+          cp "$BUILD_DIR/STS2-ShunMod.dll" publish/
+          cp STS2_ShunMod.json publish/
+          cp "$BUILD_DIR/STS2-ShunMod.pck" publish/ 2>/dev/null || echo "⚠️ 无 .pck"
+          ls -la publish/
+          cd publish && zip -r ../STS2-ShunMod.zip .
+
+      - name: Set version
+        id: ver
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "TAG=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
-            echo "PRERELEASE=${{ github.event.inputs.prerelease }}" >> $GITHUB_OUTPUT
-            echo "TITLE=Release ${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
           else
             echo "TAG=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-            echo "PRERELEASE=false" >> $GITHUB_OUTPUT
-            echo "TITLE=Release ${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Generate release notes
@@ -52,16 +86,12 @@ jobs:
             else
               git log --pretty=format:"- %s ([%h](https://github.com/${{ github.repository }}/commit/%H))" --reverse
             fi
-            echo ""
-            echo ""
-            echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV:-HEAD}...${{ steps.vars.outputs.TAG }}"
           } > release_notes.md
 
       - name: Create Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          ARGS="--repo \"${{ github.repository }}\" --title \"${{ steps.vars.outputs.TITLE }}\" --notes-file release_notes.md"
-          [ "${{ steps.vars.outputs.PRERELEASE }}" = "true" ] && ARGS="$ARGS --prerelease"
-          eval "gh release create \"${{ steps.vars.outputs.TAG }}\" $ARGS"
-          echo "✅ Release ${{ steps.vars.outputs.TAG }} 创建成功"
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.TAG }}
+          files: STS2-ShunMod.zip
+          body_path: release_notes.md
+          prerelease: ${{ github.event.inputs.prerelease || false }}
