@@ -1,0 +1,100 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号 (如 v0.1.0)'
+        required: true
+        type: string
+      prerelease:
+        description: '预发布版本'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 9.0
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Download STS2 references
+        run: |
+          mkdir -p deps
+          echo "下载 sts2.dll 和 0Harmony.dll..."
+          gh release download deps \
+            --dir deps \
+            --pattern "*.dll" \
+            --repo "${{ github.repository }}" \
+            --clobber 2>/dev/null || {
+            echo ""
+            echo "=============================================="
+            echo "  缺少游戏引用文件！"
+            echo "  请先在仓库创建一个 deps 标签的 Release，"
+            echo "  上传 sts2.dll 和 0Harmony.dll 作为附件。"
+            echo "=============================================="
+            exit 1
+          }
+          ls -la deps/
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Build
+        run: |
+          dotnet build -c Release -p:Sts2DataDir="$(pwd)/deps"
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p publish/STS2-ShunMod
+          # DLL
+          cp STS2-ShunMod/bin/Release/net9.0/STS2-ShunMod.dll publish/STS2-ShunMod/
+          # 模组清单 (JSON)
+          cp STS2_ShunMod.json publish/STS2-ShunMod/
+          # PCK (PckPacker 在 build 时自动生成)
+          if [ -f STS2-ShunMod/bin/Release/net9.0/STS2-ShunMod.pck ]; then
+            cp STS2-ShunMod/bin/Release/net9.0/STS2-ShunMod.pck publish/STS2-ShunMod/
+          else
+            echo "⚠️ 未找到 .pck 文件，仅打包 DLL + JSON"
+          fi
+          # 打包
+          cd publish
+          zip -r ../STS2-ShunMod.zip STS2-ShunMod/
+          cd ..
+          echo "打包完成:"
+          ls -lh STS2-ShunMod.zip
+          unzip -l STS2-ShunMod.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: STS2-ShunMod
+          path: STS2-ShunMod.zip
+
+      - name: Determine tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "TAG=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "TAG=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.TAG }}
+          files: STS2-ShunMod.zip
+          prerelease: ${{ github.event.inputs.prerelease || false }}
+          generate_release_notes: true
