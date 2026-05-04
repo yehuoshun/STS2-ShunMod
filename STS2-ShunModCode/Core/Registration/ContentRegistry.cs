@@ -14,8 +14,6 @@ public static class ContentRegistry
 {
     public static void RegisterAll(Assembly assembly)
     {
-        int count = 0;
-
         foreach (var type in AssemblyScanner.GetLoadableTypes(assembly))
         {
             if (type.IsAbstract) continue;
@@ -24,8 +22,6 @@ public static class ContentRegistry
             if (poolAttr == null) continue;
 
             ModHelper.AddModelToPool(poolAttr.PoolType, type);
-            count++;
         }
-
     }
 }

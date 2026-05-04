@@ -1,13 +1,9 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
-using System;
-using MegaCrit.Sts2.Core.Logging;
-using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.Models.Powers;
 
-namespace ShunMod;
+namespace STS2_ShunMod.Patches;
 
 [HarmonyPatch(typeof(HardenedShellPower), "ModifyHpLostBeforeOstyLate")]
 public static class HardenedShellPowerPatch
