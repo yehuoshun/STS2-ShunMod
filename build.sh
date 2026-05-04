@@ -74,7 +74,7 @@ if [ "$MODE" = "--release" ]; then
     gh auth status &> /dev/null || { echo "❌ 请先 gh auth login"; exit 1; }
 
     REPO=$(git remote get-url origin | sed 's/.*github.com[:/]\(.*\)\.git/\1/')
-    BUILD_DIR="STS2-ShunMod/bin/Release/net9.0"
+    BUILD_DIR=".godot/mono/temp/bin/Release"
     TMP=$(mktemp -d)
     trap 'rm -rf "$TMP"' EXIT
 
