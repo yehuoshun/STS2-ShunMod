@@ -25,9 +25,14 @@
 ```
 STS2-ShunMod/
 ├── STS2-ShunModCode/           # C# 源代码
-│   ├── MainFile.cs             # Mod 入口，Harmony 补丁 + 卡池注册
+│   ├── MainFile.cs             # Mod 入口，Harmony 补丁 + 自动注册
 │   ├── Cards/
 │   │   └── SuperApotheosis.cs  # 超级神化卡牌
+│   ├── Core/
+│   │   └── Registration/       # 自动注册系统
+│   │       ├── PoolAttribute.cs   # [Pool] 属性
+│   │       ├── AssemblyScanner.cs # 安全类型加载
+│   │       └── ContentRegistry.cs # 属性扫描 + 自动注册
 │   ├── Patches/
 │   │   ├── HardenedShellPatch.cs
 │   │   └── InfiniteUpgrade.cs  # 无限升级 + 能量累积
@@ -40,6 +45,33 @@ STS2-ShunMod/
 ├── project.godot               # Godot 4.5 项目配置
 └── STS2-ShunMod.csproj         # .NET 9.0 项目文件
 ```
+
+---
+
+## 开发
+
+### 添加新卡牌
+
+只需新建类 + 加 `[Pool]` 属性，无需改 MainFile：
+
+```csharp
+[Pool(typeof(ColorlessCardPool))]
+public class MyNewCard : ShunCard
+{
+    public MyNewCard()
+        : base(baseCost: 1, type: CardType.Attack, rarity: CardRarity.Common, target: TargetType.Enemy)
+    {
+        // 链式配置关键词、升级等
+    }
+
+    protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
+        // 卡牌效果
+    }
+}
+```
+
+`ContentRegistry.RegisterAll()` 在启动时自动扫描并注册所有带 `[Pool]` 属性的卡牌。
 
 ---
 

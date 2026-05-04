@@ -1,9 +1,9 @@
+using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
-using MegaCrit.Sts2.Core.Models.CardPools;
 using MegaCrit.Sts2.Core.Nodes.Screens.MainMenu;
-using STS2_ShunMod.Cards;
+using STS2_ShunMod.Core.Registration;
 using STS2_ShunMod.Patches;
 
 namespace STS2_ShunMod;
@@ -19,8 +19,8 @@ public static class MainFile
     {
         try
         {
-            ModHelper.AddModelToPool(typeof(ColorlessCardPool), typeof(SuperApotheosis));
             Harmony.PatchAll();
+            ContentRegistry.RegisterAll(Assembly.GetExecutingAssembly());
         }
         catch (Exception e)
         {

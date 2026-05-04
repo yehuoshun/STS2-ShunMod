@@ -3,7 +3,9 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.CardPools;
 using MegaCrit.Sts2.Core.Nodes.CommonUi;
+using STS2_ShunMod.Core.Registration;
 using STS2_ShunMod.Utils;
 
 namespace STS2_ShunMod.Cards;
@@ -11,6 +13,7 @@ namespace STS2_ShunMod.Cards;
 /// <summary>
 /// 超级神化 (Super Apotheosis) — 升级所有局内卡牌 + 牌组中所有卡牌。
 /// </summary>
+[Pool(typeof(ColorlessCardPool))]
 public class SuperApotheosis : ShunCard
 {
     public SuperApotheosis()
