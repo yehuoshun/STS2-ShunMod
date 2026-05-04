@@ -125,30 +125,28 @@ MIT
 
 ## 发布
 
-### 自动发布（GitHub Actions）
-
-推送 tag 自动构建并发布：
+### 本地构建
 
 ```bash
-# 首次使用：上传游戏 DLL 到 deps release（仅需一次）
-# 游戏更新后重新运行即可
-git clone https://github.com/yehuoshun/STS2-ShunMod.git
-cd STS2-ShunMod
-./scripts/update-deps.sh
-
-# 发布新版本
-git tag v0.1.0
-git push --tags
+./build.sh              # 自动找游戏目录 → 构建
+./build.sh --sync       # 构建 + 同步 DLL 到 CI（游戏更新后跑一次）
 ```
 
-也可手动触发：Actions → Build & Release → Run workflow
+### 自动发布
+
+```bash
+git tag v0.1.0
+git push --tags        # GitHub Actions 自动构建 + Release
+```
+
+手动触发：Actions → Build & Release → Run workflow
 
 ### 构建产物
 
-每次 Release 自动打包：
+每次 Release 自动打包 `STS2-ShunMod.zip`：
 - `STS2-ShunMod.dll` — 程序集
 - `STS2_ShunMod.json` — 模组清单
-- `STS2-ShunMod.pck` — 资源包
+- `STS2-ShunMod.pck` — 资源包 (PckPacker 自动生成)
 
 ---
 
