@@ -21,7 +21,7 @@
 
 | 名称 | 说明 |
 |---|---|
-| ♾️ 无限升级 | IsUpgradable 始终返回 true，卡牌可无限次升级。0 费卡每次升级累积 1 点能量，打出时释放。 |
+| ♾️ 无限升级 | Patch MaxUpgradeLevel（拉到 99），参照 STS2Plus 实现。0 费卡每次升级累积 1 点能量，打出时释放。 |
 | 🛠️ 硬化外壳修复 | 修正硬化外壳能力的减伤数值计算。 |
 
 ---
@@ -40,7 +40,7 @@ STS2-ShunMod/
 │   │       ├── AssemblyScanner.cs  # 安全类型扫描
 │   │       └── ContentRegistry.cs  # 扫描 + 注册
 │   ├── Patches/
-│   │   ├── InfiniteUpgrade.cs      # 无限升级 + 0 费能量累积
+│   │   ├── InfiniteUpgrade.cs      # 无限升级（MaxUpgradeLevel）+ 0 费能量
 │   │   └── HardenedShellPatch.cs   # 硬化外壳修复
 │   └── Utils/
 │       ├── ShunCard.cs             # 卡牌基类（链式配置）
