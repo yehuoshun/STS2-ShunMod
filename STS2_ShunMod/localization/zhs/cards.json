@@ -1,6 +1,4 @@
 {
   "SUPER_APOTHEOSIS.title": "超级神化",
-  "SUPER_APOTHEOSIS.description": "升级所有卡牌。同时升级牌组中的所有卡牌。{Exhaust:showExhaustTooltip}",
-  "FLEXIBLE_POWER.title": "空白能力卡",
-  "FLEXIBLE_POWER.description": "打出本地存档中储存的所有附加能力。{Innate:showInnateTooltip}"
+  "SUPER_APOTHEOSIS.description": "升级所有卡牌。同时升级牌组中的所有卡牌。{Exhaust:showExhaustTooltip}"
 }
