@@ -31,5 +31,8 @@ jobs:
             exit 0
           }
 
+      - name: Restore
+        run: dotnet restore
+
       - name: Build
-        run: dotnet build -c Release -p:Sts2DataDir="$(realpath deps)" --no-restore 2>/dev/null || dotnet build -c Release -p:Sts2DataDir="$(realpath deps)"
+        run: dotnet build -c Release -p:Sts2DataDir="$(realpath deps)" --no-restore
