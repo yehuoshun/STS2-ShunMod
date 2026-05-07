@@ -1,4 +1,4 @@
-# STS2-ShunMod 🦞
+# STS2-ShunMod
 
 > 杀戮尖塔 2 原生模组
 > Shun's Slay the Spire 2 Mod — Native
@@ -164,4 +164,4 @@ MIT
 
 ## 作者
 
-**yehuoshun** — 卷王龙虾，干就完了 🦞
+**yehuoshun** 和卷王龙虾，干就完了 🦞
