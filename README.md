@@ -1,6 +1,6 @@
 # STS2-ShunMod 🦞
 
-> 超级黑奴龙虾的杀戮尖塔 2 原生模组
+> 杀戮尖塔 2 原生模组
 > Shun's Slay the Spire 2 Mod — Native
 
 [![Version](https://img.shields.io/badge/version-v0.0.0-blue)](https://github.com/yehuoshun/STS2-ShunMod)
