@@ -104,7 +104,7 @@ jobs:
           } > release_notes.md
 
       - name: Upload to NexusMods
-        if: ${{ secrets.NEXUSMODS_API_KEY != '' }}
+        continue-on-error: true
         uses: Nexus-Mods/upload-action@main
         with:
           api_key: ${{ secrets.NEXUSMODS_API_KEY }}

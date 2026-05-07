@@ -3,9 +3,6 @@ name: Auto Tag
 on:
   push:
     branches: [main]
-    paths-ignore:
-      # 避免 bump 版本号时触发无限循环
-      - 'STS2-ShunMod.json'
 
 jobs:
   auto-tag:
@@ -20,6 +17,12 @@ jobs:
 
       - name: Auto bump & tag
         run: |
+          # 跳过 [skip ci] commit，避免死循环
+          if git log -1 --pretty=%B | grep -q '\[skip ci\]'; then
+            echo "⏭️ Skip: [skip ci] commit"
+            exit 0
+          fi
+
           VERSION=$(python3 -c "import json; print(json.load(open('STS2-ShunMod.json'))['version'])")
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
 
@@ -54,6 +57,4 @@ print(json.dumps(d, indent=2, ensure_ascii=False))
             echo "🏷️ JSON 版本高于最新 tag，打标: $VERSION"
             git tag "$VERSION"
             git push origin "$VERSION"
-          else
-            echo "✅ 无需操作"
           fi
