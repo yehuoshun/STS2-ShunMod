@@ -52,7 +52,7 @@ jobs:
 
       - name: Build & Export .pck
         run: |
-          dotnet build -c Release -p:Sts2DataDir="$(realpath deps)"
+          dotnet build STS2-ShunMod.csproj -c Release -p:Sts2DataDir="$(realpath deps)"
           echo "=== 下载 Godot 4.5.1 Mono ==="
           GODOT_URL="https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_mono_linux_x86_64.zip"
           curl -sL "$GODOT_URL" -o godot.zip || { echo "❌ 下载失败，回退到资源目录"; exit 0; }

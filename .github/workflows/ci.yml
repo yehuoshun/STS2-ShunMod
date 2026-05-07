@@ -30,11 +30,11 @@ jobs:
             echo "⚠️ 缺少游戏 DLL，CI 跳过编译验证"
 
       - name: Restore
-        run: dotnet restore
+        run: dotnet restore STS2-ShunMod.csproj
 
       - name: Build
         if: hashFiles('deps/sts2.dll') != ''
-        run: dotnet build -c Release -p:Sts2DataDir="$(realpath deps)" --no-restore
+        run: dotnet build STS2-ShunMod.csproj -c Release -p:Sts2DataDir="$(realpath deps)" --no-restore
 
   test-job:
     runs-on: ubuntu-latest
