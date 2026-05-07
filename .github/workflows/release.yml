@@ -103,6 +103,15 @@ jobs:
             fi
           } > release_notes.md
 
+      - name: Upload to NexusMods
+        uses: Nexus-Mods/upload-action@main
+        with:
+          api_key: ${{ secrets.NEXUSMODS_API_KEY }}
+          file_group_id: ${{ secrets.NEXUSMODS_FILE_GROUP_ID }}
+          filename: STS2-ShunMod.zip
+          version: ${{ steps.ver.outputs.TAG }}
+          file_category: main
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
