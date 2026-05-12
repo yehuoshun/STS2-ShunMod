@@ -23,6 +23,7 @@
 |---|---|
 | ♾️ 无限升级 | Patch MaxUpgradeLevel（拉到 99），参照 STS2Plus 实现。 |
 | 🛠️ 硬化外壳修复 | 修正硬化外壳能力的减伤数值计算。 |
+| ✨ 无限附魔 | 卡牌同时拥有多种附魔，同类附魔叠加层数。 |
 
 ---
 
@@ -40,7 +41,8 @@ STS2-ShunMod/
 │   │       ├── AssemblyScanner.cs  # 安全类型扫描
 │   │       └── ContentRegistry.cs  # 扫描 + 注册
 │   ├── Patches/
-│   │   ├── InfiniteUpgrade.cs      # 无限升级（MaxUpgradeLevel）+ 0 费能量
+│   │   ├── InfiniteUpgrade.cs      # 无限升级（MaxUpgradeLevel）
+│   │   ├── InfiniteEnchant.cs      # 无限附魔（多种附魔共存 + 叠层）
 │   │   └── HardenedShellPatch.cs   # 硬化外壳修复
 │   └── Utils/
 │       ├── ShunCard.cs             # 卡牌基类（链式配置）
