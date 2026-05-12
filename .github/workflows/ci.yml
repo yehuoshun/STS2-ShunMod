@@ -85,6 +85,8 @@ json.dump(d, open('STS2-ShunMod.json', 'w'), indent=2, ensure_ascii=False)
             git commit -m "chore: bump $VERSION => $NEW_VERSION [skip ci]"
             git tag "$NEW_VERSION"
             git push origin main --tags
+            echo "Triggering release workflow for $NEW_VERSION..."
+            gh workflow run release.yml -f version="$NEW_VERSION"
           else
             echo "version mismatch: json=$VERSION tag=$LATEST_TAG, skipping"
           fi
