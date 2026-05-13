@@ -51,7 +51,7 @@ public static class InfiniteEnchant_MultiEnchant
         if (dict.TryGetValue(typeKey, out var existing))
         {
             // 同类附魔：叠加层数并重新应用卡牌效果（Amount 变化后需刷新属性）
-            existing.Amount += amount;
+            existing.Amount += (int)amount;
             existing.ModifyCard();
             __result = existing;
         }
@@ -61,7 +61,7 @@ public static class InfiniteEnchant_MultiEnchant
             card.EnchantInternal(enchantment, amount);
             enchantment.ModifyCard();
             dict[typeKey] = enchantment;
-            __result = card.Enchantment;
+            __result = card.Enchantment!;
         }
 
         card.FinalizeUpgradeInternal();
