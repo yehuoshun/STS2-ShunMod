@@ -1,6 +1,5 @@
 using System.Reflection;
 using HarmonyLib;
-using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using STS2_ShunMod.Utils;
 
@@ -9,9 +8,8 @@ namespace STS2_ShunMod.Patches;
 // ════════════════════════════════════════════════════════
 // 无限升级系统 — 参考 STS2Plus UnlimitedGrowth 实现
 //
-// 双补丁兜底：
-//   Patch 1: MaxUpgradeLevel getter → 拉到 99
-//   Patch 2: IsUpgradable getter → 强制 true（v0.105+ API 变化兜底）
+// Patch 1: MaxUpgradeLevel getter → 拉到 99
+// Patch 2: IsUpgradable getter → ShunCard 强制可升级（兜底）
 // ════════════════════════════════════════════════════════
 
 internal static class UpgradeConst
@@ -28,34 +26,19 @@ public static class InfiniteUpgrade_MaxUpgradeLevel
 {
     static IEnumerable<MethodBase> TargetMethods()
     {
-        Log.Info("[ShunMod] 扫描 MaxUpgradeLevel getter...");
-
         var baseGetter = AccessTools.PropertyGetter(typeof(CardModel), nameof(CardModel.MaxUpgradeLevel));
         if (baseGetter != null)
-        {
-            Log.Info($"[ShunMod]   -> 基类: {baseGetter.DeclaringType?.Name}.{baseGetter.Name}");
             yield return baseGetter;
-        }
-        else
-        {
-            Log.Warn("[ShunMod]   -> 基类 getter 未找到！");
-        }
 
-        var allTypes = typeof(CardModel).Assembly.GetTypes();
-        var found = 0;
-        foreach (var type in allTypes)
+        foreach (var type in typeof(CardModel).Assembly.GetTypes())
         {
             if (type.IsAbstract || !typeof(CardModel).IsAssignableFrom(type))
                 continue;
 
             var getter = AccessTools.PropertyGetter(type, nameof(CardModel.MaxUpgradeLevel));
             if (getter != null && getter.DeclaringType == type)
-            {
-                found++;
                 yield return getter;
-            }
         }
-        Log.Info($"[ShunMod]   -> 子类覆盖: {found} 个");
     }
 
     static void Postfix(CardModel __instance, ref int __result)
