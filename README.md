@@ -24,6 +24,7 @@
 | ♾️ 无限升级 | Patch MaxUpgradeLevel（拉到 99），参照 STS2Plus 实现。 |
 | 🛠️ 硬化外壳修复 | 修正硬化外壳能力的减伤数值计算。 |
 | ✨ 无限附魔 | 卡牌同时拥有多种附魔，同类附魔叠加层数。 |
+| 🛡️ 格挡保留 | ClearBlock 跳过 + PrepareForNextTurn 恢复，格挡永不归零。参照 STS2Plus。 |
 
 ---
 
@@ -155,6 +156,12 @@ git push origin v0.1.0
 - **目标框架** .NET 9.0
 - **Mod 框架** Harmony（运行时 IL 补丁）
 - **打包** BSchneppe.StS2.PckPacker + Godot headless export
+
+---
+
+## 鸣谢
+
+- **[STS2Plus](https://github.com/StephenSHorton/STS2Plus)** — 反编译重建的 STS2 Mod，无限升级（UnlimitedGrowth）和格挡保留（BlockRetention）参考了其实现
 
 ---
 
