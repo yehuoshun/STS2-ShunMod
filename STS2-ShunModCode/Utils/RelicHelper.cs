@@ -8,7 +8,7 @@ namespace STS2_ShunMod.Utils;
 /// 遗物操作工具类 — 通过反射移除玩家遗物。
 /// </summary>
 /// <remarks>
-/// 使用反射访问 Player 的私有字段 _relics 和公共事件 RelicRemoved。
+/// 使用反射访问 Player 的私有字段 _relics 并触发移除事件。
 /// TODO: 待游戏提供公共 API 后替换反射实现。
 /// </remarks>
 public static class RelicHelper
@@ -20,10 +20,14 @@ public static class RelicHelper
         typeof(Player).GetField("_relics", BindingFlags.NonPublic | BindingFlags.Instance);
 
     /// <summary>
-    /// Player.RelicRemoved 公共事件反射缓存。
+    /// Player.RelicRemoved 事件反射缓存。优先尝试 EventInfo，
+    /// 回退到 field-like event 的 backing field。
     /// </summary>
-    private static readonly FieldInfo? RelicRemovedEvent =
-        typeof(Player).GetField("RelicRemoved", BindingFlags.Public | BindingFlags.Instance);
+    private static readonly EventInfo? RelicRemovedEventInfo =
+        typeof(Player).GetEvent("RelicRemoved", BindingFlags.Public | BindingFlags.Instance);
+
+    private static readonly FieldInfo? RelicRemovedBackingField =
+        typeof(Player).GetField("RelicRemoved", BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
 
     /// <summary>
     /// 从玩家身上移除指定遗物并触发 RelicRemoved 事件。
@@ -40,11 +44,27 @@ public static class RelicHelper
         if (!list.Remove(relic))
             return false;
 
-        // 触发 RelicRemoved 事件，通知游戏遗物已移除
-        if (RelicRemovedEvent?.GetValue(player) is Delegate del)
+        // 触发 RelicRemoved 事件
+        // 优先通过 EventInfo 获取 raise 方法，回退到 backing field 手动调用
+        var raiseMethod = RelicRemovedEventInfo?.GetRaiseMethod(nonPublic: true);
+        if (raiseMethod != null)
+        {
+            raiseMethod.Invoke(player, [relic]);
+        }
+        else if (RelicRemovedBackingField?.GetValue(player) is Delegate del)
         {
             foreach (var handler in del.GetInvocationList())
-                handler.Method.Invoke(handler.Target, [relic]);
+            {
+                try
+                {
+                    handler.DynamicInvoke(relic);
+                }
+                catch (TargetParameterCountException)
+                {
+                    // 事件签名不匹配，尝试空参数调用
+                    try { handler.DynamicInvoke(); } catch { /* 静默跳过 */ }
+                }
+            }
         }
 
         return true;

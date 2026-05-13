@@ -50,8 +50,9 @@ public static class InfiniteEnchant_MultiEnchant
 
         if (dict.TryGetValue(typeKey, out var existing))
         {
-            // 同类附魔：叠加层数（ModifyCard 不重复执行，属性已写入）
-            existing.Amount += (int)amount;
+            // 同类附魔：叠加层数并重新应用卡牌效果（Amount 变化后需刷新属性）
+            existing.Amount += amount;
+            existing.ModifyCard();
             __result = existing;
         }
         else

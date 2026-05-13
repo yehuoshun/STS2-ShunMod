@@ -46,10 +46,13 @@ public class SuperApotheosis : ShunCard
     /// </summary>
     /// <param name="choiceContext">玩家选择上下文</param>
     /// <param name="cardPlay">卡牌打出信息</param>
-    protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    protected override Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        if (Owner == null)
+            return Task.CompletedTask;
+
         // 升级战斗中所有卡牌（排除自身）
-        foreach (CardModel allCard in base.Owner!.PlayerCombatState.AllCards)
+        foreach (CardModel allCard in Owner.PlayerCombatState.AllCards)
         {
             if (allCard != this && allCard.IsUpgradable)
             {
@@ -58,10 +61,12 @@ public class SuperApotheosis : ShunCard
         }
 
         // 升级牌组中所有可升级卡牌（无预览动画）
-        var deckCards = PileType.Deck.GetPile(Owner!).Cards
+        var deckCards = PileType.Deck.GetPile(Owner).Cards
             .Where(c => c.IsUpgradable)
             .ToList();
         foreach (var card in deckCards)
             CardCmd.Upgrade(card, CardPreviewStyle.None);
+
+        return Task.CompletedTask;
     }
 }
