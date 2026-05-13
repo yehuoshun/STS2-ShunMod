@@ -11,9 +11,11 @@ namespace STS2_ShunMod.Patches;
 // 卡牌同时拥有多种附魔，同类附魔叠加层数
 //
 // 原理：
-// 1. 附魔效果通过 ModifyCard() 直接写入卡牌属性，不会丢失
-// 2. ConditionalWeakTable 存所有附魔引用
-// 3. 同类附魔叠加 Amount，异类附魔分别写入
+// 1. ConditionalWeakTable 存所有附魔引用
+// 2. 同类附魔叠加 Amount
+// 3. 异类附魔分别记录，EnchantInternal 后统一遍历全部 apply
+//    （EnchantInternal/FinalizeUpgradeInternal 只看 card.Enchantment，
+//     会覆盖之前的附魔效果，必须在之后全量重刷）
 // ════════════════════════════════════════════════════════
 
 /// <summary>
@@ -50,21 +52,25 @@ public static class InfiniteEnchant_MultiEnchant
 
         if (dict.TryGetValue(typeKey, out var existing))
         {
-            // 同类附魔：叠加层数并重新应用卡牌效果（Amount 变化后需刷新属性）
+            // 同类附魔：叠加层数
             existing.Amount += (int)amount;
-            existing.ModifyCard();
-            __result = existing;
         }
         else
         {
-            // 异类附魔：写入卡牌属性 + 记录引用
+            // 异类附魔：初始化新附魔并记录
+            // 注意：EnchantInternal 会替换 card.Enchantment 并清掉旧附魔状态
             card.EnchantInternal(enchantment, amount);
-            enchantment.ModifyCard();
             dict[typeKey] = enchantment;
-            __result = card.Enchantment!;
         }
 
+        // FinalizeUpgradeInternal 会基于 card.Enchantment（单一主附魔）重算卡牌状态
+        // 必须在它之后遍历全部附魔重新 apply，否则多附魔效果会丢失
         card.FinalizeUpgradeInternal();
+
+        foreach (var ench in dict.Values)
+            ench.ModifyCard();
+
+        __result = dict[typeKey];
         return false; // 跳过原始方法
     }
 }
