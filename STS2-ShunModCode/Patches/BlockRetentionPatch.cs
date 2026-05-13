@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using HarmonyLib;
@@ -36,11 +37,10 @@ public static class BlockRetentionClearBlockPatch
         if (!CreatureReflection.IsPlayer(__instance))
             return true;
 
+        // 始终保留 min(当前, 15)，绝不归零
         int block = CreatureReflection.GetBlock(__instance);
-        if (block <= BlockRetentionConst.MaxRetained)
-            return true;
-
-        CreatureReflection.SetBlock(__instance, BlockRetentionConst.MaxRetained);
+        int capped = Math.Min(block, BlockRetentionConst.MaxRetained);
+        CreatureReflection.SetBlock(__instance, capped);
         __result = Task.CompletedTask;
         return false;
     }
