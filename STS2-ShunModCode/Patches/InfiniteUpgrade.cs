@@ -1,14 +1,14 @@
 using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Models;
+using STS2_ShunMod.Utils;
 
 namespace STS2_ShunMod.Patches;
 
 // ════════════════════════════════════════════════════════
 // 无限升级系统 — 参考 STS2Plus 实现
-// 核心思路：Patch MaxUpgradeLevel 属性而非 IsUpgradable
-//           游戏内部用 CurrentUpgradeLevel < MaxUpgradeLevel 判断
-//           拉到 99 后自然支持无限升级
+// 核心思路：Patch MaxUpgradeLevel + IsUpgradable 双保险
+//           v0.105+ 可能改了升级判断逻辑，加 IsUpgradable 兜底
 // ════════════════════════════════════════════════════════
 
 /// <summary>
@@ -23,7 +23,7 @@ internal static class UpgradeConst
 }
 
 /// <summary>
-/// 扫描 CardModel 及其所有子类的 MaxUpgradeLevel getter，统一拦截。
+/// Patch 1: 扫描 CardModel 及其所有子类的 MaxUpgradeLevel getter，统一拦截。
 /// 参照 STS2Plus 的 UnlimitedGrowthMaxUpgradePatch，用 TargetMethods 而非直接注解。
 /// </summary>
 [HarmonyPatch]
@@ -55,14 +55,31 @@ public static class InfiniteUpgrade_MaxUpgradeLevel
     /// 后置拦截 — 将 MaxUpgradeLevel 拉到 99，移除升级次数限制。
     /// </summary>
     /// <remarks>
-    /// 安全检查：仅对 MaxUpgradeLevel >= 1 的卡牌生效（跳过诅咒/状态等不可升级牌）。
+    /// 仅跳过 __result == 0 的不可升级牌（诅咒/状态等无升级路径）。
+    /// v0.105+ 部分卡牌可能返回非预期值，放宽守卫条件。
     /// </remarks>
     static void Postfix(CardModel __instance, ref int __result)
     {
-        // 仅对有升级路径的卡牌生效
-        if (__result >= 1 && __result < UpgradeConst.MaxUpgradeCap)
+        if (__result > 0 && __result < UpgradeConst.MaxUpgradeCap)
         {
             __result = UpgradeConst.MaxUpgradeCap;
+        }
+    }
+}
+
+/// <summary>
+/// Patch 2（兜底）: 直接 Patch IsUpgradable getter。
+/// 当 MaxUpgradeLevel 补丁因版本 API 变化未生效时，此补丁确保自定义卡牌始终可升级。
+/// </summary>
+[HarmonyPatch(typeof(CardModel), nameof(CardModel.IsUpgradable), MethodType.Getter)]
+public static class InfiniteUpgrade_IsUpgradable
+{
+    static void Postfix(CardModel __instance, ref bool __result)
+    {
+        // 仅对 ShunCard 子类强制可升级，避免影响原版卡牌
+        if (!__result && __instance is ShunCard)
+        {
+            __result = true;
         }
     }
 }
