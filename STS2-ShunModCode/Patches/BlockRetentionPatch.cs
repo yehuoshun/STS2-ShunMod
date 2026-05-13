@@ -1,4 +1,3 @@
-using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using HarmonyLib;
@@ -7,22 +6,15 @@ using STS2_ShunMod.Utils;
 namespace STS2_ShunMod.Patches;
 
 // ════════════════════════════════════════════════════════
-// 格挡保留系统 — 参考 STS2Plus GlassCannonBlockRetention
+// 格挡保留系统
 //
-// 回合内 ClearBlock：不清零，保留最多 15 点
-// 回合结束 PrepareForNextTurn：记下格挡 → 恢复最多 15 点
+// ClearBlock：玩家生物直接跳过，格挡纹丝不动
+// PrepareForNextTurn：回合结束前记下格挡 → 结束后原样恢复
 // 仅对玩家生物生效，不影响怪物
-//
-// 注意：使用 CreatureReflection 反射访问，不依赖 Publicizer。
 // ════════════════════════════════════════════════════════
 
-internal static class BlockRetentionConst
-{
-    public const int MaxRetained = 15;
-}
-
 /// <summary>
-/// Patch 1: 拦截 ClearBlock()，玩家生物不清零，保留最多 MaxRetained 点格挡。
+/// Patch 1: 拦截 ClearBlock()，玩家生物不执行清格挡，直接跳过。
 /// </summary>
 [HarmonyPatch]
 public static class BlockRetentionClearBlockPatch
@@ -37,10 +29,7 @@ public static class BlockRetentionClearBlockPatch
         if (!CreatureReflection.IsPlayer(__instance))
             return true;
 
-        // 始终保留 min(当前, 15)，绝不归零
-        int block = CreatureReflection.GetBlock(__instance);
-        int capped = Math.Min(block, BlockRetentionConst.MaxRetained);
-        CreatureReflection.SetBlock(__instance, capped);
+        // 玩家生物：跳过 ClearBlock，格挡不变
         __result = Task.CompletedTask;
         return false;
     }
@@ -48,7 +37,7 @@ public static class BlockRetentionClearBlockPatch
 
 /// <summary>
 /// Patch 2: 拦截 PrepareForNextTurn()，回合结束保留格挡。
-/// Prefix 记下格挡值到 __state → PrepareForNextTurn 清掉 → Postfix 恢复。
+/// Prefix 记下格挡值 → 游戏内部清理 → Postfix 原样恢复。
 /// </summary>
 [HarmonyPatch]
 public static class BlockRetentionPrepareForNextTurnPatch
@@ -71,10 +60,6 @@ public static class BlockRetentionPrepareForNextTurnPatch
         if (__state <= 0 || !CreatureReflection.IsPlayer(__instance))
             return;
 
-        int capped = __state > BlockRetentionConst.MaxRetained
-            ? BlockRetentionConst.MaxRetained
-            : __state;
-
-        CreatureReflection.SetBlock(__instance, capped);
+        CreatureReflection.SetBlock(__instance, __state);
     }
 }
