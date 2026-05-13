@@ -49,7 +49,7 @@ public class SuperApotheosis : ShunCard
     protected override Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         var owner = Owner;
-        if (owner == null)
+        if (owner.PlayerCombatState == null)
             return Task.CompletedTask;
 
         // 升级战斗中所有卡牌（排除自身）
