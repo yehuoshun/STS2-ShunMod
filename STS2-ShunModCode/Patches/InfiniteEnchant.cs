@@ -28,7 +28,7 @@ public static class InfiniteEnchant_CanEnchant
 /// <summary>
 /// Patch 2: 完全替换 CardCmd.Enchant，支持多种附魔叠加。
 /// </summary>
-[HarmonyPatch(typeof(CardCmd), nameof(CardCmd.Enchant))]
+[HarmonyPatch(typeof(CardCmd), nameof(CardCmd.Enchant), new Type[] { typeof(EnchantmentModel), typeof(CardModel), typeof(decimal) })]
 public static class InfiniteEnchant_MultiEnchant
 {
     /// <summary>
@@ -72,7 +72,7 @@ public static class InfiniteEnchant_MultiEnchant
 /// <summary>
 /// Patch 3: ClearEnchantment 清掉所有附魔。
 /// </summary>
-[HarmonyPatch(typeof(CardCmd), nameof(CardCmd.ClearEnchantment))]
+[HarmonyPatch(typeof(CardCmd), nameof(CardCmd.ClearEnchantment), new Type[] { typeof(CardModel) })]
 public static class InfiniteEnchant_ClearAll
 {
     [HarmonyPrefix]
