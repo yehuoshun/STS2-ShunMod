@@ -21,10 +21,10 @@
 
 | 名称 | 说明 |
 |---|---|
-| ♾️ 无限升级 | Patch MaxUpgradeLevel（拉到 99），参照 STS2Plus 实现。 |
+| ♾️ 无限升级 | Patch MaxUpgradeLevel（拉到 99）。 |
 | 🛠️ 硬化外壳修复 | 修正硬化外壳能力的减伤数值计算。 |
 | ✨ 无限附魔 | 卡牌同时拥有多种附魔，同类附魔叠加层数。 |
-| 🛡️ 格挡保留 | ClearBlock 跳过 + PrepareForNextTurn 恢复，格挡永不归零。参照 STS2Plus。 |
+| 🛡️ 格挡保留 | ClearBlock 跳过 + PrepareForNextTurn 恢复，格挡永不归零。 |
 
 ---
 
