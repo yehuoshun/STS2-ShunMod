@@ -86,7 +86,7 @@ public class ReverseRingOfSevenCurses : RelicModel
         _goldGuard = true;
         int extraGold = (int)Math.Floor(_lastGoldGain * 0.5m);
         if (extraGold > 0)
-            await PlayerCmd.GainGold(Owner, extraGold);
+            await PlayerCmd.GainGold(extraGold, Owner);
         _goldGuard = false;
     }
 
@@ -123,11 +123,10 @@ public class ReverseRingOfSevenCurses : RelicModel
         if (player != Owner)
             return false;
 
-        var smithOption = options.OfType<SmithRestSiteOption>()
-            .FirstOrDefault(opt => opt.Owner == Owner);
-        if (smithOption != null)
+        var smithOptions = options.OfType<SmithRestSiteOption>().ToList();
+        if (smithOptions.Count > 0)
         {
-            smithOption.SmithCount += 1;
+            smithOptions[0].SmithCount += 1;
             return true;
         }
         return false;
