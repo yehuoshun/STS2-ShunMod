@@ -37,12 +37,6 @@ public class SuperApotheosis : ShunCard
     }
 
     /// <summary>
-    /// 卡牌大图资源路径（查看卡牌详情时显示）。
-    /// </summary>
-    public override string CustomPortraitPath =>
-        "res://STS2_ShunMod/images/packed/card_portraits/colorless/superapotheosis.png";
-
-    /// <summary>
     /// 卡牌肖像资源路径（手牌/牌组中小图）。
     /// </summary>
     public override string PortraitPath =>

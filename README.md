@@ -42,6 +42,8 @@ STS2-ShunMod/
 │   ├── MainFile.cs                 # Mod 入口（Harmony + 自动注册）
 │   ├── Cards/
 │   │   └── SuperApotheosis.cs      # 超级神化卡牌
+│   ├── Relics/
+│   │   └── ReverseRingOfSevenCurses.cs  # 逆七咒之戒
 │   ├── Core/
 │   │   └── Registration/           # 自动注册系统
 │   │       ├── PoolAttribute.cs    # [Pool] 特性
