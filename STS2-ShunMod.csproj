@@ -50,9 +50,6 @@
         <EmbeddedResource Remove="STS2-ShunModCode\patch\**" />
         <Compile Remove="STS2-ShunModCode\Abilities\**" />
         <EmbeddedResource Remove="STS2-ShunModCode\Abilities\**" />
-        <!-- Godot UI 类型需要 Godot SDK，CI 环境无 Godot 时跳过编译 -->
-        <Compile Remove="STS2-ShunModCode\Ui\CompactPotionDrawer.cs" Condition="'$(GodotPath)' == '' or !Exists('$(GodotPath)')" />
-        <Compile Remove="STS2-ShunModCode\Patches\CompactPotionDrawerPatch.cs" Condition="'$(GodotPath)' == '' or !Exists('$(GodotPath)')" />
     </ItemGroup>
 
     <ItemGroup>
