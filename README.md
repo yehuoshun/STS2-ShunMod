@@ -28,6 +28,12 @@
 
 ---
 
+## 安装
+
+下载 Release 中的 `STS2-ShunMod.zip`，解压到 Slay the Spire 2 的 `Mods/STS2-ShunMod/` 目录，启动游戏自动加载。
+
+---
+
 ## 项目结构
 
 ```
@@ -115,12 +121,6 @@ dotnet build
 ```
 
 产物输出到 `.godot/mono/temp/bin/Release/`。
-
----
-
-## 安装
-
-下载 Release 中的 `STS2-ShunMod.zip`，解压到 Slay the Spire 2 的 `Mods/STS2-ShunMod/` 目录，启动游戏自动加载。
 
 ---
 
