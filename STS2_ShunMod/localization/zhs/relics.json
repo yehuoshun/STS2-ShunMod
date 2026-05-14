@@ -1,6 +1,6 @@
 {
   "ReverseRingOfSevenCurses.title": "逆七咒之戒",
-  "ReverseRingOfSevenCurses.description": "受到的伤害 -50%，造成的伤害 +25%，获得的格挡 +20%，获得金币 +50%，休息处回复血量 +25%，击杀 BOSS 血量上限 +25%，卡牌奖励 +1，休息处升级卡牌 +1。抽牌 -1。",
+  "ReverseRingOfSevenCurses.description": "受到的伤害 -50%，造成的伤害 +25%，获得的格挡 +20%，获得金币 +50%，休息处回复血量 +25%，休息处升级卡牌 +1。抽牌 -1。",
   "ReverseRingOfSevenCurses.flavor": "七咒逆转，福祸相依。",
   "ReverseRingOfSevenCurses.additionalRestSiteHealText": "[逆七咒之戒] 回复最大生命值的 [green]37.5%（{ActualHeal}）[/green]。"
 }

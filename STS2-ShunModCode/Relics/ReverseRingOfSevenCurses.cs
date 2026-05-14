@@ -8,9 +8,7 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.Models.CardPools;
 using MegaCrit.Sts2.Core.Models.RelicPools;
-using MegaCrit.Sts2.Core.Rewards;
 using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.ValueProps;
 using STS2_ShunMod.Core.Registration;
@@ -19,7 +17,7 @@ namespace STS2_ShunMod.Relics;
 
 /// <summary>
 /// 逆七咒之戒 — 七咒之戒的反转版。
-/// 7 道诅咒逆转为祝福，7 道祝福部分逆转。
+/// 7 道诅咒逆转为 7 道祝福。
 /// </summary>
 [Pool(typeof(SharedRelicPool))]
 public class ReverseRingOfSevenCurses : RelicModel
@@ -47,12 +45,12 @@ public class ReverseRingOfSevenCurses : RelicModel
         "res://STS2_ShunMod/images/relics/reverse_ring_of_seven_curses.png";
 
     // ═══════════════════════════════════════════
-    // 7 诅咒 → 祝福（逆转为正面效果）
+    // 7 诅咒 → 7 祝福
     // ═══════════════════════════════════════════
 
     /// <summary>
-    /// 祝福1：受到伤害 -50%
-    /// 祝福2：对非 BOSS / BOSS 伤害 +25%
+    /// 1. 受到伤害 -50%
+    /// 2. 造成伤害 +25%
     /// </summary>
     public override decimal ModifyDamageMultiplicative(
         Creature? target, decimal amount, ValueProp props,
@@ -67,7 +65,7 @@ public class ReverseRingOfSevenCurses : RelicModel
         return 1m;
     }
 
-    /// <summary>祝福3：获得格挡 +20%</summary>
+    /// <summary>3. 获得格挡 +20%</summary>
     public override decimal ModifyBlockMultiplicative(
         Creature target, decimal block, ValueProp props,
         CardModel? cardSource, CardPlay? cardPlay)
@@ -77,7 +75,7 @@ public class ReverseRingOfSevenCurses : RelicModel
         return 1m;
     }
 
-    /// <summary>祝福4：获得金币 +50%</summary>
+    /// <summary>4. 获得金币 +50%</summary>
     public override bool ShouldGainGold(decimal amount, Player player)
     {
         return GoldGuard.ShouldGainGold(amount, player);
@@ -88,28 +86,12 @@ public class ReverseRingOfSevenCurses : RelicModel
         await GoldGuard.AfterGoldGained(player);
     }
 
-    /// <summary>祝福5：休息处回复血量 +25%</summary>
+    /// <summary>5. 休息处回复血量 +25%</summary>
     public override decimal ModifyRestSiteHealAmount(Creature creature, decimal amount)
     {
         if (creature.Player == Owner || creature.PetOwner == Owner)
             return amount * 1.25m;
         return amount;
-    }
-
-    /// <summary>祝福6：击杀 BOSS 血量上限 +25%</summary>
-    public override async Task AfterCombatVictory(CombatRoom room)
-    {
-        if (room?.RoomType != RoomType.Boss || Owner == null)
-            return;
-
-        int maxHpGain = (int)Math.Ceiling(Owner.Creature.MaxHp * 0.25m);
-        if (maxHpGain > 0)
-        {
-            Flash();
-            await CreatureCmd.IncreaseMaxHp(
-                new ThrowingPlayerChoiceContext(),
-                Owner.Creature, maxHpGain, isFromCard: false);
-        }
     }
 
     public override IReadOnlyList<LocString> ModifyExtraRestSiteHealText(
@@ -130,34 +112,7 @@ public class ReverseRingOfSevenCurses : RelicModel
         return list;
     }
 
-    // ═══════════════════════════════════════════
-    // 7 祝福部分逆转
-    // ═══════════════════════════════════════════
-
-    /// <summary>诅咒：抽牌 -1（原祝福 +1 逆转）</summary>
-    public override decimal ModifyHandDraw(Player player, decimal count)
-    {
-        if (player == Owner)
-            return Math.Max(0, count - 1);
-        return count;
-    }
-
-    /// <summary>祝福7：卡牌奖励 +1（原祝福 +1 保留）</summary>
-    public override bool TryModifyRewards(
-        Player player, List<Reward> rewards, AbstractRoom? room)
-    {
-        if (player != Owner || room == null)
-            return false;
-
-        if (room.RoomType is RoomType.Monster or RoomType.Boss or RoomType.Elite)
-        {
-            rewards.Add(new CardReward(
-                CardCreationOptions.ForRoom(player, room.RoomType), 3, player));
-        }
-        return true;
-    }
-
-    /// <summary>祝福8：休息处升级卡牌 +1（原祝福 +1 保留）</summary>
+    /// <summary>6. 休息处升级卡牌 +1</summary>
     public override bool TryModifyRestSiteOptions(
         Player player, ICollection<RestSiteOption> options)
     {
@@ -172,6 +127,18 @@ public class ReverseRingOfSevenCurses : RelicModel
             return true;
         }
         return false;
+    }
+
+    // ═══════════════════════════════════════════
+    // 7 祝福 → 诅咒
+    // ═══════════════════════════════════════════
+
+    /// <summary>7. 抽牌 -1（原祝福 +1 逆转）</summary>
+    public override decimal ModifyHandDraw(Player player, decimal count)
+    {
+        if (player == Owner)
+            return Math.Max(0, count - 1);
+        return count;
     }
 
     // ═══════════════════════════════════════════

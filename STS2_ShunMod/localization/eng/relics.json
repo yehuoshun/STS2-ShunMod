@@ -1,6 +1,6 @@
 {
   "ReverseRingOfSevenCurses.title": "Reverse Ring of Seven Curses",
-  "ReverseRingOfSevenCurses.description": "Damage taken -50%, Damage dealt +25%, Block gained +20%, Gold gained +50%, Rest site heal +25%, Max HP +25% on boss kill, Card rewards +1, Rest site upgrade +1. Draw -1.",
+  "ReverseRingOfSevenCurses.description": "Damage taken -50%, Damage dealt +25%, Block gained +20%, Gold gained +50%, Rest site heal +25%, Rest site upgrade +1. Draw -1.",
   "ReverseRingOfSevenCurses.flavor": "Seven curses reversed — fortune and misfortune entwined.",
   "ReverseRingOfSevenCurses.additionalRestSiteHealText": "[Reverse Ring] Heal [green]37.5% ({ActualHeal})[/green] of Max HP."
 }
