@@ -33,8 +33,29 @@ jobs:
         run: dotnet restore STS2-ShunMod.csproj
 
       - name: Build
+        id: build
         if: hashFiles('deps/sts2.dll') != ''
         run: dotnet build STS2-ShunMod.csproj -c Release -p:Sts2DataDir="$(realpath deps)" --no-restore
+
+      - name: Package
+        if: steps.build.outcome == 'success'
+        run: |
+          BUILD_DIR=.godot/mono/temp/bin/Release
+          mkdir -p publish
+          cp "$BUILD_DIR/STS2-ShunMod.dll" publish/ 2>/dev/null || echo "⚠️ 缺少 DLL"
+          cp STS2-ShunMod.json publish/ 2>/dev/null || echo "⚠️ 缺少 json"
+          if [ -d STS2_ShunMod/localization ]; then
+            mkdir -p publish/STS2_ShunMod/localization
+            cp -r STS2_ShunMod/localization/* publish/STS2_ShunMod/localization/
+          fi
+          cd publish && zip -r ../STS2-ShunMod.zip .
+
+      - name: Upload artifact
+        if: steps.build.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: STS2-ShunMod
+          path: STS2-ShunMod.zip
 
   auto-tag:
     needs: build
