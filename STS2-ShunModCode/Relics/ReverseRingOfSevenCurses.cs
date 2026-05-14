@@ -22,13 +22,8 @@ namespace STS2_ShunMod.Relics;
 [Pool(typeof(SharedRelicPool))]
 public class ReverseRingOfSevenCurses : RelicModel
 {
-    private GoldModificationGuard? _goldGuard;
-
-    private GoldModificationGuard GoldGuard => _goldGuard ??= new GoldModificationGuard(
-        () => Owner,
-        amount => Math.Floor(amount * 1.5m),
-        async amount => await PlayerCmd.LoseGold(amount * 0.5m, Owner!)
-    );
+    private bool _goldGuard;
+    private decimal _lastGoldGain;
 
     // ═══════════════════════════════════════════
     // 基础属性
@@ -75,15 +70,24 @@ public class ReverseRingOfSevenCurses : RelicModel
         return 1m;
     }
 
-    /// <summary>4. 获得金币 +50%</summary>
+    /// <summary>4. 获得金币 +50%（防递归标志）</summary>
     public override bool ShouldGainGold(decimal amount, Player player)
     {
-        return GoldGuard.ShouldGainGold(amount, player);
+        if (!_goldGuard && player == Owner)
+            _lastGoldGain = amount;
+        return true;
     }
 
     public override async Task AfterGoldGained(Player player)
     {
-        await GoldGuard.AfterGoldGained(player);
+        if (_goldGuard || player != Owner || Owner == null)
+            return;
+
+        _goldGuard = true;
+        int extraGold = (int)Math.Floor(_lastGoldGain * 0.5m);
+        if (extraGold > 0)
+            await PlayerCmd.GainGold(Owner, extraGold);
+        _goldGuard = false;
     }
 
     /// <summary>5. 休息处回复血量 +25%</summary>
@@ -140,8 +144,4 @@ public class ReverseRingOfSevenCurses : RelicModel
             return Math.Max(0, count - 1);
         return count;
     }
-
-    // ═══════════════════════════════════════════
-
-    public override RelicModel? GetUpgradeReplacement() => null;
 }
