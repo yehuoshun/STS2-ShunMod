@@ -60,6 +60,30 @@ jobs:
           GODOT=$(find godot -name "Godot*" -type f | head -1)
           [ -z "$GODOT" ] && { echo "❌ 未找到 Godot 可执行文件"; exit 0; }
           chmod +x "$GODOT"
+          # Godot Mono 导出需要 .sln 文件，.slnx 不行；生成最小 .sln
+          if [ ! -f STS2-ShunMod.sln ]; then
+            GUID="FAE04EC0-301F-11D3-BF4B-00C04F79EFBC"
+            PROJ_GUID="$(uuidgen | tr 'a-z' 'A-Z' | tr -d '-' | sed 's/\(........\)\(....\)\(....\)\(....\)\(............\)/\{\1-\2-\3-\4-\5\}/')"
+            cat > STS2-ShunMod.sln << SLNEOF
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+Project("{$GUID}") = "STS2-ShunMod", "STS2-ShunMod.csproj", "${PROJ_GUID}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		${PROJ_GUID}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		${PROJ_GUID}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		${PROJ_GUID}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		${PROJ_GUID}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
+SLNEOF
+            echo "✅ 已生成 STS2-ShunMod.sln"
+          fi
           echo "=== 导出 .pck ==="
           "$GODOT" --headless --export-pack "BasicExport" STS2-ShunMod.pck
           ls -la STS2-ShunMod.pck 2>/dev/null || echo "⚠️ 导出失败"
