@@ -162,6 +162,7 @@ git push origin v0.1.0
 ## 鸣谢
 
 - **[STS2Plus](https://github.com/StephenSHorton/STS2Plus)** — 反编译重建的 STS2 Mod，无限升级（UnlimitedGrowth）和格挡保留（BlockRetention）参考了其实现
+- **[YuWanCard / 鱼丸](https://github.com/YuWan886/Sts2-YuWanCard)** — STS2 原生 Mod 标杆，逆七咒之戒参照其七咒之戒实现，卡牌框架和项目结构深受启发
 
 ---
 
