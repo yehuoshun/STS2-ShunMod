@@ -63,6 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -116,3 +117,5 @@ json.dump(d, open('STS2-ShunMod.json', 'w'), indent=2, ensure_ascii=False)
           git commit -m "chore: bump $VERSION => $NEW_VERSION"
           git tag "$NEW_VERSION"
           git push origin main --tags
+          echo "Triggering release workflow for $NEW_VERSION..."
+          gh workflow run release.yml -f version="$NEW_VERSION"
