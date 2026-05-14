@@ -51,7 +51,7 @@ jobs:
         run: |
           MSG=$(git log -1 --pretty=%B)
           case "$MSG" in
-            *"[skip ci]"*) echo "skip ci commit, exiting"; exit 0 ;;
+            "chore: bump"*) echo "bump commit, skipping auto-tag"; exit 0 ;;
           esac
 
           VERSION=$(python3 -c "import json; print(json.load(open('STS2-ShunMod.json'))['version'])")
@@ -92,8 +92,6 @@ json.dump(d, open('STS2-ShunMod.json', 'w'), indent=2, ensure_ascii=False)
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add STS2-ShunMod.json
-          git commit -m "chore: bump $VERSION => $NEW_VERSION [skip ci]"
+          git commit -m "chore: bump $VERSION => $NEW_VERSION"
           git tag "$NEW_VERSION"
           git push origin main --tags
-          echo "Triggering release workflow for $NEW_VERSION..."
-          gh workflow run release.yml -f version="$NEW_VERSION"
