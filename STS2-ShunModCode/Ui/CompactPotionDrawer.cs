@@ -407,11 +407,12 @@ internal sealed class CompactPotionDrawer : Control
 
     private static NPotionContainer? FindPotionContainer(Node root)
     {
-        // 按类型搜索，不依赖节点路径
         foreach (var child in root.GetChildren())
         {
             if (child is NPotionContainer pc && GodotObject.IsInstanceValid(pc))
                 return pc;
+            var found = FindPotionContainer(child);
+            if (found != null) return found;
         }
         return null;
     }
