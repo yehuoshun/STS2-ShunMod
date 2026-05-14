@@ -62,7 +62,6 @@ jobs:
           path: STS2-ShunMod.zip
 
   auto-tag:
-    needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
