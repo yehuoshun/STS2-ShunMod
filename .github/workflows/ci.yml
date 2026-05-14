@@ -27,10 +27,9 @@ jobs:
           mkdir -p deps
           gh release download deps \
             --dir deps \
-            --pattern '*.dll' \
-            --repo '${{ github.repository }}' \
-            --clobber 2>/dev/null || \
-            echo '⚠️ 缺少游戏 DLL，CI 跳过编译验证'
+            --pattern "*.dll" \
+            --repo "${{ github.repository }}" \
+            --clobber 2>/dev/null || printf '%s\n' "⚠️ 缺少游戏 DLL，CI 跳过编译验证"
 
       - name: Restore
         run: dotnet restore STS2-ShunMod.csproj
@@ -44,31 +43,28 @@ jobs:
         if: steps.build.outcome == 'success'
         run: |
           mkdir -p publish
-          # DLL — 搜索 build 输出目录
-          DLL=$(find . -path '*/Release/*/STS2-ShunMod.dll' -not -path '*/publish/*' | head -1)
+          # DLL
+          DLL=$(find . -path "*/Release/*/STS2-ShunMod.dll" -not -path "*/publish/*" | head -1)
           if [ -n "$DLL" ]; then
             cp "$DLL" publish/
           else
-            echo '⚠️ 未找到 DLL，尝试常见路径...'
-            cp bin/Release/net9.0/STS2-ShunMod.dll publish/ 2>/dev/null || \
-            cp STS2-ShunModCode/bin/Release/net9.0/STS2-ShunMod.dll publish/ 2>/dev/null || \
-            echo '❌ 缺少 DLL'
+            for try in bin/Release/net9.0/STS2-ShunMod.dll STS2-ShunModCode/bin/Release/net9.0/STS2-ShunMod.dll; do
+              [ -f "$try" ] && { cp "$try" publish/; break; }
+            done
+            [ -f publish/STS2-ShunMod.dll ] || printf '%s\n' "❌ 缺少 DLL"
           fi
-          # JSON manifest
-          cp STS2-ShunMod.json publish/ 2>/dev/null || echo '⚠️ 缺少 json'
-          # .pck (PckPacker 生成)
-          PCK=$(find . -maxdepth 5 -name '*.pck' -not -path '*/publish/*' | head -1)
+          # JSON
+          cp STS2-ShunMod.json publish/ 2>/dev/null || printf '%s\n' "⚠️ 缺少 json"
+          # .pck
+          PCK=$(find . -maxdepth 5 -name "*.pck" -not -path "*/publish/*" | head -1)
           if [ -n "$PCK" ]; then
             cp "$PCK" publish/
           else
-            echo '⚠️ 缺少 pck'
+            printf '%s\n' "⚠️ 缺少 pck"
           fi
-          # 资源文件（图片、本地化等）
-          if [ -d STS2_ShunMod ]; then
-            cp -r STS2_ShunMod publish/
-          fi
-          cd publish && zip -r ../STS2-ShunMod.zip .
-          echo "package_size=$(stat -c%s ../STS2-ShunMod.zip)" >> $GITHUB_OUTPUT
+          # 资源
+          [ -d STS2_ShunMod ] && cp -r STS2_ShunMod publish/
+          cd publish && zip -qr ../STS2-ShunMod.zip .
 
       - name: Upload artifact
         if: steps.build.outcome == 'success'
@@ -92,10 +88,10 @@ jobs:
         run: |
           MSG=$(git log -1 --pretty=%B)
           case "$MSG" in
-            'chore: bump'*) echo 'bump commit, skipping auto-tag'; exit 0 ;;
+            "chore: bump"*) echo "bump commit, skipping auto-tag"; exit 0 ;;
           esac
 
-          VERSION=$(python3 -c 'import json; print(json.load(open("STS2-ShunMod.json"))["version"])')
+          VERSION=$(python3 -c "import json; print(json.load(open('STS2-ShunMod.json'))['version'])")
           LATEST_TAG=$(git tag --sort=-v:refname | head -1)
 
           if [ -z "$LATEST_TAG" ]; then
@@ -107,12 +103,7 @@ jobs:
 
           if [ "$LATEST_TAG" != "$VERSION" ]; then
             echo "sync: json=$VERSION => tag=$LATEST_TAG"
-            python3 -c '
-import json
-d = json.load(open("STS2-ShunMod.json"))
-d["version"] = "'"$LATEST_TAG"'"
-json.dump(d, open("STS2-ShunMod.json", "w"), indent=2, ensure_ascii=False)
-'
+            python3 -c "import json; d=json.load(open('STS2-ShunMod.json')); d['version']='${LATEST_TAG}'; json.dump(d, open('STS2-ShunMod.json','w'), indent=2, ensure_ascii=False)"
             VERSION="$LATEST_TAG"
           fi
 
@@ -124,7 +115,7 @@ json.dump(d, open("STS2-ShunMod.json", "w"), indent=2, ensure_ascii=False)
           NEW_VERSION="v${MAJOR}.${MINOR}.${NEW_PATCH}"
           echo "bump: $VERSION => $NEW_VERSION"
 
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag -a "$NEW_VERSION" -m "Release $NEW_VERSION"
           git push origin "$NEW_VERSION"
