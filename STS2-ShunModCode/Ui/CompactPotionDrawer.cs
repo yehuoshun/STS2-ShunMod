@@ -17,7 +17,6 @@ namespace STS2_ShunMod.Ui;
 /// 解决药水过多时挤出屏幕外的问题。
 /// 基于 NPotionContainer / NPotionHolder 反编译代码编写。
 /// </summary>
-[ScriptPath("res://src/Ui/CompactPotionDrawer.cs")]
 internal sealed class CompactPotionDrawer : Control
 {
     private const string NodeName = "STS2ShunCompactPotionDrawer";
@@ -51,6 +50,8 @@ internal sealed class CompactPotionDrawer : Control
     private bool _open;
     private int _cols = 3;
 
+    private bool _initialized;
+
     // ── attach ────────────────────────────────────────────────
 
     public static void Attach(NPotionContainer container)
@@ -70,6 +71,8 @@ internal sealed class CompactPotionDrawer : Control
         var d = new CompactPotionDrawer { Name = NodeName };
         globalUi.AddChild(d, false, InternalMode.Disabled);
         globalUi.MoveChild(d, -1);
+        // 确保 UI 初始化（_Ready 在 C# new + AddChild 时不一定触发）
+        d.InitUI();
         d.Rebind(container);
     }
 
@@ -78,6 +81,8 @@ internal sealed class CompactPotionDrawer : Control
         _container = container;
         _potionHoldersNode =
             (Control?)PotionHoldersNodeField?.GetValue(container);
+        // 隐藏原版横向药水条
+        container.Visible = false;
         SyncPosition();
         Refresh();
         Visible = true;
@@ -85,8 +90,16 @@ internal sealed class CompactPotionDrawer : Control
 
     // ── lifecycle ─────────────────────────────────────────────
 
-    public override void _Ready()
+    /// <summary>
+    /// 显式初始化 UI 子节点。
+    /// 在 C# new + AddChild 方式创建节点时，Godot 的 _Ready 可能不触发，
+    /// 因此 Attach() 中会主动调用此方法。_Ready 作为后备。
+    /// </summary>
+    private void InitUI()
     {
+        if (_initialized) return;
+        _initialized = true;
+
         MouseFilter = MouseFilterEnum.Ignore;
         FocusMode = FocusModeEnum.None;
         SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
@@ -108,6 +121,8 @@ internal sealed class CompactPotionDrawer : Control
         _panel.Visible = false;
         AddChild(_panel, false, InternalMode.Disabled);
     }
+
+    public override void _Ready() => InitUI();
 
     public override void _Input(InputEvent e)
     {
