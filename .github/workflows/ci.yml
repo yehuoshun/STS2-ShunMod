@@ -86,6 +86,8 @@ jobs:
           fetch-depth: 0
 
       - name: Auto bump and tag
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           MSG=$(git log -1 --pretty=%B)
           case "$MSG" in
