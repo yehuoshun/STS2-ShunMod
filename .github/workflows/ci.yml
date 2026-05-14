@@ -105,18 +105,10 @@ json.dump(d, open('STS2-ShunMod.json', 'w'), indent=2, ensure_ascii=False)
           NEW_VERSION="v${MAJOR}.${MINOR}.${NEW_PATCH}"
           echo "bump: $VERSION => $NEW_VERSION"
 
-          python3 -c "
-import json
-d = json.load(open('STS2-ShunMod.json'))
-d['version'] = '$NEW_VERSION'
-json.dump(d, open('STS2-ShunMod.json', 'w'), indent=2, ensure_ascii=False)
-"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add STS2-ShunMod.json
-          git commit -m "chore: bump $VERSION => $NEW_VERSION"
-          git tag "$NEW_VERSION"
-          git push origin main --tags
+          git tag -a "$NEW_VERSION" -m "Release $NEW_VERSION"
+          git push origin "$NEW_VERSION"
           echo "Triggering release workflow for $NEW_VERSION via API..."
           HTTP_CODE=$(curl -sS -X POST \
             -H "Authorization: Bearer ${{ github.token }}" \
