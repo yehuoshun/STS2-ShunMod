@@ -55,6 +55,7 @@ internal sealed partial class CompactPotionDrawer : Control
     private readonly List<NPotionHolder> _holders = new();
     private bool _open;
     private bool _dragging;
+    private bool _containerHiding;
     private Vector2 _dragStart;
     private Vector2 _btnStartPos;
     private int _cols = 3;
@@ -183,7 +184,35 @@ internal sealed partial class CompactPotionDrawer : Control
     private void HideContainer()
     {
         if (_container == null || !GodotObject.IsInstanceValid(_container)) return;
-        _container.Visible = false;
+
+        // 不能设 Visible=false（会导致 holder 子节点如 NPotionPopup 不可见），
+        // 改为只隐藏容器内非 PotionHolders 路径的视觉元素
+        _containerHiding = true;
+
+        // 找到容器直系子节点中通往 _potionHoldersNode 的那个
+        Control? holdersAncestor = _potionHoldersNode;
+        while (holdersAncestor != null && holdersAncestor.GetParent() != _container)
+            holdersAncestor = holdersAncestor.GetParent() as Control;
+
+        foreach (var child in _container.GetChildren())
+        {
+            if (child != holdersAncestor && child is CanvasItem ci)
+                ci.Visible = false;
+        }
+
+        // 去掉容器直系祖先的背景
+        holdersAncestor?.AddThemeStyleboxOverride("panel", new StyleBoxEmpty());
+
+        // PotionHolders 的兄弟节点也隐藏
+        if (_potionHoldersNode?.GetParent() is Control potionHoldersParent)
+        {
+            foreach (var sib in potionHoldersParent.GetChildren())
+            {
+                if (sib != _potionHoldersNode && sib is CanvasItem csi)
+                    csi.Visible = false;
+            }
+        }
+
         _container.MouseFilter = MouseFilterEnum.Ignore;
         _container.FocusMode = FocusModeEnum.None;
     }
@@ -191,7 +220,23 @@ internal sealed partial class CompactPotionDrawer : Control
     private void RestoreContainer()
     {
         if (_container == null || !GodotObject.IsInstanceValid(_container)) return;
-        _container.Visible = true;
+        _containerHiding = false;
+
+        foreach (var child in _container.GetChildren())
+        {
+            if (child is CanvasItem ci)
+                ci.Visible = true;
+        }
+
+        if (_potionHoldersNode?.GetParent() is Control potionHoldersParent)
+        {
+            foreach (var sib in potionHoldersParent.GetChildren())
+            {
+                if (sib is CanvasItem csi)
+                    csi.Visible = true;
+            }
+        }
+
         _container.MouseFilter = MouseFilterEnum.Stop;
         _container.FocusMode = FocusModeEnum.All;
     }
@@ -243,7 +288,7 @@ internal sealed partial class CompactPotionDrawer : Control
 
     public override void _Input(InputEvent e)
     {
-        if (_open && (e.IsActionPressed("ui_cancel") || e.IsActionPressed("ui_back")))
+        if (_open && e.IsActionPressed("ui_cancel"))
         {
             Close();
             GetViewport().SetInputAsHandled();
@@ -370,6 +415,15 @@ internal sealed partial class CompactPotionDrawer : Control
         if (_panel != null) _panel.Visible = false;
         ReturnHolders();
         if (_btn != null) _btn.GrabFocus();
+    }
+
+    internal static void Hide()
+    {
+        foreach (var d in Instances.Values)
+        {
+            if (GodotObject.IsInstanceValid(d) && d._open)
+                d.HideContainer();
+        }
     }
 
     private void LayoutPopup()
