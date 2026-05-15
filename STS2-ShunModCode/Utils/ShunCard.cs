@@ -17,7 +17,7 @@ public abstract class ShunCard : CardModel
     /// <summary>
     /// 卡牌关键词列表（消耗 / 保留 / 虚无等）。
     /// </summary>
-    private readonly List<CardKeyword> _keywords = [];
+    private new readonly List<CardKeyword> _keywords = [];
 
     /// <summary>
     /// 悬停提示工厂列表，用于生成关键词对应的鼠标悬浮说明。
