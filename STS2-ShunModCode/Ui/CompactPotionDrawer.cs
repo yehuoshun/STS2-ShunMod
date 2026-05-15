@@ -18,7 +18,7 @@ namespace STS2_ShunMod.Ui;
 /// 紧凑药水抽屉 —— 隐藏原版横向药水条，替换为按钮 + 弹出网格。
 /// 参照 STS2Plus CompactRelicDrawer 模式。
 /// </summary>
-internal sealed class CompactPotionDrawer : Control
+internal sealed partial class CompactPotionDrawer : Control
 {
     private const string NodeName = "STS2ShunCompactPotionDrawer";
     private const float BtnW = 116f, BtnH = 64f;
