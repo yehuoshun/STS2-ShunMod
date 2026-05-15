@@ -24,6 +24,8 @@ internal static class PotionFillForwardPatch
         AccessTools.Field(typeof(NPotionContainer), "_player");
     private static readonly System.Reflection.MethodInfo PotionSetter =
         AccessTools.PropertySetter(typeof(NPotionHolder), "Potion");
+    private static readonly System.Reflection.FieldInfo EmptyIconField =
+        AccessTools.Field(typeof(NPotionHolder), "_emptyIcon");
 
     private const string ChaosPotionName = "EntropicBrew";
 
@@ -71,6 +73,9 @@ internal static class PotionFillForwardPatch
                 // 从源 holder 的场景树移除 NPotion（设 Potion=null 不会自动移）
                 holders[j].RemoveChild(potion!);
                 PotionSetter?.Invoke(holders[j], new object?[] { null });
+                // 恢复源 holder 的空图标
+                if (EmptyIconField?.GetValue(holders[j]) is Godot.CanvasItem emptyIcon)
+                    emptyIcon.Modulate = Godot.Colors.White;
                 holders[i].AddPotion(potion!);
                 break;
             }
