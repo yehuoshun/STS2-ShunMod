@@ -57,14 +57,20 @@ public static class InfiniteEnchant_MultiEnchant
         }
         else
         {
-            // 异类附魔：初始化新附魔并记录
-            // 注意：EnchantInternal 会替换 card.Enchantment 并清掉旧附魔状态
-            card.EnchantInternal(enchantment, amount);
+            // 异类附魔：记录新附魔，不调用 EnchantInternal（会覆盖旧附魔状态）
+            enchantment.Amount = (int)amount;
             dict[typeKey] = enchantment;
         }
 
-        // FinalizeUpgradeInternal 会基于 card.Enchantment（单一主附魔）重算卡牌状态
-        // 必须在它之后遍历全部附魔重新 apply，否则多附魔效果会丢失
+        // ⚠️ 修复「附魔覆盖」bug：
+        // EnchantInternal 会清掉旧附魔的内部状态（buff/特效等），
+        // ModifyCard 只能恢复属性修改，无法复原 EnchantInternal 的副作用。
+        // 因此改为全量重建：先清除，再用第一个附魔做 EnchantInternal（主附魔），
+        // 最后全部附魔统一 ModifyCard 叠加效果。
+        card.ClearEnchantmentInternal();
+
+        var primaryEnchant = dict.Values.First();
+        card.EnchantInternal(primaryEnchant, primaryEnchant.Amount);
         card.FinalizeUpgradeInternal();
 
         foreach (var ench in dict.Values)
