@@ -20,7 +20,7 @@ namespace STS2_ShunMod.Relics;
 /// 7 道诅咒逆转为 7 道祝福。
 /// </summary>
 [Pool(typeof(SharedRelicPool))]
-public class ReverseRingOfSevenCurses : RelicModel
+public class ShunModReverseRingOfSevenCurses : RelicModel
 {
     private bool _goldGuard;
     private decimal _lastGoldGain;
@@ -107,7 +107,7 @@ public class ReverseRingOfSevenCurses : RelicModel
         var list = new List<LocString>(currentExtraText);
         var extraText = new LocString(
             "relics",
-            "ReverseRingOfSevenCurses.additionalRestSiteHealText");
+            "ShunModReverseRingOfSevenCurses.additionalRestSiteHealText");
         decimal baseHeal = (decimal)player.Creature.MaxHp * 0.3m;
         decimal actualHeal = baseHeal * 1.5m;
         int actualHealInt = (int)actualHeal;
