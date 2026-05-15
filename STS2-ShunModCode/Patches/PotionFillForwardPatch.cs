@@ -55,8 +55,6 @@ internal static class PotionFillForwardPatch
         var holders = HoldersField?.GetValue(container) as List<NPotionHolder>;
         if (holders == null) return;
 
-        var player = PlayerField?.GetValue(container) as Player;
-
         for (int i = 0; i < holders.Count; i++)
         {
             if (holders[i] == null || !Godot.GodotObject.IsInstanceValid(holders[i]))
@@ -72,29 +70,9 @@ internal static class PotionFillForwardPatch
                 var potion = holders[j].Potion;
                 PotionSetter?.Invoke(holders[j], new object?[] { null });
                 holders[i].AddPotion(potion!);
-
-                // 同步更新 Player.PotionSlots 顺序
-                SyncPotionSlots(player, potion!.Model, i);
                 break;
             }
         }
-    }
-
-    private static void SyncPotionSlots(Player? player, PotionModel potion, int newIndex)
-    {
-        if (player == null) return;
-        try
-        {
-            var slots = player.PotionSlots;
-            if (slots == null) return;
-            int oldIdx = slots.IndexOf(potion);
-            if (oldIdx >= 0 && oldIdx != newIndex)
-            {
-                slots.RemoveAt(oldIdx);
-                slots.Insert(newIndex, potion);
-            }
-        }
-        catch { /* best effort */ }
     }
 
     private static void EnsureEntropicBrew(NPotionContainer container)
