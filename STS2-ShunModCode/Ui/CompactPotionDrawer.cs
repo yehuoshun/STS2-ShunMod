@@ -54,6 +54,9 @@ internal sealed partial class CompactPotionDrawer : Control
     private Button? _closeBtn;
     private readonly List<NPotionHolder> _holders = new();
     private bool _open;
+    private bool _dragging;
+    private Vector2 _dragStart;
+    private Vector2 _btnStartPos;
     private int _cols = 3;
 
     // ── attach ────────────────────────────────────────────────
@@ -270,7 +273,9 @@ internal sealed partial class CompactPotionDrawer : Control
         b.AddThemeStyleboxOverride("pressed", SBox(Prs, Bdr.Lightened(0.12f), 2));
         b.AddThemeStyleboxOverride("focus", FocusSBox());
         b.AddThemeStyleboxOverride("disabled", SBox(Bg.Darkened(0.12f), Bdr, 2));
+        b.MouseDefaultCursorShape = CursorShape.PointingHand;
         b.Pressed += Toggle;
+        b.GuiInput += OnBtnGuiInput;
 
         var margin = new MarginContainer();
         margin.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
@@ -462,6 +467,31 @@ internal sealed partial class CompactPotionDrawer : Control
     {
         if (e is InputEventMouseButton mb && mb.Pressed && mb.ButtonIndex == MouseButton.Left)
             Close();
+    }
+
+    private void OnBtnGuiInput(InputEvent e)
+    {
+        if (_open) return;
+        if (e is InputEventMouseButton mb)
+        {
+            if (mb.ButtonIndex == MouseButton.Left)
+            {
+                if (mb.Pressed)
+                {
+                    _dragging = true;
+                    _dragStart = mb.GlobalPosition;
+                    _btnStartPos = _btn!.Position;
+                }
+                else
+                {
+                    _dragging = false;
+                }
+            }
+        }
+        else if (e is InputEventMouseMotion mm && _dragging)
+        {
+            _btn!.Position = _btnStartPos + (mm.GlobalPosition - _dragStart);
+        }
     }
 
     // ── helpers ───────────────────────────────────────────────
