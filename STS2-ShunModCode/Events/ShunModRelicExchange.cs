@@ -12,15 +12,17 @@ using STS2_ShunMod.Core.Registration;
 namespace STS2_ShunMod.Events;
 
 /// <summary>
-/// 遗物交易所 — 用遗物换遗物、换附魔、或消耗生命刷新选项。
+/// 遗物交易所 — 用遗物换遗物、换附魔、刷新选项、退出。
 /// </summary>
 /// <remarks>
-/// 三个选项：
+/// 可反复交易，直到选择退出：
 /// <list type="number">
 /// <item>随机一个玩家遗物 → 随机一个新遗物（从遗物池抽取）</item>
 /// <item>随机一个玩家遗物 → 卡牌附魔（随机附魔类型，目标随机牌组中一张）</item>
 /// <item>扣除 5 生命 → 刷新以上两个选项的随机结果</item>
+/// <item>退出交易所</item>
 /// </list>
+/// 选项 1-3 不结束事件，选完后重新随机生成选项继续交易。
 /// </remarks>
 [Pool(typeof(EventRelicPool))]
 public class ShunModRelicExchange : EventModel
@@ -44,17 +46,13 @@ public class ShunModRelicExchange : EventModel
         var options = new List<EventOption>();
 
         // ── 选项 1：遗物换遗物 ──
-        if (_playerRelic1 != null && _rewardRelic != null)
+        if (_playerRelic1 != null && _rewardRelic != null && playerRelics.Count > 0)
         {
-            // TODO: 本地化 key 需要在 localization/events.json 中添加
-            // SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_1
-            //   参数: {sacrificeName} {rewardName}
             options.Add(new EventOption(ctx, InitialOptionKey("OPT_1"), async () =>
             {
                 RelicHelper.RemoveRelic(Owner, _playerRelic1!);
-                // TODO: 确认 PlayerCmd.GainRelic 签名
                 await PlayerCmd.GainRelic(Owner, _rewardRelic!);
-                SetEventFinished(L10NLookup("pages.CLOSE.description"));
+                // 不调 SetEventFinished → 重新 GenerateInitialOptions，继续交易
             }));
         }
 
@@ -65,7 +63,6 @@ public class ShunModRelicExchange : EventModel
             {
                 RelicHelper.RemoveRelic(Owner, _playerRelic2!);
                 CardCmd.Enchant(_enchantTargetCard, _rewardEnchant!, 1);
-                SetEventFinished(L10NLookup("pages.CLOSE.description"));
             }));
         }
 
@@ -73,7 +70,12 @@ public class ShunModRelicExchange : EventModel
         options.Add(new EventOption(ctx, InitialOptionKey("OPT_3"), async () =>
         {
             await PlayerCmd.Damage(Owner, 5);
-            // 不调 SetEventFinished → 系统重新 GenerateInitialOptions 实现刷新
+        }));
+
+        // ── 选项 4：退出 ──
+        options.Add(new EventOption(ctx, InitialOptionKey("OPT_4"), () =>
+        {
+            SetEventFinished(L10NLookup("pages.CLOSE.description"));
         }));
 
         return options;
