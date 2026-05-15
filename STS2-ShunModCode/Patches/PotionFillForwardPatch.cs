@@ -68,6 +68,8 @@ internal static class PotionFillForwardPatch
                 if (!holders[j].HasPotion) continue;
 
                 var potion = holders[j].Potion;
+                // 从源 holder 的场景树移除 NPotion（设 Potion=null 不会自动移）
+                holders[j].RemoveChild(potion!);
                 PotionSetter?.Invoke(holders[j], new object?[] { null });
                 holders[i].AddPotion(potion!);
                 break;
