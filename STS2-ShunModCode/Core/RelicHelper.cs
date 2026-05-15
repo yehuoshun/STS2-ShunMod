@@ -2,7 +2,7 @@ using System.Reflection;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Models;
 
-namespace STS2_ShunMod.Utils;
+namespace STS2_ShunMod.Core;
 
 /// <summary>
 /// 遗物操作工具类 — 通过反射移除玩家遗物。

@@ -6,7 +6,7 @@ using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.CardPools;
 using MegaCrit.Sts2.Core.Nodes.CommonUi;
 using STS2_ShunMod.Core.Registration;
-using STS2_ShunMod.Utils;
+using STS2_ShunMod.Core;
 
 namespace STS2_ShunMod.Cards;
 

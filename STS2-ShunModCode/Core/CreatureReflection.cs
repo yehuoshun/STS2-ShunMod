@@ -1,7 +1,7 @@
 using System.Reflection;
 using HarmonyLib;
 
-namespace STS2_ShunMod.Utils;
+namespace STS2_ShunMod.Core;
 
 /// <summary>
 /// Creature 反射工具 — 访问 Creature 类型内部属性（Block / IsPlayer 等）。

@@ -55,6 +55,9 @@ STS2-ShunMod/
 │   ├── Relics/
 │   │   └── ReverseRingOfSevenCurses.cs  # 逆七咒之戒
 │   ├── Core/
+│   │   ├── ShunCard.cs             # 卡牌基类（链式配置）
+│   │   ├── CreatureReflection.cs   # Creature 反射工具
+│   │   ├── RelicHelper.cs          # 遗物反射工具
 │   │   └── Registration/           # 自动注册系统
 │   │       ├── PoolAttribute.cs    # [Pool] 特性
 │   │       ├── AssemblyScanner.cs  # 安全类型扫描
@@ -62,11 +65,9 @@ STS2-ShunMod/
 │   ├── Patches/
 │   │   ├── InfiniteUpgrade.cs      # 无限升级（MaxUpgradeLevel）
 │   │   ├── InfiniteEnchant.cs      # 无限附魔（多种附魔共存 + 叠层）
+│   │   ├── BlockRetentionPatch.cs  # 格挡保留
 │   │   ├── HardenedShellPatch.cs   # 硬化外壳修复
 │   │   └── PotionFillForwardPatch.cs  # 药水填充前移 + 混沌药水保底
-│   └── Utils/
-│       ├── ShunCard.cs             # 卡牌基类（链式配置）
-│       └── RelicHelper.cs          # 遗物操作
 ├── STS2-ShunMod/                   # Godot 资源
 │   ├── cards/                      # 卡牌美术
 │   └── localization/               # 本地化（中/英）

@@ -1,7 +1,7 @@
 using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Models;
-using STS2_ShunMod.Utils;
+using STS2_ShunMod.Core;
 
 namespace STS2_ShunMod.Patches;
 

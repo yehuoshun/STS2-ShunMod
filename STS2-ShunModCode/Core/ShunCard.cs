@@ -3,7 +3,7 @@ using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 
-namespace STS2_ShunMod.Utils;
+namespace STS2_ShunMod.Core;
 
 /// <summary>
 /// 卡牌基类 — 封装 CardModel 的抽象成员，提供链式配置方法。

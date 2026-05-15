@@ -1,7 +1,7 @@
 using System.Reflection;
 using System.Threading.Tasks;
 using HarmonyLib;
-using STS2_ShunMod.Utils;
+using STS2_ShunMod.Core;
 
 namespace STS2_ShunMod.Patches;
 
