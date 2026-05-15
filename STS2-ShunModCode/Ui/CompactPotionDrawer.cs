@@ -416,7 +416,16 @@ internal sealed partial class CompactPotionDrawer : Control
             var p = h.GetParent();
             p?.RemoveChild(h);
             _grid.AddChild(h);
+            h.GuiInput += OnHolderGuiInput;
         }
+    }
+
+    private void OnHolderGuiInput(InputEvent e)
+    {
+        // 点击药水时关闭弹出网格，holder 回到原容器后再处理点击，
+        // 避免药水使用UI叠加
+        if (e is InputEventMouseButton mb && mb.Pressed && mb.ButtonIndex == MouseButton.Left)
+            Close();
     }
 
     private void ReturnHolders()
@@ -424,6 +433,7 @@ internal sealed partial class CompactPotionDrawer : Control
         foreach (var h in _holders)
         {
             if (h == null || !GodotObject.IsInstanceValid(h)) continue;
+            h.GuiInput -= OnHolderGuiInput;
             var p = h.GetParent();
             if (p != _potionHoldersNode)
             {
