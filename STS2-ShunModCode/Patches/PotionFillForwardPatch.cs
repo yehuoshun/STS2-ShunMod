@@ -55,6 +55,8 @@ internal static class PotionFillForwardPatch
         var holders = HoldersField?.GetValue(container) as List<NPotionHolder>;
         if (holders == null) return;
 
+        var player = PlayerField?.GetValue(container) as Player;
+
         for (int i = 0; i < holders.Count; i++)
         {
             if (holders[i] == null || !Godot.GodotObject.IsInstanceValid(holders[i]))
@@ -70,9 +72,29 @@ internal static class PotionFillForwardPatch
                 var potion = holders[j].Potion;
                 PotionSetter?.Invoke(holders[j], new object?[] { null });
                 holders[i].AddPotion(potion!);
+
+                // 同步更新 Player.PotionSlots 顺序
+                SyncPotionSlots(player, potion!.Model, i);
                 break;
             }
         }
+    }
+
+    private static void SyncPotionSlots(Player? player, PotionModel potion, int newIndex)
+    {
+        if (player == null) return;
+        try
+        {
+            var slots = player.PotionSlots;
+            if (slots == null) return;
+            int oldIdx = slots.IndexOf(potion);
+            if (oldIdx >= 0 && oldIdx != newIndex)
+            {
+                slots.RemoveAt(oldIdx);
+                slots.Insert(newIndex, potion);
+            }
+        }
+        catch { /* best effort */ }
     }
 
     private static void EnsureEntropicBrew(NPotionContainer container)
@@ -91,9 +113,17 @@ internal static class PotionFillForwardPatch
                 return;
         }
 
-        // 栏位已满则跳过
-        if (holders.All(h => Godot.GodotObject.IsInstanceValid(h) && h.HasPotion))
-            return;
+        // 找第一个空栏位
+        int emptyIndex = -1;
+        for (int i = 0; i < holders.Count; i++)
+        {
+            if (Godot.GodotObject.IsInstanceValid(holders[i]) && !holders[i].HasPotion)
+            {
+                emptyIndex = i;
+                break;
+            }
+        }
+        if (emptyIndex < 0) return; // 栏位已满
 
         // 从药水池中找混沌药水
         var options = PotionFactory.GetPotionOptions(player, Array.Empty<PotionModel>());
@@ -101,6 +131,6 @@ internal static class PotionFillForwardPatch
         if (chaos == null) return;
 
         var mutable = chaos.ToMutable();
-        TaskHelper.RunSafely(PotionCmd.TryToProcure(mutable, player));
+        TaskHelper.RunSafely(PotionCmd.TryToProcure(mutable, player, emptyIndex));
     }
 }
