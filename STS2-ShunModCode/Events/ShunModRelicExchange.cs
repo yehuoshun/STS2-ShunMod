@@ -1,9 +1,8 @@
 using System.Reflection;
 using MegaCrit.Sts2.Core.Commands;
-using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
-using MegaCrit.Sts2.Core.Localization;
+using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.RelicPools;
 using STS2_ShunMod.Core;
@@ -27,7 +26,7 @@ namespace STS2_ShunMod.Events;
 [Pool(typeof(EventRelicPool))]
 public class ShunModRelicExchange : EventModel
 {
-    private static readonly Random Rng = new();
+    
 
     // ── 当前随机结果（每次生成选项时更新） ──
     private RelicModel? _playerRelic1;
@@ -36,7 +35,7 @@ public class ShunModRelicExchange : EventModel
     private EnchantmentModel? _rewardEnchant;
     private CardModel? _enchantTargetCard;
 
-    public override IEnumerable<EventOption> GenerateInitialOptions(PlayerChoiceContext ctx)
+    public override IEnumerable<EventOption> GenerateInitialOptions()
     {
         var player = Owner;
         var playerRelics = GetPlayerRelics(player);
@@ -48,7 +47,7 @@ public class ShunModRelicExchange : EventModel
         // ── 选项 1：遗物换遗物 ──
         if (_playerRelic1 != null && _rewardRelic != null && playerRelics.Count > 0)
         {
-            options.Add(new EventOption(ctx, InitialOptionKey("OPT_1"), async () =>
+            options.Add(new EventOption(InitialOptionKey("OPT_1"), async () =>
             {
                 RelicHelper.RemoveRelic(Owner, _playerRelic1!);
                 await PlayerCmd.GainRelic(Owner, _rewardRelic!);
@@ -59,7 +58,7 @@ public class ShunModRelicExchange : EventModel
         // ── 选项 2：遗物换附魔 ──
         if (_playerRelic2 != null && _rewardEnchant != null && _enchantTargetCard != null)
         {
-            options.Add(new EventOption(ctx, InitialOptionKey("OPT_2"), async () =>
+            options.Add(new EventOption(InitialOptionKey("OPT_2"), async () =>
             {
                 RelicHelper.RemoveRelic(Owner, _playerRelic2!);
                 CardCmd.Enchant(_enchantTargetCard, _rewardEnchant!, 1);
@@ -67,15 +66,16 @@ public class ShunModRelicExchange : EventModel
         }
 
         // ── 选项 3：消耗 5 HP 刷新 ──
-        options.Add(new EventOption(ctx, InitialOptionKey("OPT_3"), async () =>
+        options.Add(new EventOption(InitialOptionKey("OPT_3"), async () =>
         {
             await PlayerCmd.Damage(Owner, 5);
         }));
 
         // ── 选项 4：退出 ──
-        options.Add(new EventOption(ctx, InitialOptionKey("OPT_4"), () =>
+        options.Add(new EventOption(InitialOptionKey("OPT_4"), async () =>
         {
             SetEventFinished(L10NLookup("pages.CLOSE.description"));
+            await Task.CompletedTask;
         }));
 
         return options;
