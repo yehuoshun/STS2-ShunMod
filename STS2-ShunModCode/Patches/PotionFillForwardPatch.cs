@@ -1,27 +1,38 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using HarmonyLib;
+using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Factories;
+using MegaCrit.Sts2.Core.Helpers;
+using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Nodes.Potions;
 
 namespace STS2_ShunMod.Patches;
 
 /// <summary>
-/// 药水填充前移：使用/丢弃药水后，后方药水自动向前填充空位。
-/// 例：5栏位用完3号 → 4号→3号, 5号→4号。
+/// 药水填充前移 + 混沌药水保底。
+/// 使用/丢弃后后方药水向前填充，若无混沌药水则自动补充。
 /// </summary>
 [HarmonyPatchCategory("Gameplay")]
 internal static class PotionFillForwardPatch
 {
     private static readonly System.Reflection.FieldInfo HoldersField =
         AccessTools.Field(typeof(NPotionContainer), "_holders");
-
+    private static readonly System.Reflection.FieldInfo PlayerField =
+        AccessTools.Field(typeof(NPotionContainer), "_player");
     private static readonly System.Reflection.MethodInfo PotionSetter =
         AccessTools.PropertySetter(typeof(NPotionHolder), "Potion");
+
+    private const string ChaosPotionName = "EntropicBrew";
 
     [HarmonyPatch(typeof(NPotionContainer), "RemoveUsed")]
     [HarmonyPostfix]
     private static void RemoveUsedPostfix(NPotionContainer __instance)
     {
         CompactBelt(__instance);
+        EnsureEntropicBrew(__instance);
     }
 
     [HarmonyPatch(typeof(NPotionContainer), "Discard")]
@@ -29,6 +40,14 @@ internal static class PotionFillForwardPatch
     private static void DiscardPostfix(NPotionContainer __instance)
     {
         CompactBelt(__instance);
+        EnsureEntropicBrew(__instance);
+    }
+
+    [HarmonyPatch(typeof(NPotionContainer), "Initialize")]
+    [HarmonyPostfix]
+    private static void InitializePostfix(NPotionContainer __instance)
+    {
+        EnsureEntropicBrew(__instance);
     }
 
     private static void CompactBelt(NPotionContainer container)
@@ -42,7 +61,6 @@ internal static class PotionFillForwardPatch
                 continue;
             if (holders[i].HasPotion) continue;
 
-            // 找后方第一个有药水的栏位
             for (int j = i + 1; j < holders.Count; j++)
             {
                 if (holders[j] == null || !Godot.GodotObject.IsInstanceValid(holders[j]))
@@ -50,12 +68,39 @@ internal static class PotionFillForwardPatch
                 if (!holders[j].HasPotion) continue;
 
                 var potion = holders[j].Potion;
-                // 从源栏位移除（Potion 设 null 后 AddPotion 会 AddChild，自动移父）
                 PotionSetter?.Invoke(holders[j], new object?[] { null });
-                // 添加到目标栏位
                 holders[i].AddPotion(potion!);
                 break;
             }
         }
+    }
+
+    private static void EnsureEntropicBrew(NPotionContainer container)
+    {
+        var player = PlayerField?.GetValue(container) as Player;
+        if (player == null) return;
+
+        var holders = HoldersField?.GetValue(container) as List<NPotionHolder>;
+        if (holders == null) return;
+
+        // 已有混沌药水则跳过
+        foreach (var h in holders)
+        {
+            if (!Godot.GodotObject.IsInstanceValid(h) || !h.HasPotion) continue;
+            if (h.Potion!.Model.GetType().Name == ChaosPotionName)
+                return;
+        }
+
+        // 栏位已满则跳过
+        if (holders.All(h => Godot.GodotObject.IsInstanceValid(h) && h.HasPotion))
+            return;
+
+        // 从药水池中找混沌药水
+        var options = PotionFactory.GetPotionOptions(player, Array.Empty<PotionModel>());
+        var chaos = options.FirstOrDefault(p => p.GetType().Name == ChaosPotionName);
+        if (chaos == null) return;
+
+        var mutable = chaos.ToMutable();
+        TaskHelper.RunSafely(PotionCmd.TryToProcure(mutable, player));
     }
 }
