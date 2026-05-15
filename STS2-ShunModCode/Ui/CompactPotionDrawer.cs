@@ -70,7 +70,17 @@ internal sealed class CompactPotionDrawer : Control
             globalUi.AddChild(d, false, InternalMode.Disabled);
             globalUi.MoveChild(d, -1);
         }
-        d.Bind(globalUi, runState);
+        d._pendingBind = (globalUi, runState);
+        d.CallDeferred(nameof(DeferredBind));
+    }
+
+    private (NGlobalUi globalUi, RunState runState)? _pendingBind;
+
+    private void DeferredBind()
+    {
+        if (_pendingBind is not var (ui, rs)) return;
+        _pendingBind = null;
+        Bind(ui, rs);
     }
 
     private static void PruneInvalid()
