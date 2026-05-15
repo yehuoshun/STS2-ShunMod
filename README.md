@@ -38,6 +38,14 @@
 
 ---
 
+## 事件
+
+| 名称 | 说明 |
+|---|---|
+| 🏪 遗物交易所 | ①随机遗物换随机遗物 ②随机遗物换卡牌附魔 ③扣5HP刷新选项 |
+
+---
+
 ## 安装
 
 下载 Release 中的 `STS2-ShunMod.zip`，解压到 Slay the Spire 2 的 `Mods/STS2-ShunMod/` 目录，启动游戏自动加载。
@@ -52,6 +60,8 @@ STS2-ShunMod/
 │   ├── MainFile.cs                 # Mod 入口（Harmony + 自动注册）
 │   ├── Cards/
 │   │   └── SuperApotheosis.cs      # 超级神化卡牌
+│   ├── Events/
+│   │   └── ShunModRelicExchange.cs   # 遗物交易所
 │   ├── Relics/
 │   │   └── ReverseRingOfSevenCurses.cs  # 逆七咒之戒
 │   ├── Core/
@@ -67,7 +77,8 @@ STS2-ShunMod/
 │   │   ├── InfiniteEnchant.cs      # 无限附魔（多种附魔共存 + 叠层）
 │   │   ├── BlockRetentionPatch.cs  # 格挡保留
 │   │   ├── HardenedShellPatch.cs   # 硬化外壳修复
-│   │   └── PotionFillForwardPatch.cs  # 药水填充前移 + 混沌药水保底
+│   │   ├── PotionFillForwardPatch.cs  # 药水填充前移 + 混沌药水保底
+│   │   └── EventRegistrationPatch.cs  # 事件注册（地图钩子）
 ├── STS2-ShunMod/                   # Godot 资源
 │   ├── cards/                      # 卡牌美术
 │   └── localization/               # 本地化（中/英）
