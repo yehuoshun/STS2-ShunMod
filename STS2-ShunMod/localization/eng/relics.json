@@ -1,6 +1,6 @@
 {
-  "ShunModReverseRingOfSevenCurses.title": "Reverse Ring of Seven Curses",
-  "ShunModReverseRingOfSevenCurses.description": "Damage taken -50%, Damage dealt +25%, Block gained +20%, Gold gained +50%, Rest site heal +25%, Rest site upgrade +1. Draw -1.",
-  "ShunModReverseRingOfSevenCurses.flavor": "Seven curses reversed — fortune and misfortune entwined.",
-  "ShunModReverseRingOfSevenCurses.additionalRestSiteHealText": "[Reverse Ring] Heal [green]37.5% ({ActualHeal})[/green] of Max HP."
+  "STS2-ShunMod.ShunModReverseRingOfSevenCurses.title": "Reverse Ring of Seven Curses",
+  "STS2-ShunMod.ShunModReverseRingOfSevenCurses.description": "Damage taken -50%, Damage dealt +25%, Block gained +20%, Gold gained +50%, Rest site heal +25%, Rest site upgrade +1. Draw -1.",
+  "STS2-ShunMod.ShunModReverseRingOfSevenCurses.flavor": "Seven curses reversed — fortune and misfortune entwined.",
+  "STS2-ShunMod.ShunModReverseRingOfSevenCurses.additionalRestSiteHealText": "[Reverse Ring] Heal [green]37.5% ({ActualHeal})[/green] of Max HP."
 }
