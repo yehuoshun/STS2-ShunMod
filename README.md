@@ -25,6 +25,15 @@
 
 ---
 
+## 药水
+
+| 功能 | 说明 |
+|---|---|
+| 🔄 填充前移 | 使用/丢弃药水后，后方药水自动向前填充空位。例：5栏位用完3号 → 4号→3号, 5号→4号。 |
+| 🌀 混沌药水保底 | 药水栏始终至少有一个 EntropicBrew（混沌药水）。开局/使用/丢弃后检测，无则自动补充。 |
+
+---
+
 ## 补丁
 
 | 名称 | 说明 |
@@ -60,7 +69,8 @@ STS2-ShunMod/
 │   ├── Patches/
 │   │   ├── InfiniteUpgrade.cs      # 无限升级（MaxUpgradeLevel）
 │   │   ├── InfiniteEnchant.cs      # 无限附魔（多种附魔共存 + 叠层）
-│   │   └── HardenedShellPatch.cs   # 硬化外壳修复
+│   │   ├── HardenedShellPatch.cs   # 硬化外壳修复
+│   │   └── PotionFillForwardPatch.cs  # 药水填充前移 + 混沌药水保底
 │   └── Utils/
 │       ├── ShunCard.cs             # 卡牌基类（链式配置）
 │       └── RelicHelper.cs          # 遗物操作
