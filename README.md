@@ -64,7 +64,7 @@ STS2-ShunMod/
 │   └── Utils/
 │       ├── ShunCard.cs             # 卡牌基类（链式配置）
 │       └── RelicHelper.cs          # 遗物操作
-├── STS2_ShunMod/                   # Godot 资源
+├── STS2-ShunMod/                   # Godot 资源
 │   ├── cards/                      # 卡牌美术
 │   └── localization/               # 本地化（中/英）
 ├── project.godot                   # Godot 4.5 项目
@@ -91,7 +91,7 @@ public class MyCard : ShunCard
         WithCostUpgradeBy(-1);
     }
 
-    public override string PortraitPath => "res://STS2_ShunMod/cards/my_card.png";
+    public override string PortraitPath => "res://STS2-ShunMod/cards/my_card.png";
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {

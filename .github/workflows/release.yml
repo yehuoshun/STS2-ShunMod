@@ -77,9 +77,9 @@ jobs:
             echo "⚠️ 无 .pck"
           fi
           # 本地化文件 — STS2 从文件系统读取，不在 PCK 里
-          if [ -d STS2_ShunMod/localization ]; then
-            mkdir -p publish/STS2_ShunMod/localization
-            cp -r STS2_ShunMod/localization/* publish/STS2_ShunMod/localization/
+          if [ -d STS2-ShunMod/localization ]; then
+            mkdir -p publish/STS2-ShunMod/localization
+            cp -r STS2-ShunMod/localization/* publish/STS2-ShunMod/localization/
             echo "✅ 已复制本地化文件"
           else
             echo "⚠️ 缺少本地化目录"

@@ -63,7 +63,7 @@ jobs:
             printf '%s\n' "⚠️ 缺少 pck"
           fi
           # 资源
-          [ -d STS2_ShunMod ] && cp -r STS2_ShunMod publish/
+          [ -d STS2-ShunMod ] && cp -r STS2-ShunMod publish/
           cd publish && zip -qr ../STS2-ShunMod.zip .
 
       - name: Upload artifact

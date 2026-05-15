@@ -34,10 +34,10 @@ public class ReverseRingOfSevenCurses : RelicModel
     protected override IEnumerable<DynamicVar> CanonicalVars => [];
 
     protected override string BigIconPath =>
-        "res://STS2_ShunMod/images/relics/reverse_ring_of_seven_curses.png";
+        "res://STS2-ShunMod/images/relics/reverse_ring_of_seven_curses.png";
 
     public override string PackedIconPath =>
-        "res://STS2_ShunMod/images/relics/reverse_ring_of_seven_curses.png";
+        "res://STS2-ShunMod/images/relics/reverse_ring_of_seven_curses.png";
 
     // ═══════════════════════════════════════════
     // 7 诅咒 → 7 祝福
