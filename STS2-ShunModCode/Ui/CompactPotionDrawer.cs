@@ -74,13 +74,48 @@ internal sealed class CompactPotionDrawer : Control
         d.CallDeferred(nameof(DeferredBind));
     }
 
+    /// <summary>
+    /// 当 NPotionContainer.UpdateNavigation 被调用时尝试绑定。
+    /// 药水容器可能动态创建，此时才在场景树中可用。
+    /// </summary>
+    public static void TryInitFromContainer(NGlobalUi globalUi, NPotionContainer container)
+    {
+        if (!GodotObject.IsInstanceValid(globalUi)) return;
+        if (!GodotObject.IsInstanceValid(container)) return;
+
+        PruneInvalid();
+        if (!Instances.TryGetValue(globalUi, out var d) || !GodotObject.IsInstanceValid(d))
+            return;
+
+        // 已经绑定过且容器没变就跳过
+        if (d._container != null && GodotObject.IsInstanceValid(d._container))
+            return;
+
+        if (d._pendingBind.HasValue)
+        {
+            // 还没绑定过，立即用新容器绑定
+            d.Bind(d._pendingBind.Value.globalUi, d._pendingBind.Value.runState, container);
+            d._pendingBind = null;
+        }
+        else
+        {
+            // bind 已经调过但没找到容器，现在容器出现了，补偿绑定
+            d.BindContainer(container);
+        }
+    }
+
     private (NGlobalUi globalUi, RunState runState)? _pendingBind;
 
     private void DeferredBind()
     {
         if (_pendingBind is not var (ui, rs)) return;
-        _pendingBind = null;
-        Bind(ui, rs);
+        var container = FindPotionContainer(ui);
+        if (container != null)
+        {
+            _pendingBind = null;
+            Bind(ui, rs, container);
+        }
+        // 容器还没就绪，等待 TryInitFromContainer 触发
     }
 
     private static void PruneInvalid()
@@ -89,41 +124,57 @@ internal sealed class CompactPotionDrawer : Control
         foreach (var k in dead) Instances.Remove(k);
     }
 
-    private void Bind(NGlobalUi globalUi, RunState runState)
+    private void Bind(NGlobalUi globalUi, RunState runState, NPotionContainer container)
     {
-        if (_player != null)
-        {
-            _player.PotionProcured -= OnPotionProcured;
-            _player.UsedPotionRemoved -= OnUsedPotionRemoved;
-            _player.PotionDiscarded -= OnPotionDiscarded;
-            _player.MaxPotionCountChanged -= OnMaxPotionChanged;
-            _player.RelicObtained -= OnRelicsUpdated;
-            _player.RelicRemoved -= OnRelicsUpdated;
-        }
+        UnbindPlayer();
 
         _globalUi = globalUi;
-        _container = FindPotionContainer(globalUi);
+        _container = container;
         _player = LocalContext.GetMe(runState);
+        _potionHoldersNode = (Control?)PotionHoldersField?.GetValue(_container);
 
-        if (_container != null)
-            _potionHoldersNode = (Control?)PotionHoldersField?.GetValue(_container);
-
-        if (_player != null)
-        {
-            _player.PotionProcured += OnPotionProcured;
-            _player.UsedPotionRemoved += OnUsedPotionRemoved;
-            _player.PotionDiscarded += OnPotionDiscarded;
-            _player.MaxPotionCountChanged += OnMaxPotionChanged;
-            _player.RelicObtained += OnRelicsUpdated;
-            _player.RelicRemoved += OnRelicsUpdated;
-        }
-
+        BindPlayer();
         HideContainer();
         SyncPosition();
         Refresh(rebuild: true);
         Visible = true;
         SetProcess(true);
         SetProcessInput(true);
+    }
+
+    /// <summary>
+    /// 补偿绑定：已调用过 Bind 但没找到容器，容器后来才出现。
+    /// </summary>
+    private void BindContainer(NPotionContainer container)
+    {
+        _container = container;
+        _potionHoldersNode = (Control?)PotionHoldersField?.GetValue(_container);
+        HideContainer();
+        SyncPosition();
+        Refresh(rebuild: true);
+    }
+
+    private void UnbindPlayer()
+    {
+        if (_player == null) return;
+        _player.PotionProcured -= OnPotionProcured;
+        _player.UsedPotionRemoved -= OnUsedPotionRemoved;
+        _player.PotionDiscarded -= OnPotionDiscarded;
+        _player.MaxPotionCountChanged -= OnMaxPotionChanged;
+        _player.RelicObtained -= OnRelicsUpdated;
+        _player.RelicRemoved -= OnRelicsUpdated;
+        _player = null;
+    }
+
+    private void BindPlayer()
+    {
+        if (_player == null) return;
+        _player.PotionProcured += OnPotionProcured;
+        _player.UsedPotionRemoved += OnUsedPotionRemoved;
+        _player.PotionDiscarded += OnPotionDiscarded;
+        _player.MaxPotionCountChanged += OnMaxPotionChanged;
+        _player.RelicObtained += OnRelicsUpdated;
+        _player.RelicRemoved += OnRelicsUpdated;
     }
 
     private void HideContainer()
