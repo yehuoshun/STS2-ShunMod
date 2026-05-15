@@ -23,12 +23,12 @@ namespace STS2_ShunMod.Cards;
 /// </list>
 /// </remarks>
 [Pool(typeof(ColorlessCardPool))]
-public class ShunModSuperApotheosis : ShunCard
+public class SuperApotheosis : ShunCard
 {
     /// <summary>
     /// 配置卡牌基础属性与关键词。
     /// </summary>
-    public ShunModSuperApotheosis()
+    public SuperApotheosis()
         : base(baseCost: 2, type: CardType.Skill, rarity: CardRarity.Rare, target: TargetType.Self)
     {
         WithKeywords(CardKeyword.Exhaust);
