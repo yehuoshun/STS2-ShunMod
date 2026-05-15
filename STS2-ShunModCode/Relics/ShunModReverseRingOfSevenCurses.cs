@@ -107,7 +107,7 @@ public class ShunModReverseRingOfSevenCurses : RelicModel
         var list = new List<LocString>(currentExtraText);
         var extraText = new LocString(
             "relics",
-            "STS2-ShunMod.ShunModReverseRingOfSevenCurses.additionalRestSiteHealText");
+            "SHUN_MOD_REVERSE_RING_OF_SEVEN_CURSES.additionalRestSiteHealText");
         decimal baseHeal = (decimal)player.Creature.MaxHp * 0.3m;
         decimal actualHeal = baseHeal * 1.5m;
         int actualHealInt = (int)actualHeal;
