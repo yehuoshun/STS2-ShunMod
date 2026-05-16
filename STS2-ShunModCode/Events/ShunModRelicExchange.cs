@@ -100,7 +100,7 @@ public class ShunModRelicExchange : EventModel
                 // 重新 roll 并回到 INITIAL 页面刷新选项
                 var currentRelics = GetPlayerRelics(Owner);
                 RollOptions(Owner!, currentRelics);
-                SetPageKey("INITIAL");
+                SetPage("INITIAL");
             }, InitialOptionKey("OPT_3")));
         }
 
