@@ -110,7 +110,7 @@ public class ShunModRelicExchange : EventModel
     {
         // TODO: IDE 里找正确扣血 API，可能有 DamageCmd / PlayerCmd.TakeDamage 等
         // 临时用 Creature 直接扣，IDE 补全确认正确方法
-        player.Creature.Hp -= amount;
+        player.Creature.Health -= amount;
         await Task.CompletedTask;
     }
 
