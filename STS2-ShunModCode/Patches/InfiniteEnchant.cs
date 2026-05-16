@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Commands;
@@ -19,27 +18,31 @@ namespace STS2_ShunMod.Patches;
 // ════════════════════════════════════════════════════════
 
 /// <summary>
-/// Patch 1: CanEnchant 永远返回 true，移除附魔条件限制。
+///     Patch 1: CanEnchant 永远返回 true，移除附魔条件限制。
 /// </summary>
 [HarmonyPatch(typeof(EnchantmentModel), nameof(EnchantmentModel.CanEnchant))]
 public static class InfiniteEnchant_CanEnchant
 {
-    static void Postfix(ref bool __result) => __result = true;
+    private static void Postfix(ref bool __result)
+    {
+        __result = true;
+    }
 }
 
 /// <summary>
-/// Patch 2: 完全替换 CardCmd.Enchant，支持多种附魔叠加。
+///     Patch 2: 完全替换 CardCmd.Enchant，支持多种附魔叠加。
 /// </summary>
-[HarmonyPatch(typeof(CardCmd), nameof(CardCmd.Enchant), new Type[] { typeof(EnchantmentModel), typeof(CardModel), typeof(decimal) })]
+[HarmonyPatch(typeof(CardCmd), nameof(CardCmd.Enchant), typeof(EnchantmentModel), typeof(CardModel), typeof(decimal))]
 public static class InfiniteEnchant_MultiEnchant
 {
     /// <summary>
-    /// 每张卡的全部附魔：类型全名 → 附魔对象。
+    ///     每张卡的全部附魔：类型全名 → 附魔对象。
     /// </summary>
-    internal static readonly ConditionalWeakTable<CardModel, Dictionary<string, EnchantmentModel>> AllEnchantments = new();
+    internal static readonly ConditionalWeakTable<CardModel, Dictionary<string, EnchantmentModel>> AllEnchantments =
+        new();
 
     [HarmonyPrefix]
-    static bool Prefix(
+    private static bool Prefix(
         EnchantmentModel enchantment,
         CardModel card,
         decimal amount,
@@ -79,13 +82,13 @@ public static class InfiniteEnchant_MultiEnchant
 }
 
 /// <summary>
-/// Patch 3: ClearEnchantment 清掉所有附魔。
+///     Patch 3: ClearEnchantment 清掉所有附魔。
 /// </summary>
-[HarmonyPatch(typeof(CardCmd), nameof(CardCmd.ClearEnchantment), new Type[] { typeof(CardModel) })]
+[HarmonyPatch(typeof(CardCmd), nameof(CardCmd.ClearEnchantment), typeof(CardModel))]
 public static class InfiniteEnchant_ClearAll
 {
     [HarmonyPrefix]
-    static bool Prefix(CardModel card)
+    private static bool Prefix(CardModel card)
     {
         card.ClearEnchantmentInternal();
         InfiniteEnchant_MultiEnchant.AllEnchantments.Remove(card);

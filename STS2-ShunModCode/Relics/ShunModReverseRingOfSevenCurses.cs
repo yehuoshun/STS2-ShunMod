@@ -4,20 +4,18 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Entities.RestSite;
-using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.RelicPools;
-using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.ValueProps;
 using STS2_ShunMod.Core.Registration;
 
 namespace STS2_ShunMod.Relics;
 
 /// <summary>
-/// 逆七咒之戒 — 七咒之戒的反转版。
-/// 7 道诅咒逆转为 7 道祝福。
+///     逆七咒之戒 — 七咒之戒的反转版。
+///     7 道诅咒逆转为 7 道祝福。
 /// </summary>
 [Pool(typeof(SharedRelicPool))]
 public class ShunModReverseRingOfSevenCurses : RelicModel
@@ -44,8 +42,8 @@ public class ShunModReverseRingOfSevenCurses : RelicModel
     // ═══════════════════════════════════════════
 
     /// <summary>
-    /// 1. 受到伤害 -50%
-    /// 2. 造成伤害 +25%
+    ///     1. 受到伤害 -50%
+    ///     2. 造成伤害 +25%
     /// </summary>
     public override decimal ModifyDamageMultiplicative(
         Creature? target, decimal amount, ValueProp props,
@@ -84,7 +82,7 @@ public class ShunModReverseRingOfSevenCurses : RelicModel
             return;
 
         _goldGuard = true;
-        int extraGold = (int)Math.Floor(_lastGoldGain * 0.5m);
+        var extraGold = (int)Math.Floor(_lastGoldGain * 0.5m);
         if (extraGold > 0)
             await PlayerCmd.GainGold(extraGold, Owner);
         _goldGuard = false;
@@ -108,9 +106,9 @@ public class ShunModReverseRingOfSevenCurses : RelicModel
         var extraText = new LocString(
             "relics",
             "SHUN_MOD_REVERSE_RING_OF_SEVEN_CURSES.additionalRestSiteHealText");
-        decimal baseHeal = (decimal)player.Creature.MaxHp * 0.3m;
-        decimal actualHeal = baseHeal * 1.5m;
-        int actualHealInt = (int)actualHeal;
+        var baseHeal = player.Creature.MaxHp * 0.3m;
+        var actualHeal = baseHeal * 1.5m;
+        var actualHealInt = (int)actualHeal;
         extraText.Add("ActualHeal", actualHealInt.ToString());
         list.Add(extraText);
         return list;
@@ -129,6 +127,7 @@ public class ShunModReverseRingOfSevenCurses : RelicModel
             smithOptions[0].SmithCount += 1;
             return true;
         }
+
         return false;
     }
 

@@ -18,13 +18,13 @@ internal static class UpgradeConst
 }
 
 /// <summary>
-/// Patch 1: 拦截所有 CardModel 子类的 MaxUpgradeLevel getter。
-/// 参照 STS2Plus UnlimitedGrowthMaxUpgradePatch，用 TargetMethods 动态扫描。
+///     Patch 1: 拦截所有 CardModel 子类的 MaxUpgradeLevel getter。
+///     参照 STS2Plus UnlimitedGrowthMaxUpgradePatch，用 TargetMethods 动态扫描。
 /// </summary>
 [HarmonyPatch]
 public static class InfiniteUpgrade_MaxUpgradeLevel
 {
-    static IEnumerable<MethodBase> TargetMethods()
+    private static IEnumerable<MethodBase> TargetMethods()
     {
         var baseGetter = AccessTools.PropertyGetter(typeof(CardModel), nameof(CardModel.MaxUpgradeLevel));
         if (baseGetter != null)
@@ -41,27 +41,21 @@ public static class InfiniteUpgrade_MaxUpgradeLevel
         }
     }
 
-    static void Postfix(CardModel __instance, ref int __result)
+    private static void Postfix(CardModel __instance, ref int __result)
     {
-        if (__result > 0 && __result < UpgradeConst.MaxUpgradeCap)
-        {
-            __result = UpgradeConst.MaxUpgradeCap;
-        }
+        if (__result > 0 && __result < UpgradeConst.MaxUpgradeCap) __result = UpgradeConst.MaxUpgradeCap;
     }
 }
 
 /// <summary>
-/// Patch 2（兜底）: 直接拦截 IsUpgradable getter。
-/// 当 Patch 1 因版本 API 变化未命中时，确保 ShunCard 始终可升级。
+///     Patch 2（兜底）: 直接拦截 IsUpgradable getter。
+///     当 Patch 1 因版本 API 变化未命中时，确保 ShunCard 始终可升级。
 /// </summary>
 [HarmonyPatch(typeof(CardModel), nameof(CardModel.IsUpgradable), MethodType.Getter)]
 public static class InfiniteUpgrade_IsUpgradable
 {
-    static void Postfix(CardModel __instance, ref bool __result)
+    private static void Postfix(CardModel __instance, ref bool __result)
     {
-        if (!__result && __instance is ShunCard)
-        {
-            __result = true;
-        }
+        if (!__result && __instance is ShunCard) __result = true;
     }
 }

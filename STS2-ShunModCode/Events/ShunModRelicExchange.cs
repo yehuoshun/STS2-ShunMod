@@ -1,8 +1,6 @@
 using System.Reflection;
-using System.Threading.Tasks;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Players;
-using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Events;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.RelicPools;
@@ -12,18 +10,18 @@ using STS2_ShunMod.Core.Registration;
 namespace STS2_ShunMod.Events;
 
 /// <summary>
-/// 遗物交易所 — 可反复交易，直到选退出。
+///     遗物交易所 — 可反复交易，直到选退出。
 /// </summary>
 [Pool(typeof(EventRelicPool))]
 public class ShunModRelicExchange : EventModel
 {
-    private static readonly System.Random Rnd = new();
+    private static readonly Random Rnd = new();
+    private CardModel? _enchantTargetCard;
 
     private RelicModel? _playerRelic1;
-    private RelicModel? _rewardRelic;
     private RelicModel? _playerRelic2;
     private EnchantmentModel? _rewardEnchant;
-    private CardModel? _enchantTargetCard;
+    private RelicModel? _rewardRelic;
 
     protected override IReadOnlyList<EventOption> GenerateInitialOptions()
     {
@@ -34,23 +32,19 @@ public class ShunModRelicExchange : EventModel
         var options = new List<EventOption>();
 
         if (_playerRelic1 != null && _rewardRelic != null && playerRelics.Count > 0)
-        {
             options.Add(new EventOption(this, async () =>
             {
                 RelicHelper.RemoveRelic(Owner!, _playerRelic1!);
                 // TODO: 确认给玩家遗物的正确 API，IDE 里看 Owner. 补全
                 GiveRelicToPlayer(Owner!, _rewardRelic!);
             }, InitialOptionKey("OPT_1")));
-        }
 
         if (_playerRelic2 != null && _rewardEnchant != null && _enchantTargetCard != null)
-        {
             options.Add(new EventOption(this, async () =>
             {
                 RelicHelper.RemoveRelic(Owner!, _playerRelic2!);
                 CardCmd.Enchant(_rewardEnchant!, _enchantTargetCard, 1);
             }, InitialOptionKey("OPT_2")));
-        }
 
         options.Add(new EventOption(this, async () =>
         {
@@ -81,18 +75,24 @@ public class ShunModRelicExchange : EventModel
         if (playerRelics.Count > 1)
         {
             RelicModel pick2;
-            do { pick2 = playerRelics[Rnd.Next(playerRelics.Count)]; }
-            while (pick2 == _playerRelic1);
+            do
+            {
+                pick2 = playerRelics[Rnd.Next(playerRelics.Count)];
+            } while (pick2 == _playerRelic1);
+
             _playerRelic2 = pick2;
         }
-        else _playerRelic2 = _playerRelic1;
+        else
+        {
+            _playerRelic2 = _playerRelic1;
+        }
 
         _rewardEnchant = RollEnchantment();
         _enchantTargetCard = RollCardFromDeck(player);
     }
 
     /// <summary>
-    /// 给予玩家遗物（反射操作 _relics 列表 + 触发事件）。
+    ///     给予玩家遗物（反射操作 _relics 列表 + 触发事件）。
     /// </summary>
     private static void GiveRelicToPlayer(Player player, RelicModel relic)
     {
@@ -100,7 +100,7 @@ public class ShunModRelicExchange : EventModel
     }
 
     /// <summary>
-    /// 对玩家造成伤害。
+    ///     对玩家造成伤害。
     /// </summary>
     private static async Task DamagePlayer(Player player, int amount)
     {
@@ -120,7 +120,7 @@ public class ShunModRelicExchange : EventModel
             "_entries", BindingFlags.NonPublic | BindingFlags.Instance);
         if (entriesField?.GetValue(sharedPool) is not IEnumerable<object> entries) return null;
 
-        var entryList = entries.Cast<object>().ToList();
+        var entryList = entries.ToList();
         if (entryList.Count == 0) return null;
 
         var entry = entryList[Rnd.Next(entryList.Count)];

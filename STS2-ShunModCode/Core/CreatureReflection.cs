@@ -4,9 +4,9 @@ using HarmonyLib;
 namespace STS2_ShunMod.Core;
 
 /// <summary>
-/// Creature 反射工具 — 访问 Creature 类型内部属性（Block / IsPlayer 等）。
-/// 因为 Publicizer 可能未启用，用反射比直接属性访问更稳健。
-/// 参考 STS2Plus GameReflection 精简。
+///     Creature 反射工具 — 访问 Creature 类型内部属性（Block / IsPlayer 等）。
+///     因为 Publicizer 可能未启用，用反射比直接属性访问更稳健。
+///     参考 STS2Plus GameReflection 精简。
 /// </summary>
 internal static class CreatureReflection
 {
@@ -20,7 +20,7 @@ internal static class CreatureReflection
         AccessTools.Property(CreatureType, "IsPlayer");
 
     /// <summary>
-    /// 获取 Creature.Block（int），反射失败返回 0。
+    ///     获取 Creature.Block（int），反射失败返回 0。
     /// </summary>
     public static int GetBlock(object creature)
     {
@@ -28,7 +28,7 @@ internal static class CreatureReflection
     }
 
     /// <summary>
-    /// 设置 Creature.Block。
+    ///     设置 Creature.Block。
     /// </summary>
     public static void SetBlock(object creature, int value)
     {
@@ -36,7 +36,7 @@ internal static class CreatureReflection
     }
 
     /// <summary>
-    /// 判断是否为玩家生物（Creature.IsPlayer）。
+    ///     判断是否为玩家生物（Creature.IsPlayer）。
     /// </summary>
     public static bool IsPlayer(object? creature)
     {

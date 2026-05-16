@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Threading.Tasks;
 using HarmonyLib;
 using STS2_ShunMod.Core;
 
@@ -14,17 +13,17 @@ namespace STS2_ShunMod.Patches;
 // ════════════════════════════════════════════════════════
 
 /// <summary>
-/// Patch 1: 拦截 ClearBlock()，玩家生物不执行清格挡，直接跳过。
+///     Patch 1: 拦截 ClearBlock()，玩家生物不执行清格挡，直接跳过。
 /// </summary>
 [HarmonyPatch]
 public static class BlockRetentionClearBlockPatch
 {
-    static MethodBase TargetMethod()
+    private static MethodBase TargetMethod()
     {
         return AccessTools.Method(CreatureReflection.CreatureType, "ClearBlock");
     }
 
-    static bool Prefix(object __instance, ref Task __result)
+    private static bool Prefix(object __instance, ref Task __result)
     {
         if (!CreatureReflection.IsPlayer(__instance))
             return true;
@@ -36,18 +35,18 @@ public static class BlockRetentionClearBlockPatch
 }
 
 /// <summary>
-/// Patch 2: 拦截 PrepareForNextTurn()，回合结束保留格挡。
-/// Prefix 记下格挡值 → 游戏内部清理 → Postfix 原样恢复。
+///     Patch 2: 拦截 PrepareForNextTurn()，回合结束保留格挡。
+///     Prefix 记下格挡值 → 游戏内部清理 → Postfix 原样恢复。
 /// </summary>
 [HarmonyPatch]
 public static class BlockRetentionPrepareForNextTurnPatch
 {
-    static MethodBase TargetMethod()
+    private static MethodBase TargetMethod()
     {
         return AccessTools.Method(CreatureReflection.CreatureType, "PrepareForNextTurn");
     }
 
-    static void Prefix(object __instance, ref int __state)
+    private static void Prefix(object __instance, ref int __state)
     {
         if (!CreatureReflection.IsPlayer(__instance))
             return;
@@ -55,7 +54,7 @@ public static class BlockRetentionPrepareForNextTurnPatch
         __state = CreatureReflection.GetBlock(__instance);
     }
 
-    static void Postfix(object __instance, int __state)
+    private static void Postfix(object __instance, int __state)
     {
         if (__state <= 0 || !CreatureReflection.IsPlayer(__instance))
             return;

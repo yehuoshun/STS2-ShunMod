@@ -1,18 +1,18 @@
 using System.Reflection;
-using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Modding;
+using MegaCrit.Sts2.Core.Models;
 
 namespace STS2_ShunMod.Core.Registration;
 
 /// <summary>
-/// 内容自动注册器 — 扫描 [Pool] 类型注册到卡池，
-/// 自动检测 EventModel 子类注入 ModelDb。
-/// 参照 YuWanCard ContentRegistry。
+///     内容自动注册器 — 扫描 [Pool] 类型注册到卡池，
+///     自动检测 EventModel 子类注入 ModelDb。
+///     参照 YuWanCard ContentRegistry。
 /// </summary>
 public static class ContentRegistry
 {
     /// <summary>
-    /// 扫描程序集中所有非抽象类，注册 [Pool] 类型，注入 EventModel 子类。
+    ///     扫描程序集中所有非抽象类，注册 [Pool] 类型，注入 EventModel 子类。
     /// </summary>
     public static void RegisterAll(Assembly assembly)
     {

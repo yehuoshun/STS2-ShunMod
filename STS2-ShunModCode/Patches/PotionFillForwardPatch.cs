@@ -1,6 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Reflection;
+using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Players;
@@ -12,22 +11,25 @@ using MegaCrit.Sts2.Core.Nodes.Potions;
 namespace STS2_ShunMod.Patches;
 
 /// <summary>
-/// 药水填充前移 + 混沌药水保底。
-/// 使用/丢弃后后方药水向前填充，若无混沌药水则自动补充。
+///     药水填充前移 + 混沌药水保底。
+///     使用/丢弃后后方药水向前填充，若无混沌药水则自动补充。
 /// </summary>
 [HarmonyPatchCategory("Gameplay")]
 internal static class PotionFillForwardPatch
 {
-    private static readonly System.Reflection.FieldInfo HoldersField =
-        AccessTools.Field(typeof(NPotionContainer), "_holders");
-    private static readonly System.Reflection.FieldInfo PlayerField =
-        AccessTools.Field(typeof(NPotionContainer), "_player");
-    private static readonly System.Reflection.MethodInfo PotionSetter =
-        AccessTools.PropertySetter(typeof(NPotionHolder), "Potion");
-    private static readonly System.Reflection.FieldInfo EmptyIconField =
-        AccessTools.Field(typeof(NPotionHolder), "_emptyIcon");
-
     private const string ChaosPotionName = "EntropicBrew";
+
+    private static readonly FieldInfo HoldersField =
+        AccessTools.Field(typeof(NPotionContainer), "_holders");
+
+    private static readonly FieldInfo PlayerField =
+        AccessTools.Field(typeof(NPotionContainer), "_player");
+
+    private static readonly MethodInfo PotionSetter =
+        AccessTools.PropertySetter(typeof(NPotionHolder), "Potion");
+
+    private static readonly FieldInfo EmptyIconField =
+        AccessTools.Field(typeof(NPotionHolder), "_emptyIcon");
 
     [HarmonyPatch(typeof(NPotionContainer), "RemoveUsed")]
     [HarmonyPostfix]
@@ -57,15 +59,15 @@ internal static class PotionFillForwardPatch
         var holders = HoldersField?.GetValue(container) as List<NPotionHolder>;
         if (holders == null) return;
 
-        for (int i = 0; i < holders.Count; i++)
+        for (var i = 0; i < holders.Count; i++)
         {
-            if (holders[i] == null || !Godot.GodotObject.IsInstanceValid(holders[i]))
+            if (holders[i] == null || !GodotObject.IsInstanceValid(holders[i]))
                 continue;
             if (holders[i].HasPotion) continue;
 
-            for (int j = i + 1; j < holders.Count; j++)
+            for (var j = i + 1; j < holders.Count; j++)
             {
-                if (holders[j] == null || !Godot.GodotObject.IsInstanceValid(holders[j]))
+                if (holders[j] == null || !GodotObject.IsInstanceValid(holders[j]))
                     continue;
                 if (!holders[j].HasPotion) continue;
 
@@ -74,8 +76,8 @@ internal static class PotionFillForwardPatch
                 holders[j].RemoveChild(potion!);
                 PotionSetter?.Invoke(holders[j], new object?[] { null });
                 // 恢复源 holder 的空图标
-                if (EmptyIconField?.GetValue(holders[j]) is Godot.CanvasItem emptyIcon)
-                    emptyIcon.Modulate = Godot.Colors.White;
+                if (EmptyIconField?.GetValue(holders[j]) is CanvasItem emptyIcon)
+                    emptyIcon.Modulate = Colors.White;
                 holders[i].AddPotion(potion!);
                 break;
             }
@@ -93,21 +95,20 @@ internal static class PotionFillForwardPatch
         // 已有混沌药水则跳过
         foreach (var h in holders)
         {
-            if (!Godot.GodotObject.IsInstanceValid(h) || !h.HasPotion) continue;
+            if (!GodotObject.IsInstanceValid(h) || !h.HasPotion) continue;
             if (h.Potion!.Model.GetType().Name == ChaosPotionName)
                 return;
         }
 
         // 找第一个空栏位
-        int emptyIndex = -1;
-        for (int i = 0; i < holders.Count; i++)
-        {
-            if (Godot.GodotObject.IsInstanceValid(holders[i]) && !holders[i].HasPotion)
+        var emptyIndex = -1;
+        for (var i = 0; i < holders.Count; i++)
+            if (GodotObject.IsInstanceValid(holders[i]) && !holders[i].HasPotion)
             {
                 emptyIndex = i;
                 break;
             }
-        }
+
         if (emptyIndex < 0) return; // 栏位已满
 
         // 从药水池中找混沌药水
