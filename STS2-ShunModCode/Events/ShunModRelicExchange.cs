@@ -35,7 +35,7 @@ public class ShunModRelicExchange : EventModel
     private EnchantmentModel? _rewardEnchant;
     private CardModel? _enchantTargetCard;
 
-    protected override IEnumerable<EventOption> GenerateInitialOptions()
+    protected override IReadOnlyList<EventOption> GenerateInitialOptions()
     {
         var player = Owner;
         var playerRelics = GetPlayerRelics(player);
