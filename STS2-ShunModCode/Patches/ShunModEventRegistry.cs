@@ -1,4 +1,3 @@
-using System.Runtime.Serialization;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Events;
 using MegaCrit.Sts2.Core.Models;
@@ -7,67 +6,57 @@ using STS2_ShunMod.Core.Registration;
 namespace STS2_ShunMod.Patches;
 
 /// <summary>
-///     自定义事件实例缓存 — 懒加载创建，注入 AllSharedEvents。
+///     自定义事件注册 — 从 ModelDb 取正规实例注入 AllSharedEvents。
+///     参照 YuWanCard CustomEventRegistry + AllSharedEventsPatch。
 /// </summary>
-internal static class ShunModEventCache
+public static class ShunModEventRegistry
 {
-    private static List<EventModel>? _cached;
+    /// <summary>
+    ///     共享事件列表（非 act 限定），由 AllSharedEventsPatch 注入。
+    /// </summary>
+    public static readonly List<EventModel> SharedEvents = [];
 
-    public static List<EventModel> Events
+    /// <summary>
+    ///     注册事件实例。若非 act 限定事件，加入 SharedEvents。
+    /// </summary>
+    public static void Register(EventModel eventModel)
     {
-        get
-        {
-            if (_cached != null) return _cached;
-
-            _cached = [];
-            foreach (var type in ContentRegistry.EventTypes)
-            {
-                EventModel? instance = null;
-                try
-                {
-                    instance = Activator.CreateInstance(type, true) as EventModel;
-                }
-                catch
-                {
-                    // Activator.CreateInstance 失败 → 回退到 GetUninitializedObject
-                    try
-                    {
-                        instance = FormatterServices.GetUninitializedObject(type) as EventModel;
-                    }
-                    catch { }
-                }
-                if (instance != null)
-                    _cached.Add(instance);
-            }
-            return _cached;
-        }
+        if (eventModel.Acts.Length == 0)
+            SharedEvents.Add(eventModel);
     }
 }
 
 /// <summary>
-///     将自定义事件注入 AllSharedEvents。
-///     参照 YuWanCard AllSharedEventsPatch。
+///     将 ShunModEventRegistry.SharedEvents 注入 ModelDb.AllSharedEvents。
 /// </summary>
 [HarmonyPatch(typeof(ModelDb), nameof(ModelDb.AllSharedEvents), MethodType.Getter)]
-static class AllSharedEvents_ShunModPatch
+static class AllSharedEvents_InjectPatch
 {
     [HarmonyPostfix]
     static IEnumerable<EventModel> Postfix(IEnumerable<EventModel> __result)
     {
-        return [.. __result ?? [], .. ShunModEventCache.Events];
+        return [.. __result, .. ShunModEventRegistry.SharedEvents];
     }
 }
 
 /// <summary>
-///     ModelDb.Init 前缀 — 预热事件缓存。
+///     ModelDb.Init 后 — 从 ModelDb 取正规实例注册到 ShunModEventRegistry。
 /// </summary>
 [HarmonyPatch(typeof(ModelDb), nameof(ModelDb.Init))]
-[HarmonyPriority(Priority.First)]
-static class ModelDbInit_ShunModPatch
+[HarmonyPriority(Priority.Last)]
+static class ModelDbInit_RegisterPatch
 {
-    [HarmonyPrefix]
-    static void Prefix()
+    [HarmonyPostfix]
+    static void Postfix()
     {
-        _ = ShunModEventCache.Events;
+        foreach (var type in ContentRegistry.EventTypes)
+        {
+            var id = ModelDb.GetId(type);
+            if (ModelDb.GetByIdOrNull<EventModel>(id) is EventModel em
+                && !ShunModEventRegistry.SharedEvents.Contains(em))
+            {
+                ShunModEventRegistry.Register(em);
+            }
+        }
     }
 }
