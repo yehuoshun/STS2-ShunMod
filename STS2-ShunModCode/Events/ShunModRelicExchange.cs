@@ -110,7 +110,7 @@ public class ShunModRelicExchange : EventModel
 
     private static RelicModel? RollRelicFromPool()
     {
-        var relics = ModelDb.AllSharedRelics.ToList();
+        var relics = ModelDb.AllRelics.ToList();
         return relics.Count > 0 ? relics[Rnd.Next(relics.Count)] : null;
     }
 
