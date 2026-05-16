@@ -97,10 +97,9 @@ public class ShunModRelicExchange : EventModel
             {
                 // 扣血
                 await DamagePlayer(Owner!, 5);
-                // 重新 roll 并回到 INITIAL 页面刷新选项
-                var currentRelics = GetPlayerRelics(Owner);
-                RollOptions(Owner!, currentRelics);
-                SetPage("INITIAL");
+                // 重新生成选项并刷新（GenerateInitialOptions 内部已调用 RollOptions）
+                var freshOptions = GenerateInitialOptions();
+                RefreshOptions(freshOptions);
             }, InitialOptionKey("OPT_3")));
         }
 
@@ -116,6 +115,35 @@ public class ShunModRelicExchange : EventModel
     // ════════════════════════════════════════════════════════
     // 内部辅助
     // ════════════════════════════════════════════════════════
+
+    /// <summary>
+    ///     刷新事件选项列表。尝试 EventOptions / Options / _currentOptions 等属性/字段。
+    ///     参照 STS2Plus TryWriteOptions 反射模式。
+    /// </summary>
+    private void RefreshOptions(IReadOnlyList<EventOption> options)
+    {
+        var type = GetType();
+        // 优先尝试公共属性
+        foreach (var propName in new[] { "EventOptions", "CurrentOptions", "Options" })
+        {
+            var prop = type.GetProperty(propName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            if (prop?.CanWrite == true)
+            {
+                prop.SetValue(this, options);
+                return;
+            }
+        }
+        // 回退到私有字段
+        foreach (var fieldName in new[] { "_currentOptions", "_eventOptions", "_options" })
+        {
+            var field = type.GetField(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            if (field != null)
+            {
+                field.SetValue(this, options);
+                return;
+            }
+        }
+    }
 
     private void RollOptions(Player player, IReadOnlyList<RelicModel> playerRelics)
     {
