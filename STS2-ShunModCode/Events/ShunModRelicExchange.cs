@@ -35,38 +35,37 @@ public class ShunModRelicExchange : EventModel
 
         var options = new List<EventOption>();
 
-        // PlayerChoiceContext — IDE 里补全看 EventModel 有什么属性/字段能拿到 ctx
-        // 候选: Context / ChoiceContext / PlayerContext / Player.ChoiceContext
-        var ctx = /* TODO: 用 IDE 补全 EventModel 看哪个能拿到 PlayerChoiceContext */ null!;
+        // TODO: IDE 里 this. 补全找 PlayerChoiceContext，替换 null!
+        PlayerChoiceContext ctx = null!;
 
         if (_playerRelic1 != null && _rewardRelic != null && playerRelics.Count > 0)
         {
-            options.Add(new EventOption(ctx, InitialOptionKey("OPT_1"), async () =>
+            options.Add(new EventOption(ctx, async () =>
             {
                 RelicHelper.RemoveRelic(Owner!, _playerRelic1!);
                 await PlayerCmd.GainRelic(Owner!, _rewardRelic!);
-            }));
+            }, InitialOptionKey("OPT_1")));
         }
 
         if (_playerRelic2 != null && _rewardEnchant != null && _enchantTargetCard != null)
         {
-            options.Add(new EventOption(ctx, InitialOptionKey("OPT_2"), async () =>
+            options.Add(new EventOption(ctx, async () =>
             {
                 RelicHelper.RemoveRelic(Owner!, _playerRelic2!);
                 CardCmd.Enchant(_enchantTargetCard, _rewardEnchant!, 1);
-            }));
+            }, InitialOptionKey("OPT_2")));
         }
 
-        options.Add(new EventOption(ctx, InitialOptionKey("OPT_3"), async () =>
+        options.Add(new EventOption(ctx, async () =>
         {
             await PlayerCmd.Damage(Owner!, 5);
-        }));
+        }, InitialOptionKey("OPT_3")));
 
-        options.Add(new EventOption(ctx, InitialOptionKey("OPT_4"), async () =>
+        options.Add(new EventOption(ctx, async () =>
         {
             SetEventFinished(L10NLookup("pages.CLOSE.description"));
             await Task.CompletedTask;
-        }));
+        }, InitialOptionKey("OPT_4")));
 
         return options;
     }
