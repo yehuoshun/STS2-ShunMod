@@ -106,7 +106,7 @@ public class ShunModRelicExchange : EventModel
     {
         // CreatureCmd.Damage 或 Creature.TakeDamageInternal 等，IDE 补全确认
         // 临时直接扣 Creature.Hp（属性名可能是 Hp / CurrentHp / Health）
-        player.Creature.Hp -= amount;
+        player.Creature.CurrentHp -= amount;
         await Task.CompletedTask;
     }
 
