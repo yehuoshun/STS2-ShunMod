@@ -46,33 +46,22 @@ public class ShunModRelicExchange : EventModel
         RollOptions(player, playerRelics);
 
         var options = new List<EventOption>();
-        var entry = Id.Entry;
 
-        // 选项 1: 指定遗物换指定遗物
+        // 选项 1: 指定遗物换指定遗物（图标+名称通过 LocalVars 注入）
         if (_playerRelic1 != null && _rewardRelic != null && playerRelics.Count > 0)
-        {
-            var desc = L10NLookup($"{entry}.pages.INITIAL.options.OPT_1.description");
-            desc.Add("LOSE_RELIC", _playerRelic1.Title.ToString());
-            desc.Add("GAIN_RELIC", _rewardRelic.Title.ToString());
             options.Add(new EventOption(this, async () =>
             {
                 RelicHelper.RemoveRelic(Owner!, _playerRelic1!);
                 GiveRelicToPlayer(Owner!, _rewardRelic!);
-            }, L10NLookup($"{entry}.pages.INITIAL.options.OPT_1.title"), desc, $"{entry}.pages.INITIAL.options.OPT_1"));
-        }
+            }, InitialOptionKey("OPT_1")));
 
         // 选项 2: 指定遗物换指定附魔
         if (_playerRelic2 != null && _rewardEnchant != null && _enchantTargetCard != null)
-        {
-            var desc = L10NLookup($"{entry}.pages.INITIAL.options.OPT_2.description");
-            desc.Add("LOSE_RELIC", _playerRelic2.Title.ToString());
-            desc.Add("ENCHANT_NAME", _rewardEnchant.GetType().Name);
             options.Add(new EventOption(this, async () =>
             {
                 RelicHelper.RemoveRelic(Owner!, _playerRelic2!);
                 CardCmd.Enchant(_rewardEnchant!, _enchantTargetCard, 1);
-            }, L10NLookup($"{entry}.pages.INITIAL.options.OPT_2.title"), desc, $"{entry}.pages.INITIAL.options.OPT_2"));
-        }
+            }, InitialOptionKey("OPT_2")));
 
         // 选项 3: 扣 5 HP 刷新
         options.Add(new EventOption(this, async () =>
@@ -83,7 +72,7 @@ public class ShunModRelicExchange : EventModel
         // 选项 4: 退出
         options.Add(new EventOption(this, async () =>
         {
-            SetEventFinished(L10NLookup($"{entry}.pages.CLOSE.description"));
+            SetEventFinished(L10NLookup("pages.CLOSE.description"));
         }, InitialOptionKey("OPT_4")));
 
         return options;
