@@ -1,5 +1,7 @@
 using System.Reflection;
+using System.Threading.Tasks;
 using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Events;
@@ -26,7 +28,7 @@ namespace STS2_ShunMod.Events;
 [Pool(typeof(EventRelicPool))]
 public class ShunModRelicExchange : EventModel
 {
-    
+    private static readonly System.Random Rnd = new();
 
     // ── 当前随机结果（每次生成选项时更新） ──
     private RelicModel? _playerRelic1;
@@ -47,36 +49,43 @@ public class ShunModRelicExchange : EventModel
         // ── 选项 1：遗物换遗物 ──
         if (_playerRelic1 != null && _rewardRelic != null && playerRelics.Count > 0)
         {
-            options.Add(new EventOption(InitialOptionKey("OPT_1"), async () =>
+            var opt1 = new EventOption(InitialOptionKey("OPT_1"));
+            opt1.OnSelect = async () =>
             {
-                RelicHelper.RemoveRelic(Owner, _playerRelic1!);
-                await PlayerCmd.GainRelic(Owner, _rewardRelic!);
-                // 不调 SetEventFinished → 重新 GenerateInitialOptions，继续交易
-            }));
+                RelicHelper.RemoveRelic(Owner!, _playerRelic1!);
+                await PlayerCmd.GainRelic(Owner!, _rewardRelic!);
+            };
+            options.Add(opt1);
         }
 
         // ── 选项 2：遗物换附魔 ──
         if (_playerRelic2 != null && _rewardEnchant != null && _enchantTargetCard != null)
         {
-            options.Add(new EventOption(InitialOptionKey("OPT_2"), async () =>
+            var opt2 = new EventOption(InitialOptionKey("OPT_2"));
+            opt2.OnSelect = async () =>
             {
-                RelicHelper.RemoveRelic(Owner, _playerRelic2!);
+                RelicHelper.RemoveRelic(Owner!, _playerRelic2!);
                 CardCmd.Enchant(_enchantTargetCard, _rewardEnchant!, 1);
-            }));
+            };
+            options.Add(opt2);
         }
 
         // ── 选项 3：消耗 5 HP 刷新 ──
-        options.Add(new EventOption(InitialOptionKey("OPT_3"), async () =>
+        var opt3 = new EventOption(InitialOptionKey("OPT_3"));
+        opt3.OnSelect = async () =>
         {
-            await PlayerCmd.Damage(Owner, 5);
-        }));
+            await PlayerCmd.Damage(Owner!, 5);
+        };
+        options.Add(opt3);
 
         // ── 选项 4：退出 ──
-        options.Add(new EventOption(InitialOptionKey("OPT_4"), async () =>
+        var opt4 = new EventOption(InitialOptionKey("OPT_4"));
+        opt4.OnSelect = async () =>
         {
             SetEventFinished(L10NLookup("pages.CLOSE.description"));
             await Task.CompletedTask;
-        }));
+        };
+        options.Add(opt4);
 
         return options;
     }
@@ -93,16 +102,13 @@ public class ShunModRelicExchange : EventModel
         if (playerRelics.Count == 0)
             return;
 
-        // 选项 1：随机玩家遗物 → 随机遗物池遗物
-        _playerRelic1 = playerRelics[Rng.Next(playerRelics.Count)];
+        _playerRelic1 = playerRelics[Rnd.Next(playerRelics.Count)];
         _rewardRelic = RollRelicFromPool();
 
-        // 选项 2：随机玩家遗物 → 随机附魔给随机卡牌
-        // 尽量不和选项 1 抽到同一个遗物
         if (playerRelics.Count > 1)
         {
             RelicModel pick2;
-            do { pick2 = playerRelics[Rng.Next(playerRelics.Count)]; }
+            do { pick2 = playerRelics[Rnd.Next(playerRelics.Count)]; }
             while (pick2 == _playerRelic1);
             _playerRelic2 = pick2;
         }
@@ -120,14 +126,11 @@ public class ShunModRelicExchange : EventModel
     /// </summary>
     private static RelicModel? RollRelicFromPool()
     {
-        // 通过反射获取 RelicPoolModel 中注册的遗物类型
-        // SharedRelicPool 在游戏内是单例，通过 ModelDb 获取
         var sharedPool = ModelDb.GetByIdOrNull<RelicPoolModel>(
             ModelDb.GetId(typeof(SharedRelicPool)));
         if (sharedPool == null)
             return null;
 
-        // RelicPoolModel 内部存储条目列表，通过反射读取
         var entriesField = typeof(RelicPoolModel).GetField(
             "_entries", BindingFlags.NonPublic | BindingFlags.Instance);
         if (entriesField?.GetValue(sharedPool) is not IEnumerable<object> entries)
@@ -137,8 +140,7 @@ public class ShunModRelicExchange : EventModel
         if (entryList.Count == 0)
             return null;
 
-        // 每个条目有 RelicType 属性（Type），实例化一个
-        var entry = entryList[Rng.Next(entryList.Count)];
+        var entry = entryList[Rnd.Next(entryList.Count)];
         var relicTypeProp = entry.GetType().GetProperty("RelicType");
         var relicType = relicTypeProp?.GetValue(entry) as Type;
         if (relicType == null)
@@ -159,7 +161,7 @@ public class ShunModRelicExchange : EventModel
         if (enchantTypes.Count == 0)
             return null;
 
-        var chosen = enchantTypes[Rng.Next(enchantTypes.Count)];
+        var chosen = enchantTypes[Rnd.Next(enchantTypes.Count)];
         return Activator.CreateInstance(chosen) as EnchantmentModel;
     }
 
@@ -172,7 +174,7 @@ public class ShunModRelicExchange : EventModel
         if (deck.Count == 0)
             return null;
 
-        return deck[Rng.Next(deck.Count)];
+        return deck[Rnd.Next(deck.Count)];
     }
 
     /// <summary>
