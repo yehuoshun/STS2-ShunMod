@@ -1,0 +1,13 @@
+{
+  "SHUNMOD_RELIC_EXCHANGE.title": "Relic Exchange",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.description": "You enter a smoke-filled hut.\nBehind the counter, a mysterious merchant smiles at you:\n\"Welcome! Browse as long as you like.\"",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_1.title": "Trade Relic",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_1.description": "Lose a random relic. Gain a random relic.",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_2.title": "Relic for Enchant",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_2.description": "Lose a random relic. Enchant a random card in your deck.",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_3.title": "Pay HP to Refresh",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_3.description": "Lose [red]5[/red] HP and refresh all options.",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_4.title": "Leave",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_4.description": "Exit the exchange.",
+  "SHUNMOD_RELIC_EXCHANGE.pages.CLOSE.description": "The merchant waves goodbye: \"Come back anytime!\""
+}

@@ -1,0 +1,13 @@
+{
+  "SHUNMOD_RELIC_EXCHANGE.title": "遗物交易所",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.description": "你走进一间烟雾缭绕的小屋。\n柜台后面，一个神秘商人微笑着看着你：\n\"欢迎光临！随便看看，换到你满意为止。\"",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_1.title": "交换遗物",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_1.description": "失去一个随机遗物，获得一个随机遗物。",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_2.title": "遗物换附魔",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_2.description": "失去一个随机遗物，为牌组中一张随机卡牌附加随机附魔。",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_3.title": "扣血刷新",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_3.description": "失去 [red]5[/red] 点生命，刷新所有选项。",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_4.title": "离开",
+  "SHUNMOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_4.description": "不换了，离开交易所。",
+  "SHUNMOD_RELIC_EXCHANGE.pages.CLOSE.description": "商人微笑着挥手告别：\"欢迎下次再来！\""
+}
