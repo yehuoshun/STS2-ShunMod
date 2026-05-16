@@ -2,8 +2,10 @@ using System.Reflection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Events;
+using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.RelicPools;
+using MegaCrit.Sts2.Core.Runs;
 using STS2_ShunMod.Core;
 
 namespace STS2_ShunMod.Events;
@@ -13,6 +15,21 @@ namespace STS2_ShunMod.Events;
 /// </summary>
 public class ShunModRelicExchange : EventModel
 {
+    // ════════════════════════════════════════════════════════
+    // 事件背景图路径修正 — 游戏默认路径不含 mod 前缀
+    // ════════════════════════════════════════════════════════
+
+    public override IEnumerable<string> GetAssetPaths(IRunState runState)
+    {
+        var paths = base.GetAssetPaths(runState).ToList();
+        var defaultPath = ImageHelper.GetImagePath($"events/{Id.Entry.ToLowerInvariant()}.png");
+        var modPath = $"res://STS2-ShunMod/images/events/{Id.Entry.ToLowerInvariant()}.png";
+        var index = paths.IndexOf(defaultPath);
+        if (index >= 0)
+            paths[index] = modPath;
+        return paths;
+    }
+
     private static readonly Random Rnd = new();
     private CardModel? _enchantTargetCard;
 
