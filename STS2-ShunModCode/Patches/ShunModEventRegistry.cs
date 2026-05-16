@@ -21,7 +21,7 @@ public static class ShunModEventRegistry
     /// </summary>
     public static void Register(EventModel eventModel)
     {
-        if (eventModel.Acts.Length == 0)
+        if (!SharedEvents.Contains(eventModel))
             SharedEvents.Add(eventModel);
     }
 }

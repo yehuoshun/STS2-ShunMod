@@ -141,8 +141,8 @@ public class ShunModRelicExchange : EventModel
         return deck.Count > 0 ? deck[Rnd.Next(deck.Count)] : null;
     }
 
-    private static List<RelicModel> GetPlayerRelics(Player player)
+    private static List<RelicModel> GetPlayerRelics(Player? player)
     {
-        return player.Relics.ToList();
+        return player?.Relics.ToList() ?? [];
     }
 }
