@@ -74,11 +74,13 @@ public class ShunModRelicExchange : EventModel
         {
             var loseName = _playerRelic2.Title.ToString();
             var enchantName = _rewardEnchant.Title.ToString();
+            var cardName = _enchantTargetCard.Title.ToString();
 
-            // L10NLookup + LocString.Add 注入动态变量，ToString() 解析为最终文本
+            // L10NLookup + LocString.Add 注入动态变量
             var opt2Title = L10NLookup($"{entry}.pages.INITIAL.options.OPT_2.title");
             opt2Title.Add("LOSE_RELIC", loseName);
             opt2Title.Add("ENCHANT_NAME", enchantName);
+            opt2Title.Add("CARD_NAME", cardName);
 
             // EventOption(owner, action, title, titleTip, bodyTip) — 5 参数构造器
             options.Add(new EventOption(this, async () =>
