@@ -78,7 +78,6 @@ STS2-ShunMod/
 │   │   ├── BlockRetentionPatch.cs  # 格挡保留
 │   │   ├── HardenedShellPatch.cs   # 硬化外壳修复
 │   │   ├── PotionFillForwardPatch.cs  # 药水填充前移 + 混沌药水保底
-│   │   └── EventRegistrationPatch.cs  # 事件注册（地图钩子）
 ├── STS2-ShunMod/                   # Godot 资源
 │   ├── cards/                      # 卡牌美术
 │   └── localization/               # 本地化（中/英）
