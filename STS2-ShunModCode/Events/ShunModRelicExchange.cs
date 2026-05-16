@@ -52,8 +52,8 @@ public class ShunModRelicExchange : EventModel
         if (_playerRelic1 != null && _rewardRelic != null && playerRelics.Count > 0)
         {
             var desc = L10NLookup($"{entry}.pages.INITIAL.options.OPT_1.description");
-            desc.Add("LOSE_RELIC", _playerRelic1.Name);
-            desc.Add("GAIN_RELIC", _rewardRelic.Name);
+            desc.Add("LOSE_RELIC", _playerRelic1.Title.ToString());
+            desc.Add("GAIN_RELIC", _rewardRelic.Title.ToString());
             options.Add(new EventOption(this, async () =>
             {
                 RelicHelper.RemoveRelic(Owner!, _playerRelic1!);
@@ -65,7 +65,7 @@ public class ShunModRelicExchange : EventModel
         if (_playerRelic2 != null && _rewardEnchant != null && _enchantTargetCard != null)
         {
             var desc = L10NLookup($"{entry}.pages.INITIAL.options.OPT_2.description");
-            desc.Add("LOSE_RELIC", _playerRelic2.Name);
+            desc.Add("LOSE_RELIC", _playerRelic2.Title.ToString());
             desc.Add("ENCHANT_NAME", _rewardEnchant.GetType().Name);
             options.Add(new EventOption(this, async () =>
             {
