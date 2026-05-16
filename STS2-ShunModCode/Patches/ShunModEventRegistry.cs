@@ -27,12 +27,12 @@ public static class ShunModEventRegistry
         {
             try
             {
-                if (Activator.CreateInstance(type) is EventModel eventModel)
+                if (Activator.CreateInstance(type, true) is EventModel eventModel)
                     SharedEvents.Add(eventModel);
             }
             catch
             {
-                // 跳过无法实例化的类型
+                // 跳过无法实例化的类型（例如构造函数需要参数）
             }
         }
     }
@@ -43,10 +43,10 @@ public static class ShunModEventRegistry
 ///     参照 YuWanCard InitDeDuplicationPatch。
 /// </summary>
 [HarmonyPatch(typeof(ModelDb), nameof(ModelDb.Init))]
-[HarmonyPriority(Priority.Last)]
+[HarmonyPriority(Priority.First)]
 static class ModelDbInit_EventPatch
 {
-    [HarmonyPostfix]
+    [HarmonyPrefix]
     static void CreateCustomEvents()
     {
         ShunModEventRegistry.CreateInstancesFromEventTypes();
