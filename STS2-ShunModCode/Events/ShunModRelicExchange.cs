@@ -1,5 +1,6 @@
 using System.Reflection;
 using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Events;
 using MegaCrit.Sts2.Core.Helpers;
@@ -46,28 +47,60 @@ public class ShunModRelicExchange : EventModel
         RollOptions(player, playerRelics);
 
         var options = new List<EventOption>();
+        var entry = Id.Entry;
 
-        // 选项 1: 指定遗物换指定遗物（图标+名称通过 LocalVars 注入）
+        // 选项 1: 指定遗物换指定遗物
         if (_playerRelic1 != null && _rewardRelic != null && playerRelics.Count > 0)
+        {
+            var loseName = _playerRelic1.Title.ToString();
+            var gainName = _rewardRelic.Title.ToString();
+
+            // L10NLookup + LocString.Add 注入动态变量，ToString() 解析为最终文本
+            var opt1Title = L10NLookup($"{entry}.pages.INITIAL.options.OPT_1.title");
+            opt1Title.Add("LOSE_RELIC", loseName);
+            opt1Title.Add("GAIN_RELIC", gainName);
+
+            // EventOption(owner, action, title, titleTip, bodyTip) — 5 参数构造器
+            // title 用解析后的 string，IHoverTip 传 null（无额外悬浮提示）
             options.Add(new EventOption(this, async () =>
             {
                 RelicHelper.RemoveRelic(Owner!, _playerRelic1!);
                 GiveRelicToPlayer(Owner!, _rewardRelic!);
-            }, InitialOptionKey("OPT_1")));
+            }, opt1Title.ToString(), null!, null!));
+        }
 
         // 选项 2: 指定遗物换指定附魔
         if (_playerRelic2 != null && _rewardEnchant != null && _enchantTargetCard != null)
+        {
+            var loseName = _playerRelic2.Title.ToString();
+            var enchantName = _rewardEnchant.Title.ToString();
+
+            // L10NLookup + LocString.Add 注入动态变量，ToString() 解析为最终文本
+            var opt2Title = L10NLookup($"{entry}.pages.INITIAL.options.OPT_2.title");
+            opt2Title.Add("LOSE_RELIC", loseName);
+            opt2Title.Add("ENCHANT_NAME", enchantName);
+
+            // EventOption(owner, action, title, titleTip, bodyTip) — 5 参数构造器
             options.Add(new EventOption(this, async () =>
             {
                 RelicHelper.RemoveRelic(Owner!, _playerRelic2!);
                 CardCmd.Enchant(_rewardEnchant!, _enchantTargetCard, 1);
-            }, InitialOptionKey("OPT_2")));
+            }, opt2Title.ToString(), null!, null!));
+        }
 
-        // 选项 3: 扣 5 HP 刷新
-        options.Add(new EventOption(this, async () =>
+        // 选项 3: 扣 5 HP 刷新（仅在至少有一个遗物可交易时显示）
+        if (playerRelics.Count > 0)
         {
-            await DamagePlayer(Owner!, 5);
-        }, InitialOptionKey("OPT_3")));
+            options.Add(new EventOption(this, async () =>
+            {
+                // 扣血
+                await DamagePlayer(Owner!, 5);
+                // 重新 roll 并回到 INITIAL 页面刷新选项
+                var currentRelics = GetPlayerRelics(Owner);
+                RollOptions(Owner!, currentRelics);
+                SetPageKey("INITIAL");
+            }, InitialOptionKey("OPT_3")));
+        }
 
         // 选项 4: 退出
         options.Add(new EventOption(this, async () =>
@@ -109,28 +142,63 @@ public class ShunModRelicExchange : EventModel
     }
 
     /// <summary>
-    ///     给予玩家遗物（反射操作 _relics 列表 + 触发事件）。
+    ///     给予玩家遗物（反射调用 Player.AddRelicInternal，因为方法是 internal/private）。
     /// </summary>
     private static void GiveRelicToPlayer(Player player, RelicModel relic)
     {
-        player.AddRelicInternal(relic);
+        var method = typeof(Player).GetMethod("AddRelicInternal",
+            BindingFlags.NonPublic | BindingFlags.Instance);
+        method?.Invoke(player, [relic]);
     }
 
     /// <summary>
-    ///     对玩家造成伤害。
+    ///     对玩家造成伤害（通过 CreatureCmd.DealDamage 或直接扣血）。
+    ///     TODO: 游戏提供公用伤害 API 后替换反射实现。
     /// </summary>
     private static async Task DamagePlayer(Player player, int amount)
     {
-        // CreatureCmd.Damage 或 Creature.TakeDamageInternal 等，IDE 补全确认
-        // 临时直接扣 Creature.Hp（属性名可能是 Hp / CurrentHp / Health）
-        player.Creature.CurrentHp -= amount;
+        // 尝试通过 Creature 内部的 TakeDamage 方法造成伤害
+        var takeDmgMethod = typeof(Creature).GetMethod("TakeDamage",
+            BindingFlags.NonPublic | BindingFlags.Instance);
+        if (takeDmgMethod != null)
+        {
+            takeDmgMethod.Invoke(player.Creature, [(decimal)amount]);
+        }
+        else
+        {
+            // 回退：直接扣当前生命值
+            var hpProp = typeof(Creature).GetProperty("CurrentHp");
+            if (hpProp != null)
+            {
+                var current = (decimal)(hpProp.GetValue(player.Creature) ?? 0m);
+                hpProp.SetValue(player.Creature, Math.Max(0, current - amount));
+            }
+        }
+
         await Task.CompletedTask;
     }
 
     private static RelicModel? RollRelicFromPool()
     {
-        var relics = ModelDb.AllRelics.ToList();
-        return relics.Count > 0 ? relics[Rnd.Next(relics.Count)] : null;
+        // ModelDb.AllRelics 不存在时回退到反射获取所有 RelicModel 子类
+        var allRelicsProp = typeof(ModelDb).GetProperty("AllRelics",
+            BindingFlags.Public | BindingFlags.Static);
+        if (allRelicsProp?.GetValue(null) is IEnumerable<RelicModel> relics)
+        {
+            var list = relics.ToList();
+            return list.Count > 0 ? list[Rnd.Next(list.Count)] : null;
+        }
+
+        // 回退：扫描所有 RelicModel 子类型并从 ModelDb 取实例
+        var relicTypes = typeof(RelicModel).Assembly.GetTypes()
+            .Where(t => !t.IsAbstract && typeof(RelicModel).IsAssignableFrom(t))
+            .ToList();
+        var valid = relicTypes
+            .Select(t => ModelDb.GetByIdOrNull<RelicModel>(ModelDb.GetId(t)))
+            .Where(r => r != null)
+            .Cast<RelicModel>()
+            .ToList();
+        return valid.Count > 0 ? valid[Rnd.Next(valid.Count)] : null;
     }
 
     private static EnchantmentModel? RollEnchantment()
