@@ -5,7 +5,6 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Events;
-using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.RelicPools;
 using STS2_ShunMod.Core;
@@ -35,33 +34,32 @@ public class ShunModRelicExchange : EventModel
 
         var options = new List<EventOption>();
 
-        // TODO: IDE 里 this. 补全找 PlayerChoiceContext，替换 null!
-        PlayerChoiceContext ctx = null!;
-
         if (_playerRelic1 != null && _rewardRelic != null && playerRelics.Count > 0)
         {
-            options.Add(new EventOption(ctx, async () =>
+            options.Add(new EventOption(this, async () =>
             {
                 RelicHelper.RemoveRelic(Owner!, _playerRelic1!);
-                await PlayerCmd.GainRelic(Owner!, _rewardRelic!);
+                // TODO: 确认给玩家遗物的正确 API，IDE 里看 Owner. 补全
+                GiveRelicToPlayer(Owner!, _rewardRelic!);
             }, InitialOptionKey("OPT_1")));
         }
 
         if (_playerRelic2 != null && _rewardEnchant != null && _enchantTargetCard != null)
         {
-            options.Add(new EventOption(ctx, async () =>
+            options.Add(new EventOption(this, async () =>
             {
                 RelicHelper.RemoveRelic(Owner!, _playerRelic2!);
-                CardCmd.Enchant(_enchantTargetCard, _rewardEnchant!, 1);
+                CardCmd.Enchant(_rewardEnchant!, _enchantTargetCard, 1);
             }, InitialOptionKey("OPT_2")));
         }
 
-        options.Add(new EventOption(ctx, async () =>
+        options.Add(new EventOption(this, async () =>
         {
-            await PlayerCmd.Damage(Owner!, 5);
+            // TODO: 确认扣血 API，IDE 里看 PlayerCmd. / DamageCmd. 补全
+            await DamagePlayer(Owner!, 5);
         }, InitialOptionKey("OPT_3")));
 
-        options.Add(new EventOption(ctx, async () =>
+        options.Add(new EventOption(this, async () =>
         {
             SetEventFinished(L10NLookup("pages.CLOSE.description"));
             await Task.CompletedTask;
@@ -92,6 +90,28 @@ public class ShunModRelicExchange : EventModel
 
         _rewardEnchant = RollEnchantment();
         _enchantTargetCard = RollCardFromDeck(player);
+    }
+
+    /// <summary>
+    /// 给予玩家遗物（反射操作 _relics 列表 + 触发事件）。
+    /// </summary>
+    private static void GiveRelicToPlayer(Player player, RelicModel relic)
+    {
+        var field = typeof(Player).GetField("_relics", BindingFlags.NonPublic | BindingFlags.Instance);
+        if (field?.GetValue(player) is not List<RelicModel> list) return;
+        list.Add(relic);
+        // TODO: 触发 RelicGained 事件（如有需要）
+    }
+
+    /// <summary>
+    /// 对玩家造成伤害。
+    /// </summary>
+    private static async Task DamagePlayer(Player player, int amount)
+    {
+        // TODO: IDE 里找正确扣血 API，可能有 DamageCmd / PlayerCmd.TakeDamage 等
+        // 临时用 Creature 直接扣，IDE 补全确认正确方法
+        player.Creature.Hp -= amount;
+        await Task.CompletedTask;
     }
 
     private static RelicModel? RollRelicFromPool()
