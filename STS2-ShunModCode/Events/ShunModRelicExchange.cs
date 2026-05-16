@@ -46,32 +46,44 @@ public class ShunModRelicExchange : EventModel
         RollOptions(player, playerRelics);
 
         var options = new List<EventOption>();
+        var entry = Id.Entry;
 
+        // 选项 1: 指定遗物换指定遗物
         if (_playerRelic1 != null && _rewardRelic != null && playerRelics.Count > 0)
+        {
+            var desc = L10NLookup($"{entry}.pages.INITIAL.options.OPT_1.description");
+            desc.Add("LOSE_RELIC", _playerRelic1.Name);
+            desc.Add("GAIN_RELIC", _rewardRelic.Name);
             options.Add(new EventOption(this, async () =>
             {
                 RelicHelper.RemoveRelic(Owner!, _playerRelic1!);
-                // TODO: 确认给玩家遗物的正确 API，IDE 里看 Owner. 补全
                 GiveRelicToPlayer(Owner!, _rewardRelic!);
-            }, InitialOptionKey("OPT_1")));
+            }, L10NLookup($"{entry}.pages.INITIAL.options.OPT_1.title"), desc, $"{entry}.pages.INITIAL.options.OPT_1"));
+        }
 
+        // 选项 2: 指定遗物换指定附魔
         if (_playerRelic2 != null && _rewardEnchant != null && _enchantTargetCard != null)
+        {
+            var desc = L10NLookup($"{entry}.pages.INITIAL.options.OPT_2.description");
+            desc.Add("LOSE_RELIC", _playerRelic2.Name);
+            desc.Add("ENCHANT_NAME", _rewardEnchant.GetType().Name);
             options.Add(new EventOption(this, async () =>
             {
                 RelicHelper.RemoveRelic(Owner!, _playerRelic2!);
                 CardCmd.Enchant(_rewardEnchant!, _enchantTargetCard, 1);
-            }, InitialOptionKey("OPT_2")));
+            }, L10NLookup($"{entry}.pages.INITIAL.options.OPT_2.title"), desc, $"{entry}.pages.INITIAL.options.OPT_2"));
+        }
 
+        // 选项 3: 扣 5 HP 刷新
         options.Add(new EventOption(this, async () =>
         {
-            // TODO: 确认扣血 API，IDE 里看 PlayerCmd. / DamageCmd. 补全
             await DamagePlayer(Owner!, 5);
         }, InitialOptionKey("OPT_3")));
 
+        // 选项 4: 退出
         options.Add(new EventOption(this, async () =>
         {
-            SetEventFinished(L10NLookup("pages.CLOSE.description"));
-            await Task.CompletedTask;
+            SetEventFinished(L10NLookup($"{entry}.pages.CLOSE.description"));
         }, InitialOptionKey("OPT_4")));
 
         return options;
