@@ -1,4 +1,5 @@
 using System.Reflection;
+using MegaCrit.Sts2.Core.Events;
 using MegaCrit.Sts2.Core.Modding;
 using MegaCrit.Sts2.Core.Models;
 
@@ -6,11 +7,16 @@ namespace STS2_ShunMod.Core.Registration;
 
 /// <summary>
 ///     内容自动注册器 — 扫描 [Pool] 类型注册到卡池，
-///     自动检测 EventModel 子类注入 ModelDb。
+///     自动检测 EventModel 子类注入 ModelDb 和 AllSharedEvents。
 ///     参照 YuWanCard ContentRegistry。
 /// </summary>
 public static class ContentRegistry
 {
+    /// <summary>
+    ///     自定义事件列表，由 EventInjector harmony patch 注入 AllSharedEvents。
+    /// </summary>
+    public static readonly List<EventModel> CustomEvents = [];
+
     /// <summary>
     ///     扫描程序集中所有非抽象类，注册 [Pool] 类型，注入 EventModel 子类。
     /// </summary>
@@ -30,10 +36,12 @@ public static class ContentRegistry
                 poolCount++;
             }
 
-            // 自动检测 EventModel 子类 → 注入 ModelDb（参照 YuWanCard）
+            // 自动检测 EventModel 子类 → 注入 ModelDb + 加入 CustomEvents
             if (typeof(EventModel).IsAssignableFrom(type))
             {
                 ModelDb.Inject(type);
+                if (Activator.CreateInstance(type) is EventModel instance)
+                    CustomEvents.Add(instance);
                 eventCount++;
             }
         }
