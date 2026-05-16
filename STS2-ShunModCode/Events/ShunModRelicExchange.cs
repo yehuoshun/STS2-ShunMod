@@ -24,6 +24,7 @@ public class ShunModRelicExchange : EventModel
     protected override IReadOnlyList<EventOption> GenerateInitialOptions()
     {
         var player = Owner;
+        if (player == null) return [];
         var playerRelics = GetPlayerRelics(player);
         RollOptions(player, playerRelics);
 
