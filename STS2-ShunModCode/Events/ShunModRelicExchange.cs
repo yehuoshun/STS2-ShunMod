@@ -2,7 +2,7 @@ using System.Reflection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
-using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Events;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.RelicPools;
 using STS2_ShunMod.Core;
@@ -35,7 +35,7 @@ public class ShunModRelicExchange : EventModel
     private EnchantmentModel? _rewardEnchant;
     private CardModel? _enchantTargetCard;
 
-    public override IEnumerable<EventOption> GenerateInitialOptions()
+    protected override IEnumerable<EventOption> GenerateInitialOptions()
     {
         var player = Owner;
         var playerRelics = GetPlayerRelics(player);
