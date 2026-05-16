@@ -110,29 +110,22 @@ public class ShunModRelicExchange : EventModel
 
     private static RelicModel? RollRelicFromPool()
     {
-        var sharedPool = ModelDb.GetByIdOrNull<RelicPoolModel>(
-            ModelDb.GetId(typeof(SharedRelicPool)));
-        if (sharedPool == null) return null;
-
-        var entriesField = typeof(RelicPoolModel).GetField(
-            "_entries", BindingFlags.NonPublic | BindingFlags.Instance);
-        if (entriesField?.GetValue(sharedPool) is not IEnumerable<object> entries) return null;
-
-        var entryList = entries.ToList();
-        if (entryList.Count == 0) return null;
-
-        var entry = entryList[Rnd.Next(entryList.Count)];
-        var relicType = entry.GetType().GetProperty("RelicType")?.GetValue(entry) as Type;
-        return relicType != null ? Activator.CreateInstance(relicType) as RelicModel : null;
+        var relics = ModelDb.AllSharedRelics.ToList();
+        return relics.Count > 0 ? relics[Rnd.Next(relics.Count)] : null;
     }
 
     private static EnchantmentModel? RollEnchantment()
     {
+        // 从 ModelDb 取正规实例，不能用 Activator.CreateInstance（会触发 DuplicateModelException）
         var enchantTypes = typeof(EnchantmentModel).Assembly.GetTypes()
             .Where(t => !t.IsAbstract && typeof(EnchantmentModel).IsAssignableFrom(t))
             .ToList();
-        if (enchantTypes.Count == 0) return null;
-        return Activator.CreateInstance(enchantTypes[Rnd.Next(enchantTypes.Count)]) as EnchantmentModel;
+        var valid = enchantTypes
+            .Select(t => ModelDb.GetByIdOrNull<EnchantmentModel>(ModelDb.GetId(t)))
+            .Where(e => e != null)
+            .Cast<EnchantmentModel>()
+            .ToList();
+        return valid.Count > 0 ? valid[Rnd.Next(valid.Count)] : null;
     }
 
     private static CardModel? RollCardFromDeck(Player player)
