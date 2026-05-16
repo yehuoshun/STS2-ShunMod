@@ -5,7 +5,6 @@ using MegaCrit.Sts2.Core.Events;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.RelicPools;
 using STS2_ShunMod.Core;
-using STS2_ShunMod.Core.Registration;
 
 namespace STS2_ShunMod.Events;
 
