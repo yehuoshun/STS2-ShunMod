@@ -12,7 +12,6 @@ namespace STS2_ShunMod.Events;
 /// <summary>
 ///     遗物交易所 — 可反复交易，直到选退出。
 /// </summary>
-[Pool(typeof(EventRelicPool))]
 public class ShunModRelicExchange : EventModel
 {
     private static readonly Random Rnd = new();
