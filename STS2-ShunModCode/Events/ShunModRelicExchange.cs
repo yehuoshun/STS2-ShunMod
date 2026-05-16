@@ -1,7 +1,6 @@
 using System.Reflection;
 using System.Threading.Tasks;
 using MegaCrit.Sts2.Core.Commands;
-using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Events;
@@ -97,10 +96,7 @@ public class ShunModRelicExchange : EventModel
     /// </summary>
     private static void GiveRelicToPlayer(Player player, RelicModel relic)
     {
-        var field = typeof(Player).GetField("_relics", BindingFlags.NonPublic | BindingFlags.Instance);
-        if (field?.GetValue(player) is not List<RelicModel> list) return;
-        list.Add(relic);
-        // TODO: 触发 RelicGained 事件（如有需要）
+        player.AddRelicInternal(relic);
     }
 
     /// <summary>
@@ -108,9 +104,9 @@ public class ShunModRelicExchange : EventModel
     /// </summary>
     private static async Task DamagePlayer(Player player, int amount)
     {
-        // TODO: IDE 里找正确扣血 API，可能有 DamageCmd / PlayerCmd.TakeDamage 等
-        // 临时用 Creature 直接扣，IDE 补全确认正确方法
-        player.Creature.Health -= amount;
+        // CreatureCmd.Damage 或 Creature.TakeDamageInternal 等，IDE 补全确认
+        // 临时直接扣 Creature.Hp（属性名可能是 Hp / CurrentHp / Health）
+        player.Creature.Hp -= amount;
         await Task.CompletedTask;
     }
 
@@ -143,13 +139,12 @@ public class ShunModRelicExchange : EventModel
 
     private static CardModel? RollCardFromDeck(Player player)
     {
-        var deck = PileType.Deck.GetPile(player).Cards;
+        var deck = player.Deck.Cards;
         return deck.Count > 0 ? deck[Rnd.Next(deck.Count)] : null;
     }
 
     private static List<RelicModel> GetPlayerRelics(Player player)
     {
-        var field = typeof(Player).GetField("_relics", BindingFlags.NonPublic | BindingFlags.Instance);
-        return field?.GetValue(player) as List<RelicModel> ?? [];
+        return player.Relics.ToList();
     }
 }
