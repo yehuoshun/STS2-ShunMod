@@ -73,6 +73,7 @@ STS2-ShunMod/
 │   │       ├── AssemblyScanner.cs  # 安全类型扫描
 │   │       └── ContentRegistry.cs  # 扫描 + 注册
 │   ├── Patches/
+│   │   ├── EventInjector.cs        # 自定义事件注入 AllSharedEvents
 │   │   ├── InfiniteUpgrade.cs      # 无限升级（MaxUpgradeLevel）
 │   │   ├── InfiniteEnchant.cs      # 无限附魔（多种附魔共存 + 叠层）
 │   │   ├── BlockRetentionPatch.cs  # 格挡保留
