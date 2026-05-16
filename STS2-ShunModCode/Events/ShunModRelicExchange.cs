@@ -4,6 +4,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Events;
 using MegaCrit.Sts2.Core.Helpers;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.RelicPools;
 using MegaCrit.Sts2.Core.Runs;
@@ -39,56 +40,58 @@ public class ShunModRelicExchange : EventModel
     private EnchantmentModel? _rewardEnchant;
     private RelicModel? _rewardRelic;
 
+    // ════════════════════════════════════════════════════════
+    // DynamicVars — 游戏引擎自动将 {VAR} 占位符替换为对应值
+    // ════════════════════════════════════════════════════════
+
+    private static readonly LocString EmptyLoc = new("");
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+    [
+        new StringVar("LOSE_RELIC_1", EmptyLoc),
+        new StringVar("GAIN_RELIC", EmptyLoc),
+        new StringVar("LOSE_RELIC_2", EmptyLoc),
+        new StringVar("ENCHANT_NAME", EmptyLoc),
+        new StringVar("CARD_NAME", EmptyLoc)
+    ];
+
+    public override void CalculateVars()
+    {
+        var player = Owner;
+        if (player == null) return;
+        var relics = GetPlayerRelics(player);
+        RollOptions(player, relics);
+
+        ((StringVar)DynamicVars["LOSE_RELIC_1"]).Value = _playerRelic1?.Title ?? EmptyLoc;
+        ((StringVar)DynamicVars["GAIN_RELIC"]).Value = _rewardRelic?.Title ?? EmptyLoc;
+        ((StringVar)DynamicVars["LOSE_RELIC_2"]).Value = _playerRelic2?.Title ?? EmptyLoc;
+        ((StringVar)DynamicVars["ENCHANT_NAME"]).Value = _rewardEnchant?.Title ?? EmptyLoc;
+        ((StringVar)DynamicVars["CARD_NAME"]).Value = _enchantTargetCard?.Title ?? EmptyLoc;
+    }
+
     protected override IReadOnlyList<EventOption> GenerateInitialOptions()
     {
         var player = Owner;
         if (player == null) return [];
         var playerRelics = GetPlayerRelics(player);
-        RollOptions(player, playerRelics);
 
         var options = new List<EventOption>();
-        var entry = Id.Entry;
 
         // 选项 1: 指定遗物换指定遗物
         if (_playerRelic1 != null && _rewardRelic != null && playerRelics.Count > 0)
-        {
-            var loseName = _playerRelic1.Title.ToString();
-            var gainName = _rewardRelic.Title.ToString();
-
-            // L10NLookup + LocString.Add 注入动态变量，ToString() 解析为最终文本
-            var opt1Title = L10NLookup($"{entry}.pages.INITIAL.options.OPT_1.title");
-            opt1Title.Add("LOSE_RELIC", loseName);
-            opt1Title.Add("GAIN_RELIC", gainName);
-
-            // EventOption(owner, action, title, titleTip, bodyTip) — 5 参数构造器
-            // title 用解析后的 string，IHoverTip 传 null（无额外悬浮提示）
             options.Add(new EventOption(this, async () =>
             {
                 RelicHelper.RemoveRelic(Owner!, _playerRelic1!);
                 GiveRelicToPlayer(Owner!, _rewardRelic!);
-            }, opt1Title.ToString(), null!, null!));
-        }
+            }, InitialOptionKey("OPT_1")));
 
         // 选项 2: 指定遗物换指定附魔
         if (_playerRelic2 != null && _rewardEnchant != null && _enchantTargetCard != null)
-        {
-            var loseName = _playerRelic2.Title.ToString();
-            var enchantName = _rewardEnchant.Title.ToString();
-            var cardName = _enchantTargetCard.Title.ToString();
-
-            // L10NLookup + LocString.Add 注入动态变量
-            var opt2Title = L10NLookup($"{entry}.pages.INITIAL.options.OPT_2.title");
-            opt2Title.Add("LOSE_RELIC", loseName);
-            opt2Title.Add("ENCHANT_NAME", enchantName);
-            opt2Title.Add("CARD_NAME", cardName);
-
-            // EventOption(owner, action, title, titleTip, bodyTip) — 5 参数构造器
             options.Add(new EventOption(this, async () =>
             {
                 RelicHelper.RemoveRelic(Owner!, _playerRelic2!);
                 CardCmd.Enchant(_rewardEnchant!, _enchantTargetCard, 1);
-            }, opt2Title.ToString(), null!, null!));
-        }
+            }, InitialOptionKey("OPT_2")));
 
         // 选项 3: 扣 5 HP 刷新（仅在至少有一个遗物可交易时显示）
         if (playerRelics.Count > 0)
@@ -97,7 +100,8 @@ public class ShunModRelicExchange : EventModel
             {
                 // 扣血
                 await DamagePlayer(Owner!, 5);
-                // 重新生成选项并刷新（GenerateInitialOptions 内部已调用 RollOptions）
+                // 重新 roll + 更新 DynamicVars + 刷新选项
+                CalculateVars();
                 var freshOptions = GenerateInitialOptions();
                 RefreshOptions(freshOptions);
             }, InitialOptionKey("OPT_3")));
