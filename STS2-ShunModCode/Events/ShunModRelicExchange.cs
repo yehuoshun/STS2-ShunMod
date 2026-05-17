@@ -186,11 +186,7 @@ public class ShunModRelicExchange : EventModel
         {
             list.Add(Opt(async () =>
             {
-                var c = player.Creature;
-                var m = typeof(Creature).GetMethod("ChangeHp",
-                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
-                    [typeof(decimal)]);
-                m?.Invoke(c, [(decimal)-5]);
+                player.Creature.LoseHpInternal(5, 0);
                 Refresh();
             }, "OPT_3"));
         }

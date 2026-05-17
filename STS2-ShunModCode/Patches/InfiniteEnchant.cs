@@ -64,9 +64,11 @@ public static class InfiniteEnchant_MultiEnchant
             enchantment.Amount = (int)amount;
             dict[typeKey] = enchantment;
 
-            // 首个附魔才走 EnchantInternal，后续只加 dict 不碰 card.Enchantment
+            // 首个附魔走 EnchantInternal（设 card.Enchantment），后续只调 ApplyInternal（设 Card 引用不碰 card.Enchantment）
             if (dict.Count == 1)
                 card.EnchantInternal(enchantment, amount);
+            else
+                enchantment.ApplyInternal(card, amount);
         }
 
         // FinalizeUpgradeInternal 基于 card.Enchantment 重算（始终是首个附魔）
