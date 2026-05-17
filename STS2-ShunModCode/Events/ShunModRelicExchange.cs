@@ -83,8 +83,10 @@ public class ShunModRelicExchange : EventModel
 
     private void Roll(Player player)
     {
-        _loseRelic1 = _loseRelic2 = null;
-        _gainRelic = _enchant = null;
+        _loseRelic1 = null;
+        _loseRelic2 = null;
+        _gainRelic = null;
+        _enchant = null;
         _enchantTarget = null;
 
         var relics = GetTradeableRelics(player);
@@ -126,6 +128,7 @@ public class ShunModRelicExchange : EventModel
                 TryRemoveRelic(Owner!, l);
                 TryGiveRelic(Owner!, g);
                 AfterTrade();
+                return Task.CompletedTask;
             }, "OPT_1"));
         }
 
