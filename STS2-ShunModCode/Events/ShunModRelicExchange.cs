@@ -75,34 +75,38 @@ public class ShunModRelicExchange : EventModel
         SetStr("CARD_NAME", ToText(AsLoc(_enchantTarget?.Title)));
     }
 
-    /// <summary>解析 LocString 为显示文本（反射 .Text / .Localize / .Resolve）</summary>
+    /// <summary>解析 LocString 为显示文本</summary>
+    /// <remarks>
+    ///     优先用游戏原生 API GetRawText/GetFormattedText（能正确走 LocManager 解析），
+    ///     解析失败时退到 LocEntryKey 提取可读名称。
+    ///     所有路径最终经 SanitizeForBbcode 清洗，防止 ASCII 方括号被 MegaRichTextLabel 当 BBCode 解析。
+    /// </remarks>
     private static string ToText(LocString? loc)
     {
         if (loc == null) return "?";
-        var lt = typeof(LocString);
-        foreach (var name in new[] { "Text", "Localized", "Resolved" })
+
+        // 1. 游戏原生解析
+        try { return SanitizeForBbcode(loc.GetRawText()); }
+        catch (LocException) { }
+        try { return SanitizeForBbcode(loc.GetFormattedText()); }
+        catch (LocException) { }
+
+        // 2. 回退：从 LocEntryKey 提取可读名称
+        var key = loc.LocEntryKey ?? "";
+        // 去掉 .title / .description / .flavor 等后缀
+        key = System.Text.RegularExpressions.Regex.Replace(key, @"\.(title|description|flavor|name|additionalRestSiteHealText)(\..*)?$", "");
+        // 取最后一段（去掉 MOD_ID 前缀）
+        var parts = key.Split('.');
+        key = parts.Length > 0 ? parts[^1] : key;
+        // SNAKE_CASE → Title Case
+        key = System.Text.RegularExpressions.Regex.Replace(key, @"_+", " ").Trim();
+        if (key.Length > 0)
         {
-            var p = lt.GetProperty(name, BindingFlags.Public | BindingFlags.Instance);
-            if (p != null)
-            {
-                var val = p.GetValue(loc)?.ToString() ?? "";
-                if (!string.IsNullOrEmpty(val) && !val.Contains("LocString", StringComparison.Ordinal))
-                    return val;
-            }
+            var words = key.Split(' ');
+            key = string.Join(" ", System.Array.ConvertAll(words, w =>
+                w.Length > 0 ? char.ToUpperInvariant(w[0]) + w[1..].ToLowerInvariant() : w));
         }
-        foreach (var name in new[] { "Localize", "Resolve", "GetText", "GetLocalized" })
-        {
-            var m = lt.GetMethod(name, BindingFlags.Public | BindingFlags.Instance, []);
-            if (m != null)
-            {
-                var val = m.Invoke(loc, null)?.ToString() ?? "";
-                if (!string.IsNullOrEmpty(val) && !val.Contains("LocString", StringComparison.Ordinal))
-                    return val;
-            }
-        }
-        // 回退：loc.ToString() 可能返回未解析的内部格式（含 [brackets]），
-        // 会破坏 MegaRichTextLabel 的 BBCode 解析。清洗掉 BB 标签风格的内容。
-        return SanitizeForBbcode(loc.ToString());
+        return string.IsNullOrWhiteSpace(key) ? "?" : SanitizeForBbcode(key);
     }
 
     /// <summary>清洗可能被误认为 BBCode 的方括号文本，防止 MegalLabel 解析崩溃</summary>
