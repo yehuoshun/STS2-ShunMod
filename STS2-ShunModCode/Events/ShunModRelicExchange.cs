@@ -78,8 +78,26 @@ public class ShunModRelicExchange : EventModel
     private void SetStr(string key, LocString? val)
     {
         if (val == null || !DynamicVars.TryGetValue(key, out var dv) || dv is not StringVar sv) return;
-        sv.GetType().GetProperty("String",
-            BindingFlags.Public | BindingFlags.Instance)?.SetValue(sv, val);
+        var t = sv.GetType();
+
+        // 尝试各种可能的属性/字段名设置 StringVar 的值
+        foreach (var name in new[] { "BaseValue", "Value", "String", "StringValue" })
+        {
+            var prop = t.GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            if (prop?.CanWrite == true)
+            {
+                var target = prop.PropertyType == typeof(string) ? (object)(val.ToString() ?? "") : val;
+                prop.SetValue(sv, target);
+                return;
+            }
+        }
+
+        // 回退：反射写私有字段
+        foreach (var name in new[] { "_value", "_string", "value" })
+        {
+            var field = t.GetField(name, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+            if (field != null) { field.SetValue(sv, val); return; }
+        }
     }
 
     private static LocString? AsLoc(LocString? l) => l;
