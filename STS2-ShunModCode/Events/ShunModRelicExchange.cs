@@ -1,12 +1,10 @@
 using System.Reflection;
 using System.Text.RegularExpressions;
 using MegaCrit.Sts2.Core.Commands;
-using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Events;
 using MegaCrit.Sts2.Core.Helpers;
-using MegaCrit.Sts2.Core.Models.RelicPools;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
@@ -174,7 +172,7 @@ public class ShunModRelicExchange : EventModel
         if (relics.Count == 0) return;
 
         _loseRelic1 = relics[Rnd.Next(relics.Count)];
-        _gainRelic = RollRandomRelic(player);
+        _gainRelic = RollRandomRelic();
         _enchant = RollRandomEnchant();
         _enchantTarget = RollRandomCard(player);
 
@@ -315,15 +313,17 @@ public class ShunModRelicExchange : EventModel
     // 随机池 & 过滤
     // ════════════════════════════════════════════════
 
-    private static readonly HashSet<RelicRarity> TradeableRarities =
-        [RelicRarity.Common, RelicRarity.Uncommon, RelicRarity.Rare, RelicRarity.Shop];
-
-    /// <summary>从当前角色遗物池（Shared + 角色专属）中随机一个可交易遗物</summary>
-    private static RelicModel? RollRandomRelic(Player player)
+    private static RelicModel? RollRandomRelic()
     {
-        var pool = ModelDb.RelicPool<SharedRelicPool>().GetUnlockedRelics(player.UnlockState).ToList();
-        pool.AddRange(player.Character.RelicPool.GetUnlockedRelics(player.UnlockState));
-        pool.RemoveAll(r => !IsTradeable(r));
+        IEnumerable<RelicModel>? all = null;
+        var p = typeof(ModelDb).GetProperty("AllRelics",
+            BindingFlags.Public | BindingFlags.Static);
+        if (p?.GetValue(null) is IEnumerable<RelicModel> r) all = r;
+        else all = typeof(RelicModel).Assembly.GetTypes()
+            .Where(t => !t.IsAbstract && typeof(RelicModel).IsAssignableFrom(t))
+            .Select(t => ModelDb.GetByIdOrNull<RelicModel>(ModelDb.GetId(t)))
+            .OfType<RelicModel>();
+        var pool = all.Where(IsTradeable).ToList();
         return pool.Count > 0 ? pool[Rnd.Next(pool.Count)] : null;
     }
 
@@ -341,7 +341,8 @@ public class ShunModRelicExchange : EventModel
         player.Deck.Cards is { Count: > 0 } d ? d[Rnd.Next(d.Count)] : null;
 
     private static bool IsTradeable(RelicModel relic) =>
-        TradeableRarities.Contains(relic.Rarity) && relic.GetType().Name != "Circlet";
+        typeof(RelicModel).GetProperty("Rarity")?.GetValue(relic)?.ToString() != "Starter"
+        && relic.GetType().Name != "Circlet";
 
     private static List<RelicModel> GetTradeableRelics(Player? player) =>
         player?.Relics.Where(IsTradeable).ToList() ?? [];
