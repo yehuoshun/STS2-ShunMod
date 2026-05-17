@@ -86,7 +86,7 @@ public class ShunModRelicExchange : EventModel
             var prop = t.GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             if (prop?.CanWrite != true) continue;
 
-            if (prop.PropertyType == typeof(LocString) || prop.PropertyType == typeof(LocString?))
+            if (prop.PropertyType == typeof(LocString))
             {
                 prop.SetValue(sv, val);
                 return;
