@@ -67,46 +67,56 @@ public class ShunModRelicExchange : EventModel
     {
         if (Owner == null) return;
         Roll(Owner);
-        SetStr("LOSE_RELIC_1", _loseRelic1?.Title);
-        SetStr("GAIN_RELIC", _gainRelic?.Title);
-        SetStr("LOSE_RELIC_2", _loseRelic2?.Title);
-        SetStr("ENCHANT_NAME", _enchant?.Title);
-        // CardModel.Title 类型可能是 string（非 LocString）
-        SetStr("CARD_NAME", AsLoc(_enchantTarget?.Title));
+        SetStr("LOSE_RELIC_1", ToText(_loseRelic1?.Title));
+        SetStr("GAIN_RELIC", ToText(_gainRelic?.Title));
+        SetStr("LOSE_RELIC_2", ToText(_loseRelic2?.Title));
+        SetStr("ENCHANT_NAME", ToText(_enchant?.Title));
+        SetStr("CARD_NAME", ToText(AsLoc(_enchantTarget?.Title)));
     }
 
-    private void SetStr(string key, LocString? val)
+    /// <summary>解析 LocString 为显示文本（反射 .Text / .Localize / .Resolve）</summary>
+    private static string ToText(LocString? loc)
+    {
+        if (loc == null) return "";
+        var lt = typeof(LocString);
+        foreach (var name in new[] { "Text", "Localized", "Resolved" })
+        {
+            var p = lt.GetProperty(name, BindingFlags.Public | BindingFlags.Instance);
+            if (p != null) return p.GetValue(loc)?.ToString() ?? "";
+        }
+        foreach (var name in new[] { "Localize", "Resolve", "GetText", "GetLocalized" })
+        {
+            var m = lt.GetMethod(name, BindingFlags.Public | BindingFlags.Instance, []);
+            if (m != null) return m.Invoke(loc, null)?.ToString() ?? "";
+        }
+        return loc.ToString() ?? "";
+    }
+
+    private void SetStr(string key, string? val)
     {
         if (val == null || !DynamicVars.TryGetValue(key, out var dv) || dv is not StringVar sv) return;
         var t = sv.GetType();
 
-        // 按优先级尝试属性（必须类型兼容才写，避免 LocString→decimal 强转崩溃）
         foreach (var name in new[] { "String", "StringValue", "BaseValue", "Value" })
         {
             var prop = t.GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             if (prop?.CanWrite != true) continue;
-
-            if (prop.PropertyType == typeof(LocString))
+            if (prop.PropertyType == typeof(string))
             {
                 prop.SetValue(sv, val);
                 return;
             }
-            if (prop.PropertyType == typeof(string))
+            if (prop.PropertyType == typeof(LocString))
             {
-                prop.SetValue(sv, val.ToString());
+                prop.SetValue(sv, new LocString("", val));
                 return;
             }
         }
 
-        // 回退：反射写私有字段
         foreach (var name in new[] { "_value", "_string", "_locString", "value" })
         {
             var field = t.GetField(name, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
-            if (field != null)
-            {
-                field.SetValue(sv, val);
-                return;
-            }
+            if (field != null) { field.SetValue(sv, val); return; }
         }
     }
 
@@ -217,11 +227,11 @@ public class ShunModRelicExchange : EventModel
     {
         var player = Owner!;
         Roll(player);
-        SetStr("LOSE_RELIC_1", _loseRelic1?.Title);
-        SetStr("GAIN_RELIC", _gainRelic?.Title);
-        SetStr("LOSE_RELIC_2", _loseRelic2?.Title);
-        SetStr("ENCHANT_NAME", _enchant?.Title);
-        SetStr("CARD_NAME", AsLoc(_enchantTarget?.Title));
+        SetStr("LOSE_RELIC_1", ToText(_loseRelic1?.Title));
+        SetStr("GAIN_RELIC", ToText(_gainRelic?.Title));
+        SetStr("LOSE_RELIC_2", ToText(_loseRelic2?.Title));
+        SetStr("ENCHANT_NAME", ToText(_enchant?.Title));
+        SetStr("CARD_NAME", ToText(AsLoc(_enchantTarget?.Title)));
 
         var opts = BuildList();
         // 反射写选项列表属性/字段
