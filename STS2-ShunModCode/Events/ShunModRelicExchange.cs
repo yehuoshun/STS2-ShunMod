@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text.RegularExpressions;
+using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
@@ -49,7 +50,6 @@ public class ShunModRelicExchange : EventModel
     private RelicModel? _gainRelic;
     private RelicModel? _loseRelic2;
     private EnchantmentModel? _enchant;
-    private CardModel? _enchantTarget;
 
     // ════════════════════════════════════════════════
     // DynamicVars — 反射写入 String 属性
@@ -60,8 +60,7 @@ public class ShunModRelicExchange : EventModel
         new StringVar("LOSE_RELIC_1", ""),
         new StringVar("GAIN_RELIC", ""),
         new StringVar("LOSE_RELIC_2", ""),
-        new StringVar("ENCHANT_NAME", ""),
-        new StringVar("CARD_NAME", "")
+        new StringVar("ENCHANT_NAME", "")
     ];
 
     public override void CalculateVars()
@@ -72,7 +71,6 @@ public class ShunModRelicExchange : EventModel
         SetStr("GAIN_RELIC", ToText(_gainRelic?.Title));
         SetStr("LOSE_RELIC_2", ToText(_loseRelic2?.Title));
         SetStr("ENCHANT_NAME", ToText(_enchant?.Title));
-        SetStr("CARD_NAME", ToText(AsLoc(_enchantTarget?.Title)));
     }
 
     /// <summary>解析 LocString 为显示文本</summary>
@@ -166,7 +164,6 @@ public class ShunModRelicExchange : EventModel
         _loseRelic2 = null;
         _gainRelic = null;
         _enchant = null;
-        _enchantTarget = null;
 
         var relics = GetTradeableRelics(player);
         if (relics.Count == 0) return;
@@ -174,7 +171,6 @@ public class ShunModRelicExchange : EventModel
         _loseRelic1 = relics[Rnd.Next(relics.Count)];
         _gainRelic = RollRandomRelic();
         _enchant = RollRandomEnchant();
-        _enchantTarget = RollRandomCard(player);
 
         if (relics.Count >= 2)
             do { _loseRelic2 = relics[Rnd.Next(relics.Count)]; }
@@ -211,14 +207,17 @@ public class ShunModRelicExchange : EventModel
             }, "OPT_1"));
         }
 
-        // OPT_2: 遗物 → 附魔（≥2 遗物）
-        if (relics.Count >= 2 && _loseRelic2 != null && _enchant != null && _enchantTarget != null)
+        // OPT_2: 遗物 → 附魔（≥2 遗物，玩家自选卡牌）
+        if (relics.Count >= 2 && _loseRelic2 != null && _enchant != null)
         {
-            var l = _loseRelic2; var e = _enchant; var c = _enchantTarget;
+            var l = _loseRelic2; var e = _enchant;
             list.Add(Opt(async () =>
             {
+                var mutableEnchant = (EnchantmentModel)e.MutableClone();
+                var selected = await CardSelectCmd.FromDeckForEnchantment(Owner!, mutableEnchant, 1,
+                    new CardSelectorPrefs(L10NLookup("pages.INITIAL.options.OPT_2.enchant_prompt"), 1));
+                if (!selected.Any()) return; // 取消选择则不消耗遗物
                 await RelicCmd.Remove(l);
-                CardCmd.Enchant(e, c, 1);
                 AfterTrade();
             }, "OPT_2"));
         }
@@ -264,7 +263,6 @@ public class ShunModRelicExchange : EventModel
         SetStr("GAIN_RELIC", ToText(_gainRelic?.Title));
         SetStr("LOSE_RELIC_2", ToText(_loseRelic2?.Title));
         SetStr("ENCHANT_NAME", ToText(_enchant?.Title));
-        SetStr("CARD_NAME", ToText(AsLoc(_enchantTarget?.Title)));
 
         var opts = BuildList();
         SetEventState(L10NLookup("pages.INITIAL.description"), opts);
@@ -320,9 +318,6 @@ public class ShunModRelicExchange : EventModel
             .OfType<EnchantmentModel>().ToList();
         return pool.Count > 0 ? pool[Rnd.Next(pool.Count)] : null;
     }
-
-    private static CardModel? RollRandomCard(Player player) =>
-        player.Deck.Cards is { Count: > 0 } d ? d[Rnd.Next(d.Count)] : null;
 
     private static bool IsTradeable(RelicModel relic) =>
         typeof(RelicModel).GetProperty("Rarity")?.GetValue(relic)?.ToString() != "Starter"
