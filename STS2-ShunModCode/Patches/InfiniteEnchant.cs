@@ -60,23 +60,27 @@ public static class InfiniteEnchant_MultiEnchant
         }
         else
         {
-            // 异类附魔：记录到 dict，不调 EnchantInternal（它会 set card.Enchantment，覆盖旧附魔）
+            // 异类附魔
             enchantment.Amount = (int)amount;
             dict[typeKey] = enchantment;
 
-            // 首个附魔走 EnchantInternal（设 card.Enchantment），后续只调 ApplyInternal（设 Card 引用不碰 card.Enchantment）
             if (dict.Count == 1)
                 card.EnchantInternal(enchantment, amount);
             else
                 enchantment.ApplyInternal(card, amount);
         }
 
-        // FinalizeUpgradeInternal 基于 card.Enchantment 重算（始终是首个附魔）
-        card.FinalizeUpgradeInternal();
-
-        // 所有附魔的 ModifyCard 叠加——这才是 1+1 的累加
+        // 对所有附魔调 ModifyCard：需要临时切 card.Enchantment 让 RecalculateForUpgradeOrEnchant 读到正确附魔
+        var firstEnch = card.Enchantment;
         foreach (var ench in dict.Values)
+        {
+            if (card.Enchantment != ench)
+                card.Enchantment = ench;
             ench.ModifyCard();
+        }
+        card.Enchantment = firstEnch;
+
+        card.FinalizeUpgradeInternal();
 
         __result = dict[typeKey];
         return false; // 跳过原始方法
