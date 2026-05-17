@@ -111,6 +111,8 @@ public class ShunModRelicExchange : EventModel
         return BuildOptionList();
     }
 
+    private string OptKey(string key) => $"{Id.Entry}.pages.INITIAL.options.{key}";
+
     /// <summary>
     ///     构建当前状态下的选项列表。
     ///     被 GenerateInitialOptions 和 AfterTrade → SetEventState 共用。
@@ -133,7 +135,7 @@ public class ShunModRelicExchange : EventModel
                 TryRemoveRelic(Owner!, lose);
                 TryGiveRelic(Owner!, gain);
                 AfterTrade();
-            }, InitialOptionKey("OPT_1")));
+            }, OptKey("OPT_1")));
         }
 
         // OPT_2: 遗物 → 附魔（至少 2 遗物才显示，不和 OPT_1 抢）
@@ -147,7 +149,7 @@ public class ShunModRelicExchange : EventModel
                 TryRemoveRelic(Owner!, lose);
                 CardCmd.Enchant(ench, card, 1);
                 AfterTrade();
-            }, InitialOptionKey("OPT_2")));
+            }, OptKey("OPT_2")));
         }
 
         // OPT_3: 扣血刷新
@@ -157,7 +159,7 @@ public class ShunModRelicExchange : EventModel
             {
                 await DamagePlayer(Owner!, 5);
                 AfterTrade();
-            }, InitialOptionKey("OPT_3")));
+            }, OptKey("OPT_3")));
         }
 
         // OPT_4: 退出
@@ -180,7 +182,7 @@ public class ShunModRelicExchange : EventModel
     private EventOption MakeExitOption()
     {
         return new EventOption(this, () => SetEventFinished(L10NLookup("pages.CLOSE.description")),
-            InitialOptionKey("OPT_4"));
+            OptKey("OPT_4"));
     }
 
     // ════════════════════════════════════════════════════
