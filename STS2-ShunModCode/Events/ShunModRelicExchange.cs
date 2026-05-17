@@ -11,6 +11,8 @@ using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Runs;
 
+using STS2_ShunMod.Patches;
+
 namespace STS2_ShunMod.Events;
 
 /// <summary>
@@ -174,8 +176,36 @@ public class ShunModRelicExchange : EventModel
                 if (!picked.Any()) return; // 取消不扣遗物
                 var mutableEnch = (EnchantmentModel)ench.MutableClone();
                 var card = picked.First();
-                // 走 CardCmd.Enchant → InfiniteEnchant patch → AllEnchantments 追踪
-                CardCmd.Enchant(mutableEnch, card, 1);
+
+                // 无限附魔逻辑内联（绕过 Harmony 补丁可靠性问题）
+                var typeKey = mutableEnch.GetType().FullName!;
+                var dict = InfiniteEnchant_MultiEnchant.AllEnchantments.GetOrCreateValue(card);
+
+                if (dict.TryGetValue(typeKey, out var existing))
+                {
+                    existing.Amount += 1;
+                }
+                else
+                {
+                    mutableEnch.Amount = 1;
+                    dict[typeKey] = mutableEnch;
+                    if (dict.Count == 1)
+                    {
+                        card.EnchantInternal(mutableEnch, 1);
+                        mutableEnch.ModifyCard();
+                    }
+                    else
+                    {
+                        mutableEnch.ApplyInternal(card, 1);
+                        // ModifyCard 需要 card.Enchantment 指向当前附魔，用反射临时切
+                        var firstEnch = card.Enchantment;
+                        var ep = typeof(CardModel).GetProperty("Enchantment", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
+                        ep.SetValue(card, mutableEnch);
+                        mutableEnch.ModifyCard();
+                        ep.SetValue(card, firstEnch);
+                    }
+                }
+                card.FinalizeUpgradeInternal();
                 await RelicCmd.Remove(lose);
                 Refresh();
             }, "OPT_2"));
