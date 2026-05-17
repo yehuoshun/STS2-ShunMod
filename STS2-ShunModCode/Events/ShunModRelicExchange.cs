@@ -8,81 +8,43 @@ using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Runs;
-using STS2_ShunMod.Core;
 
 namespace STS2_ShunMod.Events;
 
 /// <summary>
-///     遗物交易所 — 可反复交易，直到选退出。
+///     遗物交易所 — 随机遗物换遗物/附魔，可反复交易直到退出。
+///     参照 skill 标准 EventModel 模式。
 /// </summary>
 public class ShunModRelicExchange : EventModel
 {
-    // ════════════════════════════════════════════════════════
-    // 事件背景图路径修正 — 游戏默认路径不含 mod 前缀
-    // ════════════════════════════════════════════════════════
+    // ════════════════════════════════════════════════════
+    // 背景图
+    // ════════════════════════════════════════════════════
 
     public override IEnumerable<string> GetAssetPaths(IRunState runState)
     {
         var paths = base.GetAssetPaths(runState).ToList();
-        var defaultPath = ImageHelper.GetImagePath($"events/{Id.Entry.ToLowerInvariant()}.png");
-        var modPath = $"res://STS2-ShunMod/images/events/{Id.Entry.ToLowerInvariant()}.png";
-        var index = paths.IndexOf(defaultPath);
-        if (index >= 0)
-            paths[index] = modPath;
+        var def = ImageHelper.GetImagePath($"events/{Id.Entry.ToLowerInvariant()}.png");
+        var mod = $"res://STS2-ShunMod/images/events/{Id.Entry.ToLowerInvariant()}.png";
+        var i = paths.IndexOf(def);
+        if (i >= 0) paths[i] = mod;
         return paths;
     }
 
-    // ════════════════════════════════════════════════════════
-    // 不可交易的遗物黑名单
-    // ════════════════════════════════════════════════════════
-
-    /// <summary>
-    ///     通过反射检查遗物 Rarity 是否为 Starter。
-    ///     不用 RelicRarity 枚举避免编译时类型依赖（Publicizer 可能未暴露）。
-    /// </summary>
-    private static bool IsStarterRelic(RelicModel relic)
-    {
-        var rarityProp = typeof(RelicModel).GetProperty("Rarity");
-        var rarity = rarityProp?.GetValue(relic);
-        return rarity != null && rarity.ToString() == "Starter";
-    }
-
-    /// <summary>
-    ///     遗物名称黑名单 — 不可交易的遗物类型名。
-    ///     例如 Circlet（后备遗物）等。
-    /// </summary>
-    private static readonly HashSet<string> NonTradeableRelicNames = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "Circlet"
-    };
-
-    /// <summary>
-    ///     附魔名称黑名单 — 隐藏/系统附魔不应出现在随机池中。
-    /// </summary>
-    private static readonly HashSet<string> NonTradeableEnchantNames = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "EnchantmentModel", // 基类，不应出现
-    };
-
-    // ════════════════════════════════════════════════════════
-    // 随机状态
-    // ════════════════════════════════════════════════════════
+    // ════════════════════════════════════════════════════
+    // 状态
+    // ════════════════════════════════════════════════════
 
     private static readonly Random Rnd = new();
-    private RelicModel? _playerRelic1;
-    private RelicModel? _playerRelic2;
-    private EnchantmentModel? _rewardEnchant;
-    private RelicModel? _rewardRelic;
-    private CardModel? _enchantTargetCard;
+    private RelicModel? _loseRelic1;
+    private RelicModel? _gainRelic;
+    private RelicModel? _loseRelic2;
+    private EnchantmentModel? _enchantment;
+    private CardModel? _enchantTarget;
 
-    /// <summary>
-    ///     标记本轮 OPT_1 已被执行（防止 OPT_2 对同一遗物二次操作）。
-    /// </summary>
-    private bool _opt1Executed;
-
-    // ════════════════════════════════════════════════════════
-    // DynamicVars — 游戏引擎自动将 {VAR} 占位符替换为对应值
-    // ════════════════════════════════════════════════════════
+    // ════════════════════════════════════════════════════
+    // DynamicVars（变量名与本地化文件对齐）
+    // ════════════════════════════════════════════════════
 
     private static readonly LocString EmptyLoc = new("");
 
@@ -99,238 +61,253 @@ public class ShunModRelicExchange : EventModel
     {
         var player = Owner;
         if (player == null) return;
-        var relics = GetTradeableRelics(player);
-        RollOptions(player, relics);
-
-        ((StringVar)DynamicVars["LOSE_RELIC_1"]).Value = _playerRelic1?.Title ?? EmptyLoc;
-        ((StringVar)DynamicVars["GAIN_RELIC"]).Value = _rewardRelic?.Title ?? EmptyLoc;
-        ((StringVar)DynamicVars["LOSE_RELIC_2"]).Value = _playerRelic2?.Title ?? EmptyLoc;
-        ((StringVar)DynamicVars["ENCHANT_NAME"]).Value = _rewardEnchant?.Title ?? EmptyLoc;
-        ((StringVar)DynamicVars["CARD_NAME"]).Value = _enchantTargetCard?.Title ?? EmptyLoc;
+        Roll(player);
+        ApplyVars();
     }
+
+    private void ApplyVars()
+    {
+        ((StringVar)DynamicVars["LOSE_RELIC_1"]).Value = _loseRelic1?.Title ?? EmptyLoc;
+        ((StringVar)DynamicVars["GAIN_RELIC"]).Value = _gainRelic?.Title ?? EmptyLoc;
+        ((StringVar)DynamicVars["LOSE_RELIC_2"]).Value = _loseRelic2?.Title ?? EmptyLoc;
+        ((StringVar)DynamicVars["ENCHANT_NAME"]).Value = _enchantment?.Title ?? EmptyLoc;
+        ((StringVar)DynamicVars["CARD_NAME"]).Value = _enchantTarget?.Title ?? EmptyLoc;
+    }
+
+    // ════════════════════════════════════════════════════
+    // 随机
+    // ════════════════════════════════════════════════════
+
+    private void Roll(Player player)
+    {
+        _loseRelic1 = _loseRelic2 = null;
+        _gainRelic = null;
+        _enchantment = null;
+        _enchantTarget = null;
+
+        var relics = GetTradeableRelics(player);
+        if (relics.Count == 0) return;
+
+        _loseRelic1 = relics[Rnd.Next(relics.Count)];
+        _gainRelic = RollRandomRelic();
+
+        // OPT_2 用另一个遗物
+        if (relics.Count >= 2)
+        {
+            do { _loseRelic2 = relics[Rnd.Next(relics.Count)]; }
+            while (_loseRelic2 == _loseRelic1);
+        }
+
+        _enchantment = RollRandomEnchant();
+        _enchantTarget = RollRandomCard(player);
+    }
+
+    // ════════════════════════════════════════════════════
+    // 选项生成
+    // ════════════════════════════════════════════════════
 
     protected override IReadOnlyList<EventOption> GenerateInitialOptions()
     {
+        return BuildOptionList();
+    }
+
+    /// <summary>
+    ///     构建当前状态下的选项列表。
+    ///     被 GenerateInitialOptions 和 AfterTrade → SetEventState 共用。
+    /// </summary>
+    private IReadOnlyList<EventOption> BuildOptionList()
+    {
         var player = Owner;
         if (player == null) return [MakeExitOption()];
+
         var relics = GetTradeableRelics(player);
+        var list = new List<EventOption>();
 
-        var options = new List<EventOption>();
-
-        // 选项 1: 遗物换遗物
-        if (_playerRelic1 != null && _rewardRelic != null && relics.Count > 0)
+        // OPT_1: 遗物 → 遗物
+        if (_loseRelic1 != null && _gainRelic != null)
         {
-            var losingRelic = _playerRelic1;
-            var gainingRelic = _rewardRelic;
-            options.Add(new EventOption(this, async () =>
+            var lose = _loseRelic1;
+            var gain = _gainRelic;
+            list.Add(new EventOption(this, async () =>
             {
-                RelicHelper.RemoveRelic(Owner!, losingRelic);
-                GiveRelicToPlayer(Owner!, gainingRelic);
-                _opt1Executed = true;
+                TryRemoveRelic(Owner!, lose);
+                TryGiveRelic(Owner!, gain);
+                AfterTrade();
             }, InitialOptionKey("OPT_1")));
         }
 
-        // 选项 2: 遗物换附魔 — 至少 2 个可交易遗物才显示
-        // （避免仅 1 遗物时 OPT_1/OPT_2 争抢同一遗物）
-        var canShowOpt2 = _playerRelic2 != null
-            && _rewardEnchant != null
-            && _enchantTargetCard != null
-            && relics.Count >= 2;
-        if (canShowOpt2)
+        // OPT_2: 遗物 → 附魔（至少 2 遗物才显示，不和 OPT_1 抢）
+        if (relics.Count >= 2 && _loseRelic2 != null && _enchantment != null && _enchantTarget != null)
         {
-            var losingRelic = _playerRelic2;
-            var enchant = _rewardEnchant;
-            var targetCard = _enchantTargetCard;
-            options.Add(new EventOption(this, async () =>
+            var lose = _loseRelic2;
+            var ench = _enchantment;
+            var card = _enchantTarget;
+            list.Add(new EventOption(this, async () =>
             {
-                // 如果 OPT_1 已执行且 OPT_2 用的是同一遗物，则不重复移除
-                if (!_opt1Executed || losingRelic != _playerRelic1)
-                    RelicHelper.RemoveRelic(Owner!, losingRelic);
-                CardCmd.Enchant(enchant, targetCard, 1);
+                TryRemoveRelic(Owner!, lose);
+                CardCmd.Enchant(ench, card, 1);
+                AfterTrade();
             }, InitialOptionKey("OPT_2")));
         }
 
-        // 选项 3: 扣 5 HP 刷新
+        // OPT_3: 扣血刷新
         if (relics.Count > 0)
         {
-            var self = this;
-            options.Add(new EventOption(this, async () =>
+            list.Add(new EventOption(this, async () =>
             {
                 await DamagePlayer(Owner!, 5);
-                // 重新 roll + 更新 DynamicVars
-                var freshRelics = GetTradeableRelics(Owner!);
-                self.RollOptions(Owner!, freshRelics);
-                self.CalculateVars();
-                self._opt1Executed = false;
-                self.SetEventState(self.GenerateInitialOptions());
+                AfterTrade();
             }, InitialOptionKey("OPT_3")));
         }
 
-        // 选项 4: 退出
-        options.Add(MakeExitOption());
-
-        return options;
+        // OPT_4: 退出
+        list.Add(MakeExitOption());
+        return list;
     }
 
-    // ════════════════════════════════════════════════════════
-    // 内部辅助
-    // ════════════════════════════════════════════════════════
+    /// <summary>
+    ///     交易/刷新后：重新 Roll → 更新 DynamicVars → SetEventState 刷新页面。
+    ///     参照 skill 多页选项模式。
+    /// </summary>
+    private void AfterTrade()
+    {
+        var player = Owner!;
+        Roll(player);
+        ApplyVars();
+        SetEventState(BuildOptionList());
+    }
 
     private EventOption MakeExitOption()
     {
-        return new EventOption(this, async () =>
-        {
-            SetEventFinished(L10NLookup("pages.CLOSE.description"));
-        }, InitialOptionKey("OPT_4"));
+        return new EventOption(this, () => SetEventFinished(L10NLookup("pages.CLOSE.description")),
+            InitialOptionKey("OPT_4"));
     }
 
-    private void RollOptions(Player player, IReadOnlyList<RelicModel> playerRelics)
+    // ════════════════════════════════════════════════════
+    // 遗物操作
+    // ════════════════════════════════════════════════════
+
+    private static void TryRemoveRelic(Player player, RelicModel relic)
     {
-        _playerRelic1 = null;
-        _playerRelic2 = null;
-        _rewardRelic = null;
-        _rewardEnchant = null;
-        _enchantTargetCard = null;
-
-        if (playerRelics.Count == 0) return;
-
-        _playerRelic1 = playerRelics[Rnd.Next(playerRelics.Count)];
-        _rewardRelic = RollRelicFromPool();
-
-        // OPT_2：用另一个遗物（需要 ≥2 个可交易遗物）
-        if (playerRelics.Count >= 2)
-        {
-            RelicModel pick2;
-            do
-            {
-                pick2 = playerRelics[Rnd.Next(playerRelics.Count)];
-            } while (pick2 == _playerRelic1);
-
-            _playerRelic2 = pick2;
-        }
-
-        _rewardEnchant = RollEnchantment();
-        _enchantTargetCard = RollCardFromDeck(player);
-    }
-
-    /// <summary>
-    ///     给予玩家遗物。优先使用公开 API Player.GainRelic，
-    ///     回退到反射调用 AddRelicInternal。
-    /// </summary>
-    private static void GiveRelicToPlayer(Player player, RelicModel relic)
-    {
-        // 优先尝试公开 API
-        var gainMethod = typeof(Player).GetMethod("GainRelic",
-            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
-            [typeof(RelicModel)]);
-        if (gainMethod != null)
-        {
-            gainMethod.Invoke(player, [relic]);
-            return;
-        }
-
-        // 回退到 AddRelicInternal
-        var addMethod = typeof(Player).GetMethod("AddRelicInternal",
+        var field = typeof(Player).GetField("_relics",
             BindingFlags.NonPublic | BindingFlags.Instance);
-        addMethod?.Invoke(player, [relic]);
+        if (field?.GetValue(player) is List<RelicModel> list)
+        {
+            list.Remove(relic);
+            // 触发 RelicRemoved 事件
+            TryInvokeEvent(player, "RelicRemoved", relic);
+        }
     }
 
-    /// <summary>
-    ///     对玩家造成伤害。优先使用 Creature.ChangeHp，
-    ///     回退到反射 TakeDamage / 直接扣血。
-    /// </summary>
+    private static void TryGiveRelic(Player player, RelicModel relic)
+    {
+        var method = typeof(Player).GetMethod("AddRelicInternal",
+            BindingFlags.NonPublic | BindingFlags.Instance);
+        method?.Invoke(player, [relic]);
+    }
+
+    private static void TryInvokeEvent(object target, string eventName, params object[] args)
+    {
+        var evt = target.GetType().GetEvent(eventName,
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        if (evt == null) return;
+
+        // 获取 backing field
+        var field = target.GetType().GetField(eventName,
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        if (field?.GetValue(target) is Delegate del)
+            foreach (var h in del.GetInvocationList())
+                try { h.DynamicInvoke(args); } catch { }
+    }
+
+    // ════════════════════════════════════════════════════
+    // 伤害
+    // ════════════════════════════════════════════════════
+
     private static async Task DamagePlayer(Player player, int amount)
     {
-        var creature = player.Creature;
-
-        // 方案 1：尝试 Creature.ChangeHp（如存在会触发死亡检测）
-        var changeHpMethod = typeof(Creature).GetMethod("ChangeHp",
+        var c = player.Creature;
+        // 方案 1: ChangeHp（负数 = 扣血）
+        var m = typeof(Creature).GetMethod("ChangeHp",
             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
             [typeof(decimal)]);
-        if (changeHpMethod != null)
-        {
-            changeHpMethod.Invoke(creature, [(decimal)-amount]);
-            await Task.CompletedTask;
-            return;
-        }
+        if (m != null) { m.Invoke(c, [(decimal)-amount]); await Task.CompletedTask; return; }
 
-        // 方案 2：反射 TakeDamage
-        var takeDmgMethod = typeof(Creature).GetMethod("TakeDamage",
+        // 方案 2: TakeDamage 反射
+        m = typeof(Creature).GetMethod("TakeDamage",
             BindingFlags.NonPublic | BindingFlags.Instance);
-        if (takeDmgMethod != null)
-        {
-            takeDmgMethod.Invoke(creature, [(decimal)amount]);
-            await Task.CompletedTask;
-            return;
-        }
+        if (m != null) { m.Invoke(c, [(decimal)amount]); await Task.CompletedTask; return; }
 
-        // 方案 3：直接扣血（最后手段）
-        var hpProp = typeof(Creature).GetProperty("CurrentHp");
-        if (hpProp != null)
+        // 方案 3: 直接扣血
+        var hp = typeof(Creature).GetProperty("CurrentHp");
+        if (hp != null)
         {
-            var current = (decimal)(hpProp.GetValue(creature) ?? 0m);
-            hpProp.SetValue(creature, Math.Max(0, current - amount));
+            var cur = (decimal)(hp.GetValue(c) ?? 0m);
+            hp.SetValue(c, Math.Max(0, cur - amount));
         }
-
         await Task.CompletedTask;
     }
 
-    private static RelicModel? RollRelicFromPool()
+    // ════════════════════════════════════════════════════
+    // 随机池
+    // ════════════════════════════════════════════════════
+
+    private static RelicModel? RollRandomRelic()
     {
-        var allRelicsProp = typeof(ModelDb).GetProperty("AllRelics",
+        var p = typeof(ModelDb).GetProperty("AllRelics",
             BindingFlags.Public | BindingFlags.Static);
-        if (allRelicsProp?.GetValue(null) is IEnumerable<RelicModel> relics)
+        if (p?.GetValue(null) is IEnumerable<RelicModel> relics)
         {
-            var list = relics
-                .Where(r => !IsStarterRelic(r))
-                .Where(r => !NonTradeableRelicNames.Contains(r.GetType().Name))
-                .ToList();
-            return list.Count > 0 ? list[Rnd.Next(list.Count)] : null;
+            var pool = relics.Where(IsTradeable).ToList();
+            return pool.Count > 0 ? pool[Rnd.Next(pool.Count)] : null;
         }
 
-        // 回退：扫描所有 RelicModel 子类型并从 ModelDb 取实例
-        var relicTypes = typeof(RelicModel).Assembly.GetTypes()
-            .Where(t => !t.IsAbstract && typeof(RelicModel).IsAssignableFrom(t))
-            .ToList();
-        var valid = relicTypes
+        // 回退：反射扫描
+        var types = typeof(RelicModel).Assembly.GetTypes()
+            .Where(t => !t.IsAbstract && typeof(RelicModel).IsAssignableFrom(t));
+        var valid = types
             .Select(t => ModelDb.GetByIdOrNull<RelicModel>(ModelDb.GetId(t)))
-            .Where(r => r != null)
-            .Cast<RelicModel>()
-            .Where(r => !IsStarterRelic(r))
-            .Where(r => !NonTradeableRelicNames.Contains(r.GetType().Name))
+            .OfType<RelicModel>()
+            .Where(IsTradeable)
             .ToList();
         return valid.Count > 0 ? valid[Rnd.Next(valid.Count)] : null;
     }
 
-    private static EnchantmentModel? RollEnchantment()
+    private static EnchantmentModel? RollRandomEnchant()
     {
-        var enchantTypes = typeof(EnchantmentModel).Assembly.GetTypes()
-            .Where(t => !t.IsAbstract && typeof(EnchantmentModel).IsAssignableFrom(t))
-            .Where(t => !NonTradeableEnchantNames.Contains(t.Name))
-            .ToList();
-        var valid = enchantTypes
+        var types = typeof(EnchantmentModel).Assembly.GetTypes()
+            .Where(t => !t.IsAbstract && typeof(EnchantmentModel).IsAssignableFrom(t)
+                && t.Name != "EnchantmentModel");
+        var valid = types
             .Select(t => ModelDb.GetByIdOrNull<EnchantmentModel>(ModelDb.GetId(t)))
-            .Where(e => e != null)
-            .Cast<EnchantmentModel>()
+            .OfType<EnchantmentModel>()
             .ToList();
         return valid.Count > 0 ? valid[Rnd.Next(valid.Count)] : null;
     }
 
-    private static CardModel? RollCardFromDeck(Player player)
+    private static CardModel? RollRandomCard(Player player)
     {
         var deck = player.Deck.Cards;
         return deck.Count > 0 ? deck[Rnd.Next(deck.Count)] : null;
     }
 
-    /// <summary>
-    ///     获取玩家可交易的遗物列表（排除初始遗物和黑名单遗物）。
-    /// </summary>
+    // ════════════════════════════════════════════════════
+    // 过滤
+    // ════════════════════════════════════════════════════
+
+    private static bool IsTradeable(RelicModel relic)
+    {
+        // 反射读 Rarity，避免 RelicRarity 枚举的编译时依赖
+        var rp = typeof(RelicModel).GetProperty("Rarity");
+        var rarity = rp?.GetValue(relic);
+        if (rarity != null && rarity.ToString() == "Starter") return false;
+        if (relic.GetType().Name == "Circlet") return false;
+        return true;
+    }
+
     private static List<RelicModel> GetTradeableRelics(Player? player)
     {
         if (player == null) return [];
-        return player.Relics
-            .Where(r => !IsStarterRelic(r))
-            .Where(r => !NonTradeableRelicNames.Contains(r.GetType().Name))
-            .ToList();
+        return player.Relics.Where(IsTradeable).ToList();
     }
 }
