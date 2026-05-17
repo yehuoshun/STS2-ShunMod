@@ -80,23 +80,33 @@ public class ShunModRelicExchange : EventModel
         if (val == null || !DynamicVars.TryGetValue(key, out var dv) || dv is not StringVar sv) return;
         var t = sv.GetType();
 
-        // 尝试各种可能的属性/字段名设置 StringVar 的值
-        foreach (var name in new[] { "BaseValue", "Value", "String", "StringValue" })
+        // 按优先级尝试属性（必须类型兼容才写，避免 LocString→decimal 强转崩溃）
+        foreach (var name in new[] { "String", "StringValue", "BaseValue", "Value" })
         {
             var prop = t.GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            if (prop?.CanWrite == true)
+            if (prop?.CanWrite != true) continue;
+
+            if (prop.PropertyType == typeof(LocString) || prop.PropertyType == typeof(LocString?))
             {
-                var target = prop.PropertyType == typeof(string) ? (object)(val.ToString() ?? "") : val;
-                prop.SetValue(sv, target);
+                prop.SetValue(sv, val);
+                return;
+            }
+            if (prop.PropertyType == typeof(string))
+            {
+                prop.SetValue(sv, val.ToString());
                 return;
             }
         }
 
         // 回退：反射写私有字段
-        foreach (var name in new[] { "_value", "_string", "value" })
+        foreach (var name in new[] { "_value", "_string", "_locString", "value" })
         {
             var field = t.GetField(name, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
-            if (field != null) { field.SetValue(sv, val); return; }
+            if (field != null)
+            {
+                field.SetValue(sv, val);
+                return;
+            }
         }
     }
 
