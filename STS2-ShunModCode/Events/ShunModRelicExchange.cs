@@ -267,23 +267,7 @@ public class ShunModRelicExchange : EventModel
         SetStr("CARD_NAME", ToText(AsLoc(_enchantTarget?.Title)));
 
         var opts = BuildList();
-        // 反射写选项列表属性/字段
-        var t = GetType();
-        foreach (var name in new[] { "EventOptions", "CurrentOptions", "Options" })
-        {
-            var prop = t.GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            if (prop?.CanWrite == true) { prop.SetValue(this, opts); return; }
-        }
-        foreach (var name in new[] { "_currentOptions", "_eventOptions", "_options" })
-        {
-            var field = t.GetField(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            if (field != null) { field.SetValue(this, opts); return; }
-        }
-
-        // 最后回退：SetEventState(页面描述, 选项列表)
-        typeof(EventModel).GetMethod("SetEventState",
-            [typeof(LocString), typeof(IReadOnlyList<EventOption>)])
-            ?.Invoke(this, [L10NLookup("pages.INITIAL.description"), opts]);
+        SetEventState(L10NLookup("pages.INITIAL.description"), opts);
     }
 
     // ════════════════════════════════════════════════
