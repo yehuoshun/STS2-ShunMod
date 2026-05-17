@@ -215,7 +215,7 @@ public class ShunModRelicExchange : EventModel
             {
                 var mutableEnchant = (EnchantmentModel)e.MutableClone();
                 var selected = await CardSelectCmd.FromDeckForEnchantment(Owner!, mutableEnchant, 1,
-                    new CardSelectorPrefs(L10NLookup("pages.INITIAL.options.OPT_2.enchant_prompt"), 1));
+                    new CardSelectorPrefs(CardSelectorPrefs.EnchantSelectionPrompt, 1));
                 if (!selected.Any()) return; // 取消选择则不消耗遗物
                 await RelicCmd.Remove(l);
                 AfterTrade();
