@@ -1,15 +1,8 @@
 name: Build & Release
 
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
     inputs:
-      version:
-        description: '版本号 (如 v0.1.0)'
-        required: true
-        type: string
       prerelease:
         description: '预发布版本'
         required: false
@@ -17,7 +10,7 @@ on:
         type: boolean
 
 jobs:
-  build:
+  build-and-release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -44,7 +37,7 @@ jobs:
             echo ""
             echo "=============================================="
             echo "  缺少 CI 构建依赖！请在本地运行一次："
-            echo "    ./build.sh --sync-deps"
+            echo "    dotnet build && 上传 deps release"
             echo "=============================================="
             exit 1
           }
@@ -76,7 +69,6 @@ jobs:
           else
             echo "⚠️ 无 .pck"
           fi
-          # 本地化文件 — STS2 从文件系统读取，不在 PCK 里
           if [ -d STS2-ShunMod/localization ]; then
             mkdir -p publish/STS2-ShunMod/localization
             cp -r STS2-ShunMod/localization/* publish/STS2-ShunMod/localization/
@@ -87,14 +79,30 @@ jobs:
           ls -laR publish/
           cd publish && zip -r ../STS2-ShunMod.zip .
 
-      - name: Set version
+      - name: Auto-bump version & create tag
         id: ver
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "TAG=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
-          else
-            echo "TAG=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-          fi
+          CUR=$(python3 -c "import json; d=json.load(open('STS2-ShunMod.json')); print(d['version'])")
+          MAJOR=$(echo "${CUR#v}" | cut -d. -f1)
+          MINOR=$(echo "${CUR#v}" | cut -d. -f2)
+          PATCH=$(echo "${CUR#v}" | cut -d. -f3)
+          NEW=$((PATCH + 1))
+          V="v${MAJOR}.${MINOR}.${NEW}"
+
+          echo "bump: $CUR → $V"
+
+          # 更新 json 版本号
+          python3 -c "import json; d=json.load(open('STS2-ShunMod.json')); d['version']='${V}'; json.dump(d, open('STS2-ShunMod.json','w'), indent=2, ensure_ascii=False)"
+
+          # 提交版本号变更 + 打 tag
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add STS2-ShunMod.json
+          git commit -m "chore: bump to ${V}" || echo "no changes to commit"
+          git push
+          git tag -a "$V" -m "Release $V"
+          git push origin "$V"
+          echo "TAG=$V" >> $GITHUB_OUTPUT
 
       - name: Generate release notes
         run: |

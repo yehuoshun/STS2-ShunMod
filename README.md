@@ -162,16 +162,15 @@ data_sts2_windows_x86_64/0Harmony.dll
 
 只做一次，之后 CI 自动拉取。
 
-### CI 自动发布
+### 发布流程
 
-打 tag 推送，GitHub Actions 自动构建、导出 .pck、打包发布：
+推送代码到 main 分支后，手动触发构建：
 
-```bash
-git tag v0.1.0
-git push origin v0.1.0
-```
+**仓库 → Actions → Build & Release → Run workflow**
 
-或手动：仓库 → Actions → Build & Release → Run workflow → 填版本号。
+CI 自动完成：编译 → Godot 导出 .pck → 打包 ZIP → 成功后自动 bump 版本号并打 tag → 创建 GitHub Release 上传 ZIP。
+
+> ⚠️ 只有 ZIP 打包成功才会打 tag，不会产出空 tag。
 
 ---
 
