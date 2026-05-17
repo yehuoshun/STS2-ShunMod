@@ -7,7 +7,6 @@ using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.Models.RelicPools;
 using MegaCrit.Sts2.Core.Runs;
 using STS2_ShunMod.Core;
 
@@ -34,16 +33,22 @@ public class ShunModRelicExchange : EventModel
     }
 
     // ════════════════════════════════════════════════════════
-    // 不可交易的遗物稀有度 — 初始遗物 / Circlet 等
+    // 不可交易的遗物黑名单
     // ════════════════════════════════════════════════════════
 
-    private static readonly HashSet<RelicRarity> NonTradeableRarities =
-    [
-        RelicRarity.Starter
-    ];
+    /// <summary>
+    ///     通过反射检查遗物 Rarity 是否为 Starter。
+    ///     不用 RelicRarity 枚举避免编译时类型依赖（Publicizer 可能未暴露）。
+    /// </summary>
+    private static bool IsStarterRelic(RelicModel relic)
+    {
+        var rarityProp = typeof(RelicModel).GetProperty("Rarity");
+        var rarity = rarityProp?.GetValue(relic);
+        return rarity != null && rarity.ToString() == "Starter";
+    }
 
     /// <summary>
-    ///     遗物名称黑名单 — 这些遗物即使不是 Starter 稀有度也不可交易。
+    ///     遗物名称黑名单 — 不可交易的遗物类型名。
     ///     例如 Circlet（后备遗物）等。
     /// </summary>
     private static readonly HashSet<string> NonTradeableRelicNames = new(StringComparer.OrdinalIgnoreCase)
@@ -277,7 +282,7 @@ public class ShunModRelicExchange : EventModel
         if (allRelicsProp?.GetValue(null) is IEnumerable<RelicModel> relics)
         {
             var list = relics
-                .Where(r => !NonTradeableRarities.Contains(r.Rarity))
+                .Where(r => !IsStarterRelic(r))
                 .Where(r => !NonTradeableRelicNames.Contains(r.GetType().Name))
                 .ToList();
             return list.Count > 0 ? list[Rnd.Next(list.Count)] : null;
@@ -291,7 +296,7 @@ public class ShunModRelicExchange : EventModel
             .Select(t => ModelDb.GetByIdOrNull<RelicModel>(ModelDb.GetId(t)))
             .Where(r => r != null)
             .Cast<RelicModel>()
-            .Where(r => !NonTradeableRarities.Contains(r.Rarity))
+            .Where(r => !IsStarterRelic(r))
             .Where(r => !NonTradeableRelicNames.Contains(r.GetType().Name))
             .ToList();
         return valid.Count > 0 ? valid[Rnd.Next(valid.Count)] : null;
@@ -324,7 +329,7 @@ public class ShunModRelicExchange : EventModel
     {
         if (player == null) return [];
         return player.Relics
-            .Where(r => !NonTradeableRarities.Contains(r.Rarity))
+            .Where(r => !IsStarterRelic(r))
             .Where(r => !NonTradeableRelicNames.Contains(r.GetType().Name))
             .ToList();
     }
