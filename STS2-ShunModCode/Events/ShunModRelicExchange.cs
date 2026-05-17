@@ -168,8 +168,7 @@ public class ShunModRelicExchange : EventModel
             var lose = _loseRelic2; var ench = _enchant;
             list.Add(Opt(async () =>
             {
-                var mutable = (EnchantmentModel)ench.MutableClone();
-                var picked = await CardSelectCmd.FromDeckForEnchantment(player!, mutable, 1,
+                var picked = await CardSelectCmd.FromDeckForEnchantment(player!, ench, 1,
                     new CardSelectorPrefs(CardSelectorPrefs.EnchantSelectionPrompt, 1));
                 if (!picked.Any()) return; // 取消不扣遗物
                 await RelicCmd.Remove(lose);
