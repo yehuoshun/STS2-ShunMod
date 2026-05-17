@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Commands;
@@ -70,15 +71,17 @@ public static class InfiniteEnchant_MultiEnchant
                 enchantment.ApplyInternal(card, amount);
         }
 
-        // 对所有附魔调 ModifyCard：需要临时切 card.Enchantment 让 RecalculateForUpgradeOrEnchant 读到正确附魔
+        // 对所有附魔调 ModifyCard：需临时切 card.Enchantment（private set，用反射写）
         var firstEnch = card.Enchantment;
+        var enchantProp = typeof(CardModel).GetProperty("Enchantment",
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!;
         foreach (var ench in dict.Values)
         {
             if (card.Enchantment != ench)
-                card.Enchantment = ench;
+                enchantProp.SetValue(card, ench);
             ench.ModifyCard();
         }
-        card.Enchantment = firstEnch;
+        enchantProp.SetValue(card, firstEnch);
 
         card.FinalizeUpgradeInternal();
 
