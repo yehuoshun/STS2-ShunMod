@@ -61,8 +61,13 @@ public class ShunModRelicExchange : EventModel
         SetVarString(v, "GAIN_RELIC", _gainRelic?.Title);
         SetVarString(v, "LOSE_RELIC_2", _loseRelic2?.Title);
         SetVarString(v, "ENCHANT_NAME", _enchantment?.Title);
-        SetVarString(v, "CARD_NAME", _enchantTarget?.Title);
+        // CardModel.Title 可能返回 string（非 LocString），统一转
+        SetVarString(v, "CARD_NAME", AsLoc(_enchantTarget?.Title));
     }
+
+    private static readonly LocString NilLoc = new("", "");
+    private static LocString? AsLoc(LocString? loc) => loc;
+    private static LocString? AsLoc(string? s) => s != null ? new LocString("", s) : null;
 
     private static void SetVarString(IReadOnlyDictionary<string, DynamicVar> vars, string key, LocString? value)
     {
@@ -72,7 +77,7 @@ public class ShunModRelicExchange : EventModel
         var stringProp = typeof(StringVar).GetProperty("String", BindingFlags.Public | BindingFlags.Instance);
         if (stringProp?.CanWrite == true && stringProp.PropertyType == typeof(LocString))
         {
-            stringProp.SetValue(sv, value ?? LocString.Empty);
+            stringProp.SetValue(sv, value ?? NilLoc);
             return;
         }
 
@@ -80,13 +85,13 @@ public class ShunModRelicExchange : EventModel
         var baseProp = typeof(StringVar).GetProperty("BaseValue", BindingFlags.Public | BindingFlags.Instance);
         if (baseProp?.CanWrite == true)
         {
-            baseProp.SetValue(sv, (value ?? LocString.Empty).ToString());
+            baseProp.SetValue(sv, (value ?? NilLoc).ToString());
             return;
         }
 
         // 回退: 反射 _value
         var field = typeof(StringVar).GetField("_value", BindingFlags.NonPublic | BindingFlags.Instance);
-        field?.SetValue(sv, value ?? LocString.Empty);
+        field?.SetValue(sv, value ?? NilLoc);
     }
 
     // ════════════════════════════════════════════════════
