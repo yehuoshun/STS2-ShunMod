@@ -26,39 +26,73 @@ jobs:
             --dir deps \
             --pattern "*.dll" \
             --repo "${{ github.repository }}" \
-            --clobber 2>/dev/null || printf '%s\n' "⚠️ 缺少游戏 DLL，CI 跳过编译验证"
+            --clobber 2>/dev/null || echo "⚠️ 缺少游戏 DLL，跳过编译"
 
       - name: Restore
         run: dotnet restore STS2-ShunMod.csproj
 
-      - name: Build
+      - name: Build DLL
         if: hashFiles('deps/sts2.dll') != ''
         run: dotnet build STS2-ShunMod.csproj -c Release -p:Sts2DataDir="$(realpath deps)" --no-restore
+
+      - name: Export .pck
+        if: hashFiles('deps/sts2.dll') != ''
+        run: |
+          echo "=== 下载 Godot 4.5.1 Mono 导出 .pck ==="
+          GODOT_URL="https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_mono_linux_x86_64.zip"
+          curl -sL "$GODOT_URL" -o godot.zip 2>/dev/null || { echo "❌ 下载失败"; exit 0; }
+          unzip -q godot.zip -d godot 2>/dev/null
+          GODOT=$(find godot -name "Godot*" -type f -executable | head -1)
+          if [ -z "$GODOT" ]; then
+            echo "❌ 未找到 Godot 可执行文件"
+            exit 0
+          fi
+          chmod +x "$GODOT"
+          echo "=== 导出 ==="
+          "$GODOT" --headless --export-pack "BasicExport" STS2-ShunMod.pck 2>/dev/null || echo "⚠️ .pck 导出失败"
+          ls -la STS2-ShunMod.pck 2>/dev/null || echo "⚠️ 无 .pck"
 
       - name: Package ZIP
         if: hashFiles('deps/sts2.dll') != ''
         run: |
           BUILD_DIR=.godot/mono/temp/bin/Release
           mkdir -p publish
+          # DLL
           cp "$BUILD_DIR/STS2-ShunMod.dll" publish/ 2>/dev/null || \
             cp "$BUILD_DIR/net9.0/STS2-ShunMod.dll" publish/ 2>/dev/null || \
             cp "bin/Release/net9.0/STS2-ShunMod.dll" publish/
+          # json
           cp STS2-ShunMod.json publish/
+          # .pck
+          if [ -f STS2-ShunMod.pck ]; then
+            cp STS2-ShunMod.pck publish/
+            echo "✅ .pck 已包含"
+          else
+            echo "⚠️ 缺少 .pck，ZIP 仅含 dll+json+资源文件"
+          fi
+          # localization
           if [ -d STS2-ShunMod/localization ]; then
             mkdir -p publish/STS2-ShunMod/localization
             cp -r STS2-ShunMod/localization/* publish/STS2-ShunMod/localization/
           fi
+          # images
           if [ -d STS2-ShunMod/images ]; then
             mkdir -p publish/STS2-ShunMod/images
             cp -r STS2-ShunMod/images/* publish/STS2-ShunMod/images/
           fi
+          # Beta 版本号
+          CUR=$(python3 -c "import json; d=json.load(open('STS2-ShunMod.json')); print(d['version'])")
+          SHORT=$(git rev-parse --short HEAD)
+          BETA="${CUR}-beta.${SHORT}"
+          echo "版本: $BETA"
+          echo "$BETA" > publish/VERSION.txt
           cd publish && zip -r ../STS2-ShunMod.zip .
-          echo "✅ ZIP: $(ls -la ../STS2-ShunMod.zip | awk '{print $5}') bytes"
+          echo "✅ ZIP: $(ls -lh ../STS2-ShunMod.zip | awk '{print $5}')"
 
       - name: Upload artifact
         if: hashFiles('deps/sts2.dll') != ''
         uses: actions/upload-artifact@v4
         with:
-          name: STS2-ShunMod
+          name: STS2-ShunMod-beta
           path: STS2-ShunMod.zip
           retention-days: 30
