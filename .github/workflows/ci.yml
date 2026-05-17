@@ -80,12 +80,12 @@ jobs:
             mkdir -p publish/STS2-ShunMod/images
             cp -r STS2-ShunMod/images/* publish/STS2-ShunMod/images/
           fi
-          # Beta 版本号
+          # 版本号
           CUR=$(python3 -c "import json; d=json.load(open('STS2-ShunMod.json')); print(d['version'])")
           SHORT=$(git rev-parse --short HEAD)
-          BETA="${CUR}-beta.${SHORT}"
-          echo "版本: $BETA"
-          echo "$BETA" > publish/VERSION.txt
+          VER="${CUR}.${SHORT}"
+          echo "版本: $VER"
+          echo "$VER" > publish/VERSION.txt
           cd publish && zip -r ../STS2-ShunMod.zip .
           echo "✅ ZIP: $(ls -lh ../STS2-ShunMod.zip | awk '{print $5}')"
 
@@ -93,6 +93,6 @@ jobs:
         if: hashFiles('deps/sts2.dll') != ''
         uses: actions/upload-artifact@v4
         with:
-          name: STS2-ShunMod-beta
+          name: STS2-ShunMod
           path: STS2-ShunMod.zip
           retention-days: 30
