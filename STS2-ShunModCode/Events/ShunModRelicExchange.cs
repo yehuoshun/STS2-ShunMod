@@ -174,10 +174,8 @@ public class ShunModRelicExchange : EventModel
                 if (!picked.Any()) return; // 取消不扣遗物
                 var mutableEnch = (EnchantmentModel)ench.MutableClone();
                 var card = picked.First();
-                // 直接调 EnchantInternal，绕过 CardCmd.Enchant 上的 Harmony 补丁
-                card.EnchantInternal(mutableEnch, 1);
-                mutableEnch.ModifyCard();
-                card.FinalizeUpgradeInternal();
+                // 走 CardCmd.Enchant → InfiniteEnchant patch → AllEnchantments 追踪
+                CardCmd.Enchant(mutableEnch, card, 1);
                 await RelicCmd.Remove(lose);
                 Refresh();
             }, "OPT_2"));
