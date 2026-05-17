@@ -22,13 +22,21 @@ public class ShunModRelicExchange : EventModel
     // 背景图
     // ════════════════════════════════════════════════
 
+    /// <summary>
+    ///     重写资源路径：将默认 events/xxx.png 指向 mod 目录下的图片。
+    ///     同时把 mod 路径加入列表（防止匹配失败时也触发缓存）。
+    /// </summary>
     public override IEnumerable<string> GetAssetPaths(IRunState runState)
     {
         var paths = base.GetAssetPaths(runState).ToList();
-        var def = ImageHelper.GetImagePath($"events/{Id.Entry.ToLowerInvariant()}.png");
-        var mod = $"res://STS2-ShunMod/images/events/{Id.Entry.ToLowerInvariant()}.png";
-        var idx = paths.IndexOf(def);
-        if (idx >= 0) paths[idx] = mod;
+        var modPath = $"res://STS2-ShunMod/images/events/{Id.Entry.ToLowerInvariant()}.png";
+
+        // 替换默认路径
+        var defaultPath = ImageHelper.GetImagePath($"events/{Id.Entry.ToLowerInvariant()}.png");
+        var i = paths.IndexOf(defaultPath);
+        if (i >= 0) paths[i] = modPath;
+        else paths.Add(modPath); // 兜底：直接追加
+
         return paths;
     }
 
@@ -248,7 +256,7 @@ public class ShunModRelicExchange : EventModel
         var hp = typeof(Creature).GetProperty("CurrentHp");
         if (hp != null)
         {
-            var cur = (decimal)(hp.GetValue(c) ?? 0m);
+            var cur = Convert.ToDecimal(hp.GetValue(c) ?? 0m);
             hp.SetValue(c, Math.Max(0, cur - amount));
         }
         await Task.CompletedTask;
