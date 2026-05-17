@@ -83,8 +83,6 @@ public static class InfiniteEnchant_MultiEnchant
         }
         enchantProp.SetValue(card, firstEnch);
 
-        card.FinalizeUpgradeInternal();
-
         __result = dict[typeKey];
         return false; // 跳过原始方法
     }
