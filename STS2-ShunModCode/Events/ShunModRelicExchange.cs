@@ -202,12 +202,12 @@ public class ShunModRelicExchange : EventModel
         if (_loseRelic1 != null && _gainRelic != null)
         {
             var l = _loseRelic1; var g = _gainRelic;
-            list.Add(Opt(() =>
+            list.Add(Opt(async () =>
             {
-                TryRemoveRelic(Owner!, l);
-                TryGiveRelic(Owner!, g);
+                await RelicCmd.Remove(l);
+                var mutable = (RelicModel)g.MutableClone();
+                await RelicCmd.Obtain(mutable, Owner!);
                 AfterTrade();
-                return Task.CompletedTask;
             }, "OPT_1"));
         }
 
@@ -217,7 +217,7 @@ public class ShunModRelicExchange : EventModel
             var l = _loseRelic2; var e = _enchant; var c = _enchantTarget;
             list.Add(Opt(async () =>
             {
-                TryRemoveRelic(Owner!, l);
+                await RelicCmd.Remove(l);
                 CardCmd.Enchant(e, c, 1);
                 AfterTrade();
             }, "OPT_2"));
@@ -284,30 +284,6 @@ public class ShunModRelicExchange : EventModel
         typeof(EventModel).GetMethod("SetEventState",
             [typeof(LocString), typeof(IReadOnlyList<EventOption>)])
             ?.Invoke(this, [L10NLookup("pages.INITIAL.description"), opts]);
-    }
-
-    // ════════════════════════════════════════════════
-    // 遗物操作
-    // ════════════════════════════════════════════════
-
-    private static void TryRemoveRelic(Player player, RelicModel relic)
-    {
-        if (typeof(Player).GetField("_relics",
-            BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(player) is List<RelicModel> list)
-        {
-            list.Remove(relic);
-            if (typeof(Player).GetField("RelicRemoved",
-                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                ?.GetValue(player) is Delegate del)
-                foreach (var h in del.GetInvocationList())
-                    try { h.DynamicInvoke(relic); } catch { }
-        }
-    }
-
-    private static void TryGiveRelic(Player player, RelicModel relic)
-    {
-        typeof(Player).GetMethod("AddRelicInternal",
-            BindingFlags.NonPublic | BindingFlags.Instance)?.Invoke(player, [relic]);
     }
 
     // ════════════════════════════════════════════════
