@@ -106,11 +106,18 @@ public class ShunModRelicExchange : EventModel
     }
 
     /// <summary>清洗可能被误认为 BBCode 的方括号文本，防止 MegalLabel 解析崩溃</summary>
+    /// <remarks>
+    ///     把 ASCII 方括号 [ ] 替换为全角 ［ ］，外观近似但不会被 BBCode 解析器当成标签。
+    ///     典型场景：LocString 解析失败时，回退文本自带 [LocString table ...] 格式，
+    ///     当它嵌入 [gold][b]...[/b][/gold] 上下文中时，[LocString 会被当成 BBCode 标签导致崩溃。
+    /// </remarks>
     private static string SanitizeForBbcode(string? raw)
     {
         if (string.IsNullOrEmpty(raw)) return "?";
-        // 去掉所有 [xxx] 模式的 BBCode 风格标记
-        var cleaned = System.Text.RegularExpressions.Regex.Replace(raw, @"\[[^\]]*\]", "");
+        // 替换 ASCII 方括号为全角，保留可读性同时避免 BBCode 冲突
+        var cleaned = raw
+            .Replace('[', '［')
+            .Replace(']', '］');
         return string.IsNullOrWhiteSpace(cleaned) ? "?" : cleaned.Trim();
     }
 
