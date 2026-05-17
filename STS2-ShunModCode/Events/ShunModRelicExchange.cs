@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text.RegularExpressions;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
@@ -77,19 +78,40 @@ public class ShunModRelicExchange : EventModel
     /// <summary>解析 LocString 为显示文本（反射 .Text / .Localize / .Resolve）</summary>
     private static string ToText(LocString? loc)
     {
-        if (loc == null) return "";
+        if (loc == null) return "?";
         var lt = typeof(LocString);
         foreach (var name in new[] { "Text", "Localized", "Resolved" })
         {
             var p = lt.GetProperty(name, BindingFlags.Public | BindingFlags.Instance);
-            if (p != null) return p.GetValue(loc)?.ToString() ?? "";
+            if (p != null)
+            {
+                var val = p.GetValue(loc)?.ToString() ?? "";
+                if (!string.IsNullOrEmpty(val) && !val.Contains("LocString", StringComparison.Ordinal))
+                    return val;
+            }
         }
         foreach (var name in new[] { "Localize", "Resolve", "GetText", "GetLocalized" })
         {
             var m = lt.GetMethod(name, BindingFlags.Public | BindingFlags.Instance, []);
-            if (m != null) return m.Invoke(loc, null)?.ToString() ?? "";
+            if (m != null)
+            {
+                var val = m.Invoke(loc, null)?.ToString() ?? "";
+                if (!string.IsNullOrEmpty(val) && !val.Contains("LocString", StringComparison.Ordinal))
+                    return val;
+            }
         }
-        return loc.ToString() ?? "";
+        // 回退：loc.ToString() 可能返回未解析的内部格式（含 [brackets]），
+        // 会破坏 MegaRichTextLabel 的 BBCode 解析。清洗掉 BB 标签风格的内容。
+        return SanitizeForBbcode(loc.ToString());
+    }
+
+    /// <summary>清洗可能被误认为 BBCode 的方括号文本，防止 MegalLabel 解析崩溃</summary>
+    private static string SanitizeForBbcode(string? raw)
+    {
+        if (string.IsNullOrEmpty(raw)) return "?";
+        // 去掉所有 [xxx] 模式的 BBCode 风格标记
+        var cleaned = System.Text.RegularExpressions.Regex.Replace(raw, @"\[[^\]]*\]", "");
+        return string.IsNullOrWhiteSpace(cleaned) ? "?" : cleaned.Trim();
     }
 
     private void SetStr(string key, string? val)
