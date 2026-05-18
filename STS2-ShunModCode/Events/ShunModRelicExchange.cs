@@ -210,7 +210,7 @@ public class ShunModRelicExchange : EventModel
         if (_loseRelic2 != null)
         {
             var lose = _loseRelic2;
-            var deck = PileType.Deck.GetPile(player!).Cards;
+            var deck = player!.Deck.Cards;
             foreach (var (ench, key) in new[]
                          { (_enchantA, "OPT_2A"), (_enchantB, "OPT_2B"), (_enchantC, "OPT_2C") })
             {
