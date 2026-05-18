@@ -239,19 +239,9 @@ public class ShunModRelicExchange : EventModel
                     var mutableEnch = (EnchantmentModel)e.MutableClone();
                     var card = picked.First();
 
-                    // 无限附魔逻辑内联
-                    var ep = typeof(CardModel).GetProperty("Enchantment",
-                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!;
-
-                    // ⚠️ 必须在 EnchantInternal/ApplyInternal 之前抓快照
-                    var prev = card.Enchantment;
-
+                    // 无限附魔逻辑（统一走 EnchantInternal + RefreshAllEffects）
+                    var dict = InfiniteEnchant_MultiEnchant.EnsureDict(card);
                     var typeKey = mutableEnch.GetType().FullName!;
-                    if (!InfiniteEnchant_MultiEnchant.AllEnchantments.TryGetValue(card, out var dict))
-                    {
-                        dict = new Dictionary<string, EnchantmentModel>();
-                        InfiniteEnchant_MultiEnchant.AllEnchantments[card] = dict;
-                    }
 
                     if (dict.TryGetValue(typeKey, out var existing))
                         existing.Amount += 1;
@@ -259,26 +249,10 @@ public class ShunModRelicExchange : EventModel
                     {
                         mutableEnch.Amount = 1;
                         dict[typeKey] = mutableEnch;
-                        if (dict.Count == 1)
-                            card.EnchantInternal(mutableEnch, 1);
-                        else
-                        {
-                            mutableEnch.ApplyInternal(card, 1);
-                            // ApplyInternal 会覆盖 card.Enchantment，恢复为 prev
-                            if (card.Enchantment != prev)
-                                ep.SetValue(card, prev);
-                        }
+                        card.EnchantInternal(mutableEnch, 1);
                     }
 
-                    // 刷新所有附魔效果
-                    foreach (var ench in dict.Values)
-                    {
-                        if (card.Enchantment != ench)
-                            ep.SetValue(card, ench);
-                        ench.ModifyCard();
-                    }
-                    ep.SetValue(card, prev);
-                    card.FinalizeUpgradeInternal();
+                    InfiniteEnchant_MultiEnchant.RefreshAllEffects(card, dict);
                     await RelicCmd.Remove(lose);
                     Refresh();
                 }, key, tips));

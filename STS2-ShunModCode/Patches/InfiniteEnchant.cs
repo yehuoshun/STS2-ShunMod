@@ -8,49 +8,75 @@ using MegaCrit.Sts2.Core.Models;
 namespace STS2_ShunMod.Patches;
 
 // ════════════════════════════════════════════════════════
-// 无限附魔系统
+// 无限附魔系统 v2
 // 卡牌同时拥有多种附魔，同类附魔叠加层数
 //
-// 原理：
-// 1. Dictionary + ReferenceEqualityComparer 存所有附魔引用
-//    （Godot Resource 引用计数与 ConditionalWeakTable 弱引用不兼容，
-//     导致 HasEnchantType 漏检已注能卡牌，改用强引用 Dictionary）
-// 2. 同类附魔叠加 Amount
-// 3. 异类附魔分别记录，EnchantInternal 后统一遍历全部 apply
-//    （EnchantInternal/FinalizeUpgradeInternal 只看 card.Enchantment，
-//     会覆盖之前的附魔效果，必须在之后全量重刷）
+// 核心策略：
+// 1. Dictionary + ReferenceEqualityComparer 存所有附魔
+// 2. 新附魔统一走 EnchantInternal（完整注册），不混用 ApplyInternal
+// 3. ModifyCard 循环叠加所有附魔效果
+// 4. FinalizeUpgradeInternal 提交全部变更
 // ════════════════════════════════════════════════════════
 
-/// <summary>
-///     Patch 1: CanEnchant 永远返回 true，移除附魔条件限制。
-/// </summary>
+/// <summary>Patch 1: CanEnchant 永远返回 true</summary>
 [HarmonyPatch(typeof(EnchantmentModel), nameof(EnchantmentModel.CanEnchant))]
 public static class InfiniteEnchant_CanEnchant
 {
-    private static void Postfix(ref bool __result)
-    {
-        __result = true;
-    }
+    private static void Postfix(ref bool __result) => __result = true;
 }
 
-/// <summary>
-///     Patch 2: 完全替换 CardCmd.Enchant，支持多种附魔叠加。
-/// </summary>
+/// <summary>Patch 2: 替换 CardCmd.Enchant，支持多附魔叠加</summary>
 [HarmonyPatch(typeof(CardCmd), nameof(CardCmd.Enchant), typeof(EnchantmentModel), typeof(CardModel), typeof(decimal))]
 public static class InfiniteEnchant_MultiEnchant
 {
-    /// <summary>
-    ///     每张卡的全部附魔：类型全名 → 附魔对象。
-    ///     使用引用相等比较器，确保同一 CardModel 实例匹配。
-    /// </summary>
     internal static readonly Dictionary<CardModel, Dictionary<string, EnchantmentModel>> AllEnchantments =
         new(ReferenceEqualityComparer.Instance);
 
-    /// <summary>检查卡牌是否已拥有指定类型的附魔。</summary>
-    internal static bool HasEnchantType(CardModel card, string typeFullName)
+    internal static bool HasEnchantType(CardModel card, string typeFullName) =>
+        AllEnchantments.TryGetValue(card, out var dict) && dict.ContainsKey(typeFullName);
+
+    private static readonly PropertyInfo EnchantmentProp = typeof(CardModel).GetProperty("Enchantment",
+        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!;
+
+    /// <summary>
+    ///     确保卡片的字典已初始化。读档场景中卡片可能已有附魔（card.Enchantment != null），
+    ///     此时将其纳入字典管理，避免被新附魔覆盖丢失。
+    /// </summary>
+    internal static Dictionary<string, EnchantmentModel> EnsureDict(CardModel card)
     {
-        return AllEnchantments.TryGetValue(card, out var dict)
-               && dict.ContainsKey(typeFullName);
+        if (AllEnchantments.TryGetValue(card, out var dict))
+            return dict;
+
+        dict = new Dictionary<string, EnchantmentModel>();
+        AllEnchantments[card] = dict;
+
+        if (card.Enchantment != null)
+        {
+            var typeKey = card.Enchantment.GetType().FullName!;
+            dict[typeKey] = card.Enchantment;
+        }
+
+        return dict;
+    }
+
+    /// <summary>
+    ///     遍历所有附魔调用 ModifyCard，然后 FinalizeUpgradeInternal 提交。
+    ///     通过反射临时切换 card.Enchantment，确保每个附魔的 ModifyCard
+    ///     正确读取自身数据。
+    /// </summary>
+    internal static void RefreshAllEffects(CardModel card, Dictionary<string, EnchantmentModel> dict)
+    {
+        if (dict.Count == 0) return;
+
+        foreach (var ench in dict.Values)
+        {
+            if (card.Enchantment != ench)
+                EnchantmentProp.SetValue(card, ench);
+            ench.ModifyCard();
+        }
+
+        EnchantmentProp.SetValue(card, dict.Values.First());
+        card.FinalizeUpgradeInternal();
     }
 
     [HarmonyPrefix]
@@ -62,58 +88,27 @@ public static class InfiniteEnchant_MultiEnchant
     {
         enchantment.AssertMutable();
 
-        var enchantProp = typeof(CardModel).GetProperty("Enchantment",
-            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!;
-
-        // ⚠️ 必须在 EnchantInternal/ApplyInternal 之前抓快照
-        // ApplyInternal 内部会把 card.Enchantment = this，覆盖原有附魔引用
-        var firstEnch = card.Enchantment;
-
+        var dict = EnsureDict(card);
         var typeKey = enchantment.GetType().FullName!;
-        if (!AllEnchantments.TryGetValue(card, out var dict))
-        {
-            dict = new Dictionary<string, EnchantmentModel>();
-            AllEnchantments[card] = dict;
-        }
 
         if (dict.TryGetValue(typeKey, out var existing))
         {
-            // 同类附魔：叠加层数
+            // 同类附魔：只叠加层数，ModifyCard 会读取新 Amount
             existing.Amount += (int)amount;
         }
         else
         {
-            // 异类附魔
+            // 异类附魔：走 EnchantInternal 完整注册
             enchantment.Amount = (int)amount;
             dict[typeKey] = enchantment;
-
-            if (dict.Count == 1)
-                card.EnchantInternal(enchantment, amount);
-            else
-            {
-                enchantment.ApplyInternal(card, amount);
-                // ApplyInternal 会覆盖 card.Enchantment，恢复为 firstEnch
-                // 让后续 ModifyCard 循环基于正确的"首个附魔"遍历
-                if (card.Enchantment != firstEnch)
-                    enchantProp.SetValue(card, firstEnch);
-            }
+            card.EnchantInternal(enchantment, amount);
         }
 
-        // 对所有附魔调 ModifyCard：需临时切 card.Enchantment（private set，用反射写）
-        foreach (var ench in dict.Values)
-        {
-            if (card.Enchantment != ench)
-                enchantProp.SetValue(card, ench);
-            ench.ModifyCard();
-        }
-        enchantProp.SetValue(card, firstEnch);
-
-        // FinalizeUpgradeInternal 提交 DynamicVars + EnergyCost 变更
-        // 必须在所有附魔 ModifyCard 之后调用，否则费用等变更不生效
-        card.FinalizeUpgradeInternal();
+        // 全量刷新所有附魔效果
+        RefreshAllEffects(card, dict);
 
         __result = dict[typeKey];
-        return false; // 跳过原始方法
+        return false;
     }
 }
 
@@ -152,20 +147,5 @@ public static class InfiniteEnchant_MultiDescription
 
         if (names.Count > 0)
             __result += $"\n[color=#aaccff]附魔: {string.Join("，", names)}[/color]";
-    }
-}
-
-/// <summary>
-///     Patch 4: ClearEnchantment 清掉所有附魔。
-/// </summary>
-[HarmonyPatch(typeof(CardCmd), nameof(CardCmd.ClearEnchantment), typeof(CardModel))]
-public static class InfiniteEnchant_ClearAll
-{
-    [HarmonyPrefix]
-    private static bool Prefix(CardModel card)
-    {
-        card.ClearEnchantmentInternal();
-        InfiniteEnchant_MultiEnchant.AllEnchantments.Remove(card);
-        return false;
     }
 }
