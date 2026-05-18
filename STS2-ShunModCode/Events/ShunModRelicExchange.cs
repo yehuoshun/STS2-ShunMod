@@ -240,7 +240,11 @@ public class ShunModRelicExchange : EventModel
 
                     // 无限附魔逻辑内联
                     var typeKey = mutableEnch.GetType().FullName!;
-                    var dict = InfiniteEnchant_MultiEnchant.AllEnchantments.GetOrCreateValue(card);
+                    if (!InfiniteEnchant_MultiEnchant.AllEnchantments.TryGetValue(card, out var dict))
+                    {
+                        dict = new Dictionary<string, EnchantmentModel>();
+                        InfiniteEnchant_MultiEnchant.AllEnchantments[card] = dict;
+                    }
 
                     if (dict.TryGetValue(typeKey, out var existing))
                         existing.Amount += 1;
