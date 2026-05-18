@@ -6,6 +6,7 @@ using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Events;
 using MegaCrit.Sts2.Core.Helpers;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
@@ -156,18 +157,24 @@ public class ShunModRelicExchange : EventModel
         if (_loseRelic1 != null && _gainRelic != null)
         {
             var lose = _loseRelic1; var gain = _gainRelic;
+            var tips = new List<IHoverTip>();
+            tips.AddRange(lose.HoverTips);
+            tips.AddRange(gain.HoverTips);
             list.Add(Opt(async () =>
             {
                 await RelicCmd.Remove(lose);
                 await RelicCmd.Obtain((RelicModel)gain.MutableClone(), player!);
                 Refresh();
-            }, "OPT_1"));
+            }, "OPT_1", tips));
         }
 
         // OPT_2: 遗物 → 附魔（玩家自选卡牌）
         if (_loseRelic2 != null && _enchant != null)
         {
             var lose = _loseRelic2; var ench = _enchant;
+            var tips = new List<IHoverTip>();
+            tips.AddRange(lose.HoverTips);
+            tips.AddRange(ench.HoverTips);
             list.Add(Opt(async () =>
             {
                 var picked = await CardSelectCmd.FromDeckGeneric(player!,
@@ -212,7 +219,7 @@ public class ShunModRelicExchange : EventModel
                 card.FinalizeUpgradeInternal();
                 await RelicCmd.Remove(lose);
                 Refresh();
-            }, "OPT_2"));
+            }, "OPT_2", tips));
         }
 
         // OPT_3: 扣血刷新
@@ -233,8 +240,8 @@ public class ShunModRelicExchange : EventModel
         return list;
     }
 
-    private EventOption Opt(Func<Task> cb, string key) =>
-        new(this, cb, $"{Id.Entry}.pages.INITIAL.options.{key}");
+    private EventOption Opt(Func<Task> cb, string key, IEnumerable<IHoverTip>? hoverTips = null) =>
+        new(this, cb, $"{Id.Entry}.pages.INITIAL.options.{key}", hoverTips ?? Array.Empty<IHoverTip>());
 
     /// <summary>交易/刷新后：重新 Roll → 写 DynamicVars → SetEventState</summary>
     private void Refresh()
