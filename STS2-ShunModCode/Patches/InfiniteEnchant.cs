@@ -83,6 +83,10 @@ public static class InfiniteEnchant_MultiEnchant
         }
         enchantProp.SetValue(card, firstEnch);
 
+        // FinalizeUpgradeInternal 提交 DynamicVars + EnergyCost 变更
+        // 必须在所有附魔 ModifyCard 之后调用，否则费用等变更不生效
+        card.FinalizeUpgradeInternal();
+
         __result = dict[typeKey];
         return false; // 跳过原始方法
     }
