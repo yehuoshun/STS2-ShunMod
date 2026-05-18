@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Reflection;
 using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
