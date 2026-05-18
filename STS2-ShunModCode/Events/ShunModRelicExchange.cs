@@ -212,7 +212,12 @@ public class ShunModRelicExchange : EventModel
             foreach (var (ench, key) in new[]
                          { (_enchantA, "OPT_2A"), (_enchantB, "OPT_2B") })
             {
-                if (ench == null || !deck.Any(c => ench.CanEnchant(c)))
+                if (ench == null)
+                    continue;
+                // 检查是否有可附魔的卡牌（已拥有此附魔的卡牌排除）
+                var enchType = ench.GetType().FullName!;
+                if (!deck.Any(c => ench.CanEnchant(c)
+                                   && !InfiniteEnchant_MultiEnchant.HasEnchantType(c, enchType)))
                     continue;
 
                 var e = ench;
@@ -223,7 +228,8 @@ public class ShunModRelicExchange : EventModel
                 {
                     var picked = await CardSelectCmd.FromDeckGeneric(player!,
                         new CardSelectorPrefs(CardSelectorPrefs.EnchantSelectionPrompt, 1, 1),
-                        filter: c => e.CanEnchant(c));
+                        filter: c => e.CanEnchant(c)
+                                     && !InfiniteEnchant_MultiEnchant.HasEnchantType(c, enchType));
                     if (!picked.Any())
                     {
                         Refresh();

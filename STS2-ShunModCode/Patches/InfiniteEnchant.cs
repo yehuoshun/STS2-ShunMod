@@ -42,6 +42,13 @@ public static class InfiniteEnchant_MultiEnchant
     internal static readonly ConditionalWeakTable<CardModel, Dictionary<string, EnchantmentModel>> AllEnchantments =
         new();
 
+    /// <summary>检查卡牌是否已拥有指定类型的附魔。</summary>
+    internal static bool HasEnchantType(CardModel card, string typeFullName)
+    {
+        return AllEnchantments.TryGetValue(card, out var dict)
+               && dict.ContainsKey(typeFullName);
+    }
+
     [HarmonyPrefix]
     private static bool Prefix(
         EnchantmentModel enchantment,
