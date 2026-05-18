@@ -35,6 +35,7 @@
 | 🛡️ 格挡保留 | 格挡永不归零。 |
 | 🔄 药水填充前移 | 使用/丢弃药水后，后方药水自动向前填充空位。 |
 | 🌀 混沌药水保底 | 药水栏始终至少有一个 EntropicBrew。开局/使用/丢弃后自动补充。 |
+| 💥 显示总伤害 | 多段卡/X卡在卡牌描述末尾显示总伤害（单段伤害 × 段数）。 |
 
 ---
 
@@ -79,6 +80,7 @@ STS2-ShunMod/
 │   │   ├── BlockRetentionPatch.cs  # 格挡保留
 │   │   ├── HardenedShellPatch.cs   # 硬化外壳修复
 │   │   ├── PotionFillForwardPatch.cs  # 药水填充前移 + 混沌药水保底
+│   │   ├── ShowTotalDamage.cs      # 显示总伤害（多段卡/X卡）
 ├── STS2-ShunMod/                   # Godot 资源
 │   ├── cards/                      # 卡牌美术
 │   └── localization/               # 本地化（中/英）
