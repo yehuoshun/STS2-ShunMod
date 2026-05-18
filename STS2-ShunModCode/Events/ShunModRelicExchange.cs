@@ -185,13 +185,6 @@ public class ShunModRelicExchange : EventModel
                 {
                     // 同类附魔：叠加层数
                     existing.Amount += 1;
-                    // 已存在则不需要重新 EnchantInternal，ModifyCard 刷新效果即可
-                    var ep = typeof(CardModel).GetProperty("Enchantment",
-                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
-                    var prev = card.Enchantment;
-                    ep.SetValue(card, existing);
-                    existing.ModifyCard();
-                    ep.SetValue(card, prev);
                 }
                 else
                 {
@@ -199,26 +192,24 @@ public class ShunModRelicExchange : EventModel
                     dict[typeKey] = mutableEnch;
 
                     if (dict.Count == 1)
-                    {
-                        // 首个附魔：EnchantInternal 设 card.Enchantment + ApplyInternal
                         card.EnchantInternal(mutableEnch, 1);
-                        mutableEnch.ModifyCard();
-                        card.FinalizeUpgradeInternal();
-                    }
                     else
-                    {
-                        // 追加附魔：ApplyInternal 只设 Card 引用，不覆盖 card.Enchantment
                         mutableEnch.ApplyInternal(card, 1);
-                        // ModifyCard 需要 card.Enchantment 指向当前附魔
-                        var ep = typeof(CardModel).GetProperty("Enchantment",
-                            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
-                        var firstEnch = card.Enchantment;
-                        ep.SetValue(card, mutableEnch);
-                        mutableEnch.ModifyCard();
-                        ep.SetValue(card, firstEnch);
-                        // 不调 FinalizeUpgradeInternal，避免用 firstEnch 覆盖追加附魔效果
-                    }
                 }
+
+                // 对所有附魔调 ModifyCard + FinalizeUpgradeInternal，确保全部效果生效
+                // 旧代码在 Harmony 补丁里统一循环 + Finalize，内联版必须一致
+                var ep2 = typeof(CardModel).GetProperty("Enchantment",
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
+                var prev2 = card.Enchantment;
+                foreach (var ench in dict.Values)
+                {
+                    if (card.Enchantment != ench)
+                        ep2.SetValue(card, ench);
+                    ench.ModifyCard();
+                }
+                ep2.SetValue(card, prev2);
+                card.FinalizeUpgradeInternal();
                 await RelicCmd.Remove(lose);
                 Refresh();
             }, "OPT_2"));
