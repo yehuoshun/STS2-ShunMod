@@ -240,6 +240,12 @@ public class ShunModRelicExchange : EventModel
                     var card = picked.First();
 
                     // 无限附魔逻辑内联
+                    var ep = typeof(CardModel).GetProperty("Enchantment",
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!;
+
+                    // ⚠️ 必须在 EnchantInternal/ApplyInternal 之前抓快照
+                    var prev = card.Enchantment;
+
                     var typeKey = mutableEnch.GetType().FullName!;
                     if (!InfiniteEnchant_MultiEnchant.AllEnchantments.TryGetValue(card, out var dict))
                     {
@@ -256,13 +262,15 @@ public class ShunModRelicExchange : EventModel
                         if (dict.Count == 1)
                             card.EnchantInternal(mutableEnch, 1);
                         else
+                        {
                             mutableEnch.ApplyInternal(card, 1);
+                            // ApplyInternal 会覆盖 card.Enchantment，恢复为 prev
+                            if (card.Enchantment != prev)
+                                ep.SetValue(card, prev);
+                        }
                     }
 
                     // 刷新所有附魔效果
-                    var ep = typeof(CardModel).GetProperty("Enchantment",
-                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!;
-                    var prev = card.Enchantment;
                     foreach (var ench in dict.Values)
                     {
                         if (card.Enchantment != ench)

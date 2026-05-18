@@ -62,6 +62,13 @@ public static class InfiniteEnchant_MultiEnchant
     {
         enchantment.AssertMutable();
 
+        var enchantProp = typeof(CardModel).GetProperty("Enchantment",
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!;
+
+        // ⚠️ 必须在 EnchantInternal/ApplyInternal 之前抓快照
+        // ApplyInternal 内部会把 card.Enchantment = this，覆盖原有附魔引用
+        var firstEnch = card.Enchantment;
+
         var typeKey = enchantment.GetType().FullName!;
         if (!AllEnchantments.TryGetValue(card, out var dict))
         {
@@ -83,13 +90,16 @@ public static class InfiniteEnchant_MultiEnchant
             if (dict.Count == 1)
                 card.EnchantInternal(enchantment, amount);
             else
+            {
                 enchantment.ApplyInternal(card, amount);
+                // ApplyInternal 会覆盖 card.Enchantment，恢复为 firstEnch
+                // 让后续 ModifyCard 循环基于正确的"首个附魔"遍历
+                if (card.Enchantment != firstEnch)
+                    enchantProp.SetValue(card, firstEnch);
+            }
         }
 
         // 对所有附魔调 ModifyCard：需临时切 card.Enchantment（private set，用反射写）
-        var firstEnch = card.Enchantment;
-        var enchantProp = typeof(CardModel).GetProperty("Enchantment",
-            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!;
         foreach (var ench in dict.Values)
         {
             if (card.Enchantment != ench)
