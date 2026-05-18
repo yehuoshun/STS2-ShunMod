@@ -172,6 +172,14 @@ public class ShunModRelicExchange : EventModel
         if (_loseRelic2 != null && _enchant != null)
         {
             var lose = _loseRelic2; var ench = _enchant;
+            // 检查牌组是否有满足附魔条件的卡牌（例：Goopy 要求 Defend tag）
+            var deck = PileType.Deck.GetPile(player!).Cards;
+            if (!deck.Any(c => ench.CanEnchant(c)))
+            {
+                _loseRelic2 = null;
+                _enchant = null;
+                goto doneOpt2;
+            }
             var tips = new List<IHoverTip>();
             tips.AddRange(lose.HoverTips);
             tips.AddRange(ench.HoverTips);
@@ -180,7 +188,12 @@ public class ShunModRelicExchange : EventModel
                 var picked = await CardSelectCmd.FromDeckGeneric(player!,
                     new CardSelectorPrefs(CardSelectorPrefs.EnchantSelectionPrompt, 1, 1),
                     filter: c => ench.CanEnchant(c));
-                if (!picked.Any()) return; // 取消不扣遗物
+                if (!picked.Any())
+                {
+                    // 取消不扣遗物，刷新选项
+                    Refresh();
+                    return;
+                }
                 var mutableEnch = (EnchantmentModel)ench.MutableClone();
                 var card = picked.First();
 
@@ -221,6 +234,7 @@ public class ShunModRelicExchange : EventModel
                 Refresh();
             }, "OPT_2", tips));
         }
+        doneOpt2:
 
         // OPT_3: 扣血刷新
         if (player != null && player.Relics.Any(IsTradeable))
