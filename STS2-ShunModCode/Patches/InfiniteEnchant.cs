@@ -1,6 +1,8 @@
 using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Models;
 
 namespace STS2_ShunMod.Patches;
@@ -106,7 +108,45 @@ public static class InfiniteEnchant_MultiEnchant
 }
 
 /// <summary>
-///     Patch 3: ClearEnchantment 清掉所有附魔。
+///     Patch 3: 多附魔描述 — 在卡牌描述末尾列出所有附魔名称。
+/// </summary>
+[HarmonyPatch]
+public static class InfiniteEnchant_MultiDescription
+{
+    private static MethodBase TargetMethod()
+    {
+        var previewType = typeof(CardModel).GetNestedType("DescriptionPreviewType",
+            BindingFlags.NonPublic)!;
+        return AccessTools.Method(typeof(CardModel), "GetDescriptionForPile",
+            [typeof(PileType), previewType, typeof(Creature)]);
+    }
+
+    private static void Postfix(CardModel __instance, ref string __result)
+    {
+        if (!InfiniteEnchant_MultiEnchant.AllEnchantments.TryGetValue(__instance, out var dict))
+            return;
+        if (dict.Count <= 1) return;
+
+        var primaryKey = __instance.Enchantment?.GetType().FullName;
+        var names = new List<string>();
+        foreach (var (typeKey, ench) in dict)
+        {
+            if (typeKey == primaryKey) continue;
+            try
+            {
+                var name = ench.Title?.GetRawText() ?? ench.GetType().Name;
+                names.Add(ench.Amount > 1 ? $"{name} x{ench.Amount}" : name);
+            }
+            catch { }
+        }
+
+        if (names.Count > 0)
+            __result += $"\n[color=#aaccff]附魔: {string.Join("，", names)}[/color]";
+    }
+}
+
+/// <summary>
+///     Patch 4: ClearEnchantment 清掉所有附魔。
 /// </summary>
 [HarmonyPatch(typeof(CardCmd), nameof(CardCmd.ClearEnchantment), typeof(CardModel))]
 public static class InfiniteEnchant_ClearAll
