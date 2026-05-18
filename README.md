@@ -21,7 +21,6 @@
 
 | 名称 | 稀有度 | 效果 |
 |---|---|---|
-| 逆七咒之戒 | 事件 | 受伤 -50%，伤害 +25%，格挡 +20%，金币 +50%，休息回复 +25%，升级 +1。抽牌 -1。 |
 
 ---
 
@@ -63,8 +62,6 @@ STS2-ShunMod/
 │   │   └── SuperApotheosis.cs      # 超级神化卡牌
 │   ├── Events/
 │   │   └── ShunModRelicExchange.cs   # 遗物交易所
-│   ├── Relics/
-│   │   └── ReverseRingOfSevenCurses.cs  # 逆七咒之戒
 │   ├── Core/
 │   │   ├── ShunCard.cs             # 卡牌基类（链式配置）
 │   │   ├── CreatureReflection.cs   # Creature 反射工具
