@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Models;
@@ -11,7 +10,9 @@ namespace STS2_ShunMod.Patches;
 // 卡牌同时拥有多种附魔，同类附魔叠加层数
 //
 // 原理：
-// 1. ConditionalWeakTable 存所有附魔引用
+// 1. Dictionary + ReferenceEqualityComparer 存所有附魔引用
+//    （Godot Resource 引用计数与 ConditionalWeakTable 弱引用不兼容，
+//     导致 HasEnchantType 漏检已注能卡牌，改用强引用 Dictionary）
 // 2. 同类附魔叠加 Amount
 // 3. 异类附魔分别记录，EnchantInternal 后统一遍历全部 apply
 //    （EnchantInternal/FinalizeUpgradeInternal 只看 card.Enchantment，
@@ -38,9 +39,10 @@ public static class InfiniteEnchant_MultiEnchant
 {
     /// <summary>
     ///     每张卡的全部附魔：类型全名 → 附魔对象。
+    ///     使用引用相等比较器，确保同一 CardModel 实例匹配。
     /// </summary>
-    internal static readonly ConditionalWeakTable<CardModel, Dictionary<string, EnchantmentModel>> AllEnchantments =
-        new();
+    internal static readonly Dictionary<CardModel, Dictionary<string, EnchantmentModel>> AllEnchantments =
+        new(ReferenceEqualityComparer.Instance);
 
     /// <summary>检查卡牌是否已拥有指定类型的附魔。</summary>
     internal static bool HasEnchantType(CardModel card, string typeFullName)
@@ -59,7 +61,11 @@ public static class InfiniteEnchant_MultiEnchant
         enchantment.AssertMutable();
 
         var typeKey = enchantment.GetType().FullName!;
-        var dict = AllEnchantments.GetOrCreateValue(card);
+        if (!AllEnchantments.TryGetValue(card, out var dict))
+        {
+            dict = new Dictionary<string, EnchantmentModel>();
+            AllEnchantments[card] = dict;
+        }
 
         if (dict.TryGetValue(typeKey, out var existing))
         {
