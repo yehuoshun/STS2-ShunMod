@@ -3,12 +3,15 @@
   "SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.description": "You enter a smoke-filled hut.\nBehind the counter, a mysterious merchant smiles at you:\n\"Welcome! Browse as long as you like.\"",
   "SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_1.title": "Lose {LOSE_RELIC_1}, gain {GAIN_RELIC}",
   "SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_1.description": "Trade {LOSE_RELIC_1} for {GAIN_RELIC}.",
-  "SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_2.title": "Lose {LOSE_RELIC_2}, enchant a card with \u300c{ENCHANT_NAME}\u300d",
-  "SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_2.description": "Trade {LOSE_RELIC_2} to apply \u300c{ENCHANT_NAME}\u300d enchantment to a card of your choice.",
-  "SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_2.enchant_prompt": "Choose a card to enchant",
   "SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_3.title": "Pay HP to Refresh",
   "SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_3.description": "Lose [red]5[/red] HP and refresh all options.",
   "SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_4.title": "Leave",
   "SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_4.description": "Exit the exchange.",
-  "SHUN_MOD_RELIC_EXCHANGE.pages.CLOSE.description": "The merchant waves goodbye: \"Come back anytime!\""
+  "SHUN_MOD_RELIC_EXCHANGE.pages.CLOSE.description": "The merchant waves goodbye: \"Come back anytime!\"",
+  "SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_2A.description": "Trade {LOSE_RELIC_2} to apply 「{ENCHANT_NAME_A}」 enchantment to a card of your choice.",
+  "SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_2A.title": "Lose {LOSE_RELIC_2}, enchant with 「{ENCHANT_NAME_A}」",
+  "SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_2B.description": "Trade {LOSE_RELIC_2} to apply 「{ENCHANT_NAME_B}」 enchantment to a card of your choice.",
+  "SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_2B.title": "Lose {LOSE_RELIC_2}, enchant with 「{ENCHANT_NAME_B}」",
+  "SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_2C.description": "Trade {LOSE_RELIC_2} to apply 「{ENCHANT_NAME_C}」 enchantment to a card of your choice.",
+  "SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_2C.title": "Lose {LOSE_RELIC_2}, enchant with 「{ENCHANT_NAME_C}」"
 }

@@ -30,7 +30,9 @@ public class ShunModRelicExchange : EventModel
     private RelicModel? _loseRelic1;
     private RelicModel? _gainRelic;
     private RelicModel? _loseRelic2;
-    private EnchantmentModel? _enchant;
+    private EnchantmentModel? _enchantA;
+    private EnchantmentModel? _enchantB;
+    private EnchantmentModel? _enchantC;
 
     // ════════════════════════════════════ 背景图 ════════════════════════════════════
 
@@ -52,7 +54,9 @@ public class ShunModRelicExchange : EventModel
         new StringVar("LOSE_RELIC_1", ""),
         new StringVar("GAIN_RELIC", ""),
         new StringVar("LOSE_RELIC_2", ""),
-        new StringVar("ENCHANT_NAME", "")
+        new StringVar("ENCHANT_NAME_A", ""),
+        new StringVar("ENCHANT_NAME_B", ""),
+        new StringVar("ENCHANT_NAME_C", "")
     ];
 
     public override void CalculateVars()
@@ -67,7 +71,9 @@ public class ShunModRelicExchange : EventModel
         SetStr("LOSE_RELIC_1", Resolve(_loseRelic1?.Title));
         SetStr("GAIN_RELIC", Resolve(_gainRelic?.Title));
         SetStr("LOSE_RELIC_2", Resolve(_loseRelic2?.Title));
-        SetStr("ENCHANT_NAME", Resolve(_enchant?.Title));
+        SetStr("ENCHANT_NAME_A", Resolve(_enchantA?.Title));
+        SetStr("ENCHANT_NAME_B", Resolve(_enchantB?.Title));
+        SetStr("ENCHANT_NAME_C", Resolve(_enchantC?.Title));
     }
 
     // ════════════════════════════════════ LocString 解析 ════════════════════════════════════
@@ -102,7 +108,7 @@ public class ShunModRelicExchange : EventModel
     private void Roll()
     {
         _loseRelic1 = _loseRelic2 = _gainRelic = null;
-        _enchant = null;
+        _enchantA = _enchantB = _enchantC = null;
 
         var player = Owner!;
         var available = player.Relics.Where(IsTradeable).ToList();
@@ -110,11 +116,52 @@ public class ShunModRelicExchange : EventModel
 
         _loseRelic1 = available[Rnd.Next(available.Count)];
         _gainRelic = RollRandomRelic();
-        _enchant = RollRandomEnchant();
 
         if (available.Count >= 2)
             do { _loseRelic2 = available[Rnd.Next(available.Count)]; }
             while (_loseRelic2 == _loseRelic1);
+
+        // 滚动 3 种不同附魔
+        RollThreeEnchants();
+    }
+
+    private void RollThreeEnchants()
+    {
+        var pool = GetEnchantPool();
+        if (pool.Count == 0) return;
+
+        var rolled = new HashSet<string>();
+        for (int i = 0; i < 3 && rolled.Count < pool.Count; i++)
+        {
+            var e = pool[Rnd.Next(pool.Count)];
+            var key = e.GetType().FullName!;
+            // 不重复
+            int tries = 0;
+            while (rolled.Contains(key) && tries < 10)
+            {
+                e = pool[Rnd.Next(pool.Count)];
+                key = e.GetType().FullName!;
+                tries++;
+            }
+            rolled.Add(key);
+            switch (i)
+            {
+                case 0: _enchantA = e; break;
+                case 1: _enchantB = e; break;
+                case 2: _enchantC = e; break;
+            }
+        }
+    }
+
+    private static List<EnchantmentModel> GetEnchantPool()
+    {
+        return typeof(EnchantmentModel).Assembly.GetTypes()
+            .Where(t => !t.IsAbstract && typeof(EnchantmentModel).IsAssignableFrom(t)
+                                      && t.Name != "EnchantmentModel"
+                                      && t.Name != "DeprecatedEnchantment"
+                                      && t.Name != "MockFreeEnchantment")
+            .Select(t => ModelDb.GetByIdOrNull<EnchantmentModel>(ModelDb.GetId(t)))
+            .OfType<EnchantmentModel>().ToList();
     }
 
     private static RelicModel? RollRandomRelic()
@@ -129,15 +176,6 @@ public class ShunModRelicExchange : EventModel
                 .OfType<RelicModel>();
         }
         var pool = all.Where(IsTradeable).ToList();
-        return pool.Count > 0 ? pool[Rnd.Next(pool.Count)] : null;
-    }
-
-    private static EnchantmentModel? RollRandomEnchant()
-    {
-        var pool = typeof(EnchantmentModel).Assembly.GetTypes()
-            .Where(t => !t.IsAbstract && typeof(EnchantmentModel).IsAssignableFrom(t) && t.Name != "EnchantmentModel")
-            .Select(t => ModelDb.GetByIdOrNull<EnchantmentModel>(ModelDb.GetId(t)))
-            .OfType<EnchantmentModel>().ToList();
         return pool.Count > 0 ? pool[Rnd.Next(pool.Count)] : null;
     }
 
@@ -168,73 +206,67 @@ public class ShunModRelicExchange : EventModel
             }, "OPT_1", tips));
         }
 
-        // OPT_2: 遗物 → 附魔（玩家自选卡牌）
-        if (_loseRelic2 != null && _enchant != null)
+        // OPT_2A/2B/2C: 遗物 → 附魔（三选一）
+        if (_loseRelic2 != null)
         {
-            var lose = _loseRelic2; var ench = _enchant;
-            // 检查牌组是否有满足附魔条件的卡牌（例：Goopy 要求 Defend tag）
+            var lose = _loseRelic2;
             var deck = PileType.Deck.GetPile(player!).Cards;
-            if (!deck.Any(c => ench.CanEnchant(c)))
+            foreach (var (ench, key) in new[]
+                         { (_enchantA, "OPT_2A"), (_enchantB, "OPT_2B"), (_enchantC, "OPT_2C") })
             {
-                _loseRelic2 = null;
-                _enchant = null;
-                goto doneOpt2;
-            }
-            var tips = new List<IHoverTip>();
-            tips.AddRange(lose.HoverTips);
-            tips.AddRange(ench.HoverTips);
-            list.Add(Opt(async () =>
-            {
-                var picked = await CardSelectCmd.FromDeckGeneric(player!,
-                    new CardSelectorPrefs(CardSelectorPrefs.EnchantSelectionPrompt, 1, 1),
-                    filter: c => ench.CanEnchant(c));
-                if (!picked.Any())
-                {
-                    // 取消不扣遗物，刷新选项
-                    Refresh();
-                    return;
-                }
-                var mutableEnch = (EnchantmentModel)ench.MutableClone();
-                var card = picked.First();
+                if (ench == null || !deck.Any(c => ench.CanEnchant(c)))
+                    continue;
 
-                // 无限附魔逻辑内联
-                var typeKey = mutableEnch.GetType().FullName!;
-                var dict = InfiniteEnchant_MultiEnchant.AllEnchantments.GetOrCreateValue(card);
-
-                if (dict.TryGetValue(typeKey, out var existing))
+                var e = ench;
+                var tips = new List<IHoverTip>();
+                tips.AddRange(lose.HoverTips);
+                tips.AddRange(e.HoverTips);
+                list.Add(Opt(async () =>
                 {
-                    // 同类附魔：叠加层数
-                    existing.Amount += 1;
-                }
-                else
-                {
-                    mutableEnch.Amount = 1;
-                    dict[typeKey] = mutableEnch;
+                    var picked = await CardSelectCmd.FromDeckGeneric(player!,
+                        new CardSelectorPrefs(CardSelectorPrefs.EnchantSelectionPrompt, 1, 1),
+                        filter: c => e.CanEnchant(c));
+                    if (!picked.Any())
+                    {
+                        Refresh();
+                        return;
+                    }
+                    var mutableEnch = (EnchantmentModel)e.MutableClone();
+                    var card = picked.First();
 
-                    if (dict.Count == 1)
-                        card.EnchantInternal(mutableEnch, 1);
+                    // 无限附魔逻辑内联
+                    var typeKey = mutableEnch.GetType().FullName!;
+                    var dict = InfiniteEnchant_MultiEnchant.AllEnchantments.GetOrCreateValue(card);
+
+                    if (dict.TryGetValue(typeKey, out var existing))
+                        existing.Amount += 1;
                     else
-                        mutableEnch.ApplyInternal(card, 1);
-                }
+                    {
+                        mutableEnch.Amount = 1;
+                        dict[typeKey] = mutableEnch;
+                        if (dict.Count == 1)
+                            card.EnchantInternal(mutableEnch, 1);
+                        else
+                            mutableEnch.ApplyInternal(card, 1);
+                    }
 
-                // 对所有附魔调 ModifyCard + FinalizeUpgradeInternal，确保全部效果生效
-                // 旧代码在 Harmony 补丁里统一循环 + Finalize，内联版必须一致
-                var ep2 = typeof(CardModel).GetProperty("Enchantment",
-                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
-                var prev2 = card.Enchantment;
-                foreach (var ench in dict.Values)
-                {
-                    if (card.Enchantment != ench)
-                        ep2.SetValue(card, ench);
-                    ench.ModifyCard();
-                }
-                ep2.SetValue(card, prev2);
-                card.FinalizeUpgradeInternal();
-                await RelicCmd.Remove(lose);
-                Refresh();
-            }, "OPT_2", tips));
+                    // 刷新所有附魔效果
+                    var ep = typeof(CardModel).GetProperty("Enchantment",
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!;
+                    var prev = card.Enchantment;
+                    foreach (var ench in dict.Values)
+                    {
+                        if (card.Enchantment != ench)
+                            ep.SetValue(card, ench);
+                        ench.ModifyCard();
+                    }
+                    ep.SetValue(card, prev);
+                    card.FinalizeUpgradeInternal();
+                    await RelicCmd.Remove(lose);
+                    Refresh();
+                }, key, tips));
+            }
         }
-        doneOpt2:
 
         // OPT_3: 扣血刷新
         if (player != null && player.Relics.Any(IsTradeable))
