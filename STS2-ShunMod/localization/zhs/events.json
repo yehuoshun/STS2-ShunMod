@@ -11,7 +11,5 @@
   "SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_2A.description": "用 {LOSE_RELIC_2} 为任意一张卡牌附加「{ENCHANT_NAME_A}」附魔。",
   "SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_2A.title": "失去 {LOSE_RELIC_2}，附加「{ENCHANT_NAME_A}」",
   "SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_2B.description": "用 {LOSE_RELIC_2} 为任意一张卡牌附加「{ENCHANT_NAME_B}」附魔。",
-  "SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_2B.title": "失去 {LOSE_RELIC_2}，附加「{ENCHANT_NAME_B}」",
-  "SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_2C.description": "用 {LOSE_RELIC_2} 为任意一张卡牌附加「{ENCHANT_NAME_C}」附魔。",
-  "SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_2C.title": "失去 {LOSE_RELIC_2}，附加「{ENCHANT_NAME_C}」"
+  "SHUN_MOD_RELIC_EXCHANGE.pages.INITIAL.options.OPT_2B.title": "失去 {LOSE_RELIC_2}，附加「{ENCHANT_NAME_B}」"
 }

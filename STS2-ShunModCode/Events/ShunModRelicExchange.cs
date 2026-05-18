@@ -32,7 +32,7 @@ public class ShunModRelicExchange : EventModel
     private RelicModel? _loseRelic2;
     private EnchantmentModel? _enchantA;
     private EnchantmentModel? _enchantB;
-    private EnchantmentModel? _enchantC;
+
 
     // ════════════════════════════════════ 背景图 ════════════════════════════════════
 
@@ -55,8 +55,7 @@ public class ShunModRelicExchange : EventModel
         new StringVar("GAIN_RELIC", ""),
         new StringVar("LOSE_RELIC_2", ""),
         new StringVar("ENCHANT_NAME_A", ""),
-        new StringVar("ENCHANT_NAME_B", ""),
-        new StringVar("ENCHANT_NAME_C", "")
+        new StringVar("ENCHANT_NAME_B", "")
     ];
 
     public override void CalculateVars()
@@ -73,7 +72,7 @@ public class ShunModRelicExchange : EventModel
         SetStr("LOSE_RELIC_2", Resolve(_loseRelic2?.Title));
         SetStr("ENCHANT_NAME_A", Resolve(_enchantA?.Title));
         SetStr("ENCHANT_NAME_B", Resolve(_enchantB?.Title));
-        SetStr("ENCHANT_NAME_C", Resolve(_enchantC?.Title));
+
     }
 
     // ════════════════════════════════════ LocString 解析 ════════════════════════════════════
@@ -108,7 +107,7 @@ public class ShunModRelicExchange : EventModel
     private void Roll()
     {
         _loseRelic1 = _loseRelic2 = _gainRelic = null;
-        _enchantA = _enchantB = _enchantC = null;
+        _enchantA = _enchantB = null;
 
         var player = Owner!;
         var available = player.Relics.Where(IsTradeable).ToList();
@@ -131,7 +130,7 @@ public class ShunModRelicExchange : EventModel
         if (pool.Count == 0) return;
 
         var rolled = new HashSet<string>();
-        for (int i = 0; i < 3 && rolled.Count < pool.Count; i++)
+        for (int i = 0; i < 2 && rolled.Count < pool.Count; i++)
         {
             var e = pool[Rnd.Next(pool.Count)];
             var key = e.GetType().FullName!;
@@ -148,7 +147,6 @@ public class ShunModRelicExchange : EventModel
             {
                 case 0: _enchantA = e; break;
                 case 1: _enchantB = e; break;
-                case 2: _enchantC = e; break;
             }
         }
     }
@@ -212,7 +210,7 @@ public class ShunModRelicExchange : EventModel
             var lose = _loseRelic2;
             var deck = player!.Deck.Cards;
             foreach (var (ench, key) in new[]
-                         { (_enchantA, "OPT_2A"), (_enchantB, "OPT_2B"), (_enchantC, "OPT_2C") })
+                         { (_enchantA, "OPT_2A"), (_enchantB, "OPT_2B") })
             {
                 if (ench == null || !deck.Any(c => ench.CanEnchant(c)))
                     continue;
