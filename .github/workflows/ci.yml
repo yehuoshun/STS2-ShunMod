@@ -57,35 +57,16 @@ jobs:
         run: |
           BUILD_DIR=.godot/mono/temp/bin/Release
           mkdir -p publish
-          # DLL
           cp "$BUILD_DIR/STS2-ShunMod.dll" publish/ 2>/dev/null || \
             cp "$BUILD_DIR/net9.0/STS2-ShunMod.dll" publish/ 2>/dev/null || \
             cp "bin/Release/net9.0/STS2-ShunMod.dll" publish/
-          # json
           cp STS2-ShunMod.json publish/
-          # .pck
           if [ -f STS2-ShunMod.pck ]; then
             cp STS2-ShunMod.pck publish/
             echo "✅ .pck 已包含"
           else
-            echo "⚠️ 缺少 .pck，ZIP 仅含 dll+json+资源文件"
+            echo "⚠️ 缺少 .pck"
           fi
-          # localization
-          if [ -d STS2-ShunMod/localization ]; then
-            mkdir -p publish/STS2-ShunMod/localization
-            cp -r STS2-ShunMod/localization/* publish/STS2-ShunMod/localization/
-          fi
-          # images
-          if [ -d STS2-ShunMod/images ]; then
-            mkdir -p publish/STS2-ShunMod/images
-            cp -r STS2-ShunMod/images/* publish/STS2-ShunMod/images/
-          fi
-          # Beta 版本号（正式版时不带 beta）
-          CUR=$(python3 -c "import json; d=json.load(open('STS2-ShunMod.json')); print(d['version'])")
-          SHORT=$(git rev-parse --short HEAD)
-          BETA="${CUR}-beta.${SHORT}"
-          echo "版本: $BETA"
-          echo "$BETA" > publish/VERSION.txt
           cd publish && zip -r ../STS2-ShunMod.zip .
           echo "✅ ZIP: $(ls -lh ../STS2-ShunMod.zip | awk '{print $5}')"
 

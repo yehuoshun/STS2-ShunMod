@@ -69,14 +69,7 @@ jobs:
           else
             echo "⚠️ 无 .pck"
           fi
-          if [ -d STS2-ShunMod/localization ]; then
-            mkdir -p publish/STS2-ShunMod/localization
-            cp -r STS2-ShunMod/localization/* publish/STS2-ShunMod/localization/
-            echo "✅ 已复制本地化文件"
-          else
-            echo "⚠️ 缺少本地化目录"
-          fi
-          ls -laR publish/
+          ls -la publish/
           cd publish && zip -r ../STS2-ShunMod.zip .
 
       - name: Auto-bump version & create tag
