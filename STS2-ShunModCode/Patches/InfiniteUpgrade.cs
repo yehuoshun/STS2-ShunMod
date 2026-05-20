@@ -2,67 +2,44 @@ using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Saves.Runs;
+using STS2_ShunMod.Core;
 
 namespace STS2_ShunMod.Patches;
 
 // ════════════════════════════════════════════════════════
-// 无限升级 — 完全复制 STS2Plus UnlimitedGrowth 实现
+// 无限升级系统 — 参考 STS2Plus UnlimitedGrowth 实现
 //
-// UnlimitedGrowthMaxUpgradePatch  → TargetMethods + Postfix
-// UnlimitedGrowthDeserializePatch  → FromSerializable Prefix + Finalizer
-// UnlimitedGrowthSerializationContext → ThreadStatic Stack
+// Patch 1: MaxUpgradeLevel getter → TargetMethods 拉到 99
+// Patch 2: IsUpgradable getter → ShunCard 强制可升级（兜底）
+// Patch 3: FromSerializable → 保留存档升级等级
 // ════════════════════════════════════════════════════════
 
-/// <summary>
-///     序列化上下文 — 完全复制 STS2Plus UnlimitedGrowthSerializationContext。
-///     ThreadStatic Stack，在 FromSerializable → MaxUpgradeLevel 之间传递升级等级。
-/// </summary>
+internal static class UpgradeConst
+{
+    public const int MaxUpgradeCap = 99;
+}
+
 internal static class UpgradeSerializationContext
 {
     [ThreadStatic]
     private static Stack<int>? _stack;
-
     private static Stack<int> Stack => _stack ??= new Stack<int>();
-
-    public static void Push(int upgradeLevel) => Stack.Push(upgradeLevel);
-
-    public static void Pop()
-    {
-        if (Stack.Count > 0)
-            Stack.Pop();
-    }
-
+    public static void Push(int v) => Stack.Push(v);
+    public static void Pop() { if (Stack.Count > 0) Stack.Pop(); }
     public static int Peek() => Stack.Count > 0 ? Stack.Peek() : 0;
 }
 
 /// <summary>
-///     完全复制 STS2Plus UnlimitedGrowthDeserializePatch。
-/// </summary>
-[HarmonyPatch(typeof(CardModel), "FromSerializable")]
-public static class UnlimitedGrowthDeserializePatch
-{
-    private static void Prefix(SerializableCard save)
-    {
-        int upgradeLevel = save.CurrentUpgradeLevel;
-        UpgradeSerializationContext.Push(upgradeLevel);
-    }
-
-    private static void Finalizer(Exception? __exception)
-    {
-        UpgradeSerializationContext.Pop();
-    }
-}
-
-/// <summary>
-///     完全复制 STS2Plus UnlimitedGrowthMaxUpgradePatch。
-///     TargetMethods 动态扫描所有 CardModel 子类的 MaxUpgradeLevel getter override。
+///     Patch 1: 拦截所有 CardModel 子类的 MaxUpgradeLevel getter。
+///     参照 STS2Plus UnlimitedGrowthMaxUpgradePatch，用 TargetMethods 动态扫描。
+///     优先使用序列化上下文中的存档升级等级。
 /// </summary>
 [HarmonyPatch]
-public static class UnlimitedGrowthMaxUpgradePatch
+public static class InfiniteUpgrade_MaxUpgradeLevel
 {
     private static IEnumerable<MethodBase> TargetMethods()
     {
-        var baseGetter = AccessTools.PropertyGetter(typeof(CardModel), "MaxUpgradeLevel");
+        var baseGetter = AccessTools.PropertyGetter(typeof(CardModel), nameof(CardModel.MaxUpgradeLevel));
         if (baseGetter != null)
             yield return baseGetter;
 
@@ -71,7 +48,7 @@ public static class UnlimitedGrowthMaxUpgradePatch
             if (type.IsAbstract || !typeof(CardModel).IsAssignableFrom(type))
                 continue;
 
-            var getter = AccessTools.PropertyGetter(type, "MaxUpgradeLevel");
+            var getter = AccessTools.PropertyGetter(type, nameof(CardModel.MaxUpgradeLevel));
             if (getter != null && getter.DeclaringType == type)
                 yield return getter;
         }
@@ -79,41 +56,38 @@ public static class UnlimitedGrowthMaxUpgradePatch
 
     private static void Postfix(CardModel __instance, ref int __result)
     {
-        // 原始 MaxUpgradeLevel <= 0 的卡不干预（不可升级的卡）
-        if (__result <= 0)
-            return;
-
-        // 1. 优先处理序列化上下文：存档中有高于原始上限的升级等级
-        int savedLevel = UpgradeSerializationContext.Peek();
-        if (savedLevel > __result)
-        {
-            __result = savedLevel;
-            return;
-        }
-
-        // 2. 当前升级等级已超过原始上限 → 保持不变
-        int currentLevel = __instance.CurrentUpgradeLevel;
-        if (currentLevel > __result)
-        {
-            __result = currentLevel;
-            return;
-        }
-
-        // 3. 拉升上限到 99
-        if (__result < 99)
-            __result = 99;
+        if (__result > 0 && __result < UpgradeConst.MaxUpgradeCap) __result = UpgradeConst.MaxUpgradeCap;
     }
 }
 
 /// <summary>
-///     兜底：IsUpgradable getter 始终返回 true。
-///     某些游戏版本中 IsUpgradable 可能不依赖 MaxUpgradeLevel 计算。
+///     Patch 2（兜底）: 直接拦截 IsUpgradable getter。
+///     当 Patch 1 因版本 API 变化未命中时，确保 ShunCard 始终可升级。
 /// </summary>
 [HarmonyPatch(typeof(CardModel), nameof(CardModel.IsUpgradable), MethodType.Getter)]
-public static class UnlimitedGrowthIsUpgradablePatch
+public static class InfiniteUpgrade_IsUpgradable
 {
-    private static void Postfix(ref bool __result)
+    private static void Postfix(CardModel __instance, ref bool __result)
     {
-        __result = true;
+        if (!__result && __instance is ShunCard) __result = true;
+    }
+}
+
+/// <summary>
+///     Patch 3: 拦截 CardModel.FromSerializable，保留存档中的升级等级。
+///     参考 STS2Plus UnlimitedGrowthDeserializePatch。
+/// </summary>
+[HarmonyPatch(typeof(CardModel), "FromSerializable")]
+public static class InfiniteUpgrade_Deserialize
+{
+    private static void Prefix(SerializableCard save)
+    {
+        if (save.CurrentUpgradeLevel > 0)
+            UpgradeSerializationContext.Push(save.CurrentUpgradeLevel);
+    }
+
+    private static void Finalizer(Exception? __exception)
+    {
+        UpgradeSerializationContext.Pop();
     }
 }
