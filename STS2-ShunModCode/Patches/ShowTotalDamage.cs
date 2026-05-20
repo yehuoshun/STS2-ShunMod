@@ -15,6 +15,10 @@ namespace STS2_ShunMod.Patches;
 [HarmonyPatch]
 public static class ShowTotalDamage_Description
 {
+    /// <summary>GetEnchantedReplayCount 反射调用（CI 编译兼容）</summary>
+    private static readonly MethodInfo? GetReplayMethod =
+        AccessTools.Method(typeof(CardModel), "GetEnchantedReplayCount");
+
     private static MethodBase TargetMethod()
     {
         // 私有方法 GetDescriptionForPile(PileType, DescriptionPreviewType, Creature?)
@@ -37,7 +41,7 @@ public static class ShowTotalDamage_Description
 
     private static void Postfix(CardModel __instance, ref string __result)
     {
-        int replays = __instance.GetEnchantedReplayCount();
+        int replays = GetReplayMethod?.Invoke(__instance, null) as int? ?? 0;
         if (replays <= 0) return;
 
         var perHit = GetDamageValue(__instance);
