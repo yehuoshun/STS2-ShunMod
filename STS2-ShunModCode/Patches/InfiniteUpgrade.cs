@@ -104,3 +104,16 @@ public static class UnlimitedGrowthMaxUpgradePatch
             __result = 99;
     }
 }
+
+/// <summary>
+///     兜底：IsUpgradable getter 始终返回 true。
+///     某些游戏版本中 IsUpgradable 可能不依赖 MaxUpgradeLevel 计算。
+/// </summary>
+[HarmonyPatch(typeof(CardModel), nameof(CardModel.IsUpgradable), MethodType.Getter)]
+public static class UnlimitedGrowthIsUpgradablePatch
+{
+    private static void Postfix(ref bool __result)
+    {
+        __result = true;
+    }
+}
