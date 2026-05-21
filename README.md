@@ -155,7 +155,7 @@ dotnet build
 
 ### 日志级别
 
-在 `Mods/STS2-ShunMod/` 下创建 `debug-config.json` 控制输出量：
+在 `Mods/STS2-ShunMod/logs/` 下创建 `debug-config.json` 控制输出量：
 
 ```json
 { "logLevel": "Minimal" }

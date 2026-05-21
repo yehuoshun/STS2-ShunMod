@@ -42,12 +42,12 @@ public static class ShunLogger
             var dllDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
                          ?? AppContext.BaseDirectory;
 
-            // 配置文件路径
-            _configPath = Path.Combine(dllDir, "debug-config.json");
-            LoadConfig();
-
             var logsDir = Path.Combine(dllDir, "logs");
             Directory.CreateDirectory(logsDir);
+
+            // 配置文件放 logs/ 子目录，避免游戏扫描根目录 json 时报错
+            _configPath = Path.Combine(logsDir, "debug-config.json");
+            LoadConfig();
 
             var date = DateTime.Now.ToString("yyyy-MM-dd");
             _logPath = Path.Combine(logsDir, $"shunmod-{date}.log");
