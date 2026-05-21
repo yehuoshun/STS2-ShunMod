@@ -1,4 +1,3 @@
-using System.Reflection;
 using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Commands;
@@ -20,114 +19,176 @@ internal static class PotionFillForwardPatch
 {
     private const string ChaosPotionName = "EntropicBrew";
 
+    // ── NPotionContainer ──
     private static readonly FieldInfo HoldersField =
         AccessTools.Field(typeof(NPotionContainer), "_holders");
 
     private static readonly FieldInfo PlayerField =
         AccessTools.Field(typeof(NPotionContainer), "_player");
 
-    private static readonly MethodInfo PotionSetter =
-        AccessTools.PropertySetter(typeof(NPotionHolder), "Potion");
-
+    // ── NPotionHolder ──
     private static readonly FieldInfo EmptyIconField =
         AccessTools.Field(typeof(NPotionHolder), "_emptyIcon");
 
+    // ═══════════════════════════════════════════════
+    //  Harmony Patches
+    // ═══════════════════════════════════════════════
+
     [HarmonyPatch(typeof(NPotionContainer), "RemoveUsed")]
     [HarmonyPostfix]
-    private static void RemoveUsedPostfix(NPotionContainer __instance)
-    {
-        CompactBelt(__instance);
-        EnsureEntropicBrew(__instance);
-    }
+    private static void OnRemoveUsed(NPotionContainer __instance) => OnPotionChanged(__instance);
 
     [HarmonyPatch(typeof(NPotionContainer), "Discard")]
     [HarmonyPostfix]
-    private static void DiscardPostfix(NPotionContainer __instance)
-    {
-        CompactBelt(__instance);
-        EnsureEntropicBrew(__instance);
-    }
+    private static void OnDiscard(NPotionContainer __instance) => OnPotionChanged(__instance);
 
     [HarmonyPatch(typeof(NPotionContainer), "Initialize")]
     [HarmonyPostfix]
-    private static void InitializePostfix(NPotionContainer __instance)
+    private static void OnInitialize(NPotionContainer __instance) => OnPotionChanged(__instance);
+
+    // ═══════════════════════════════════════════════
+    //  核心逻辑
+    // ═══════════════════════════════════════════════
+
+    private static void OnPotionChanged(NPotionContainer container)
     {
-        EnsureEntropicBrew(__instance);
+        try
+        {
+            var holders = HoldersField?.GetValue(container) as List<NPotionHolder>;
+            var player = PlayerField?.GetValue(container) as Player;
+            if (holders == null || player == null)
+            {
+                ShunLogger.Warn("药水填充", "反射取 holders / player 失败，补丁未生效");
+                return;
+            }
+
+            CompactIfNeeded(container, holders, player);
+            EnsureEntropicBrew(container, holders, player);
+        }
+        catch (Exception ex)
+        {
+            ShunLogger.Error("药水填充", ex);
+        }
     }
 
-    private static void CompactBelt(NPotionContainer container)
+    /// <summary>
+    ///     收集所有药水模型 → 清除所有栏位 → 重新从左获取。
+    ///     不使用 RemoveChild+AddPotion 搬节点，避免 Godot 场景树竞态。
+    /// </summary>
+    private static void CompactIfNeeded(
+        NPotionContainer container,
+        List<NPotionHolder> holders,
+        Player player)
     {
-        var holders = HoldersField?.GetValue(container) as List<NPotionHolder>;
-        if (holders == null) return;
-
-        var moved = 0;
+        // 1. 收集药水模型（从左到右，跳过空栏）
+        var models = new List<PotionModel>();
         for (var i = 0; i < holders.Count; i++)
         {
-            if (holders[i] == null || !GodotObject.IsInstanceValid(holders[i]))
-                continue;
-            if (holders[i].HasPotion) continue;
+            var h = holders[i];
+            if (h == null || !GodotObject.IsInstanceValid(h)) continue;
+            if (!h.HasPotion || h.Potion == null) continue;
+            models.Add(h.Potion.Model);
+        }
 
-            for (var j = i + 1; j < holders.Count; j++)
+        if (models.Count == 0) return; // 空带，只靠 EnsureEntropicBrew
+
+        // 2. 检测是否有间隙（空栏位出现在非空栏位之前）
+        var found = 0;
+        var needCompact = false;
+        for (var i = 0; i < holders.Count; i++)
+        {
+            var h = holders[i];
+            if (h == null || !GodotObject.IsInstanceValid(h)) continue;
+            if (h.HasPotion)
             {
-                if (holders[j] == null || !GodotObject.IsInstanceValid(holders[j]))
-                    continue;
-                if (!holders[j].HasPotion) continue;
-
-                var potion = holders[j].Potion;
-                // 从源 holder 的场景树移除 NPotion（设 Potion=null 不会自动移）
-                holders[j].RemoveChild(potion!);
-                PotionSetter?.Invoke(holders[j], new object?[] { null });
-                // 恢复源 holder 的空图标
-                if (EmptyIconField?.GetValue(holders[j]) is CanvasItem emptyIcon)
-                    emptyIcon.Modulate = Colors.White;
-                holders[i].AddPotion(potion!);
-                moved++;
+                found++;
+            }
+            else if (found < models.Count)
+            {
+                needCompact = true;
                 break;
             }
         }
 
-        if (moved > 0)
-            ShunLogger.Info("药水填充", $"前移 {moved} 个药水");
+        if (!needCompact) return;
+
+        ShunLogger.Info("药水填充", $"检测到间隙 → 整理 {models.Count} 个药水");
+
+        // 3. 清除所有 holder（Potion setter 负责内部清理，无需手动 RemoveChild）
+        for (var i = 0; i < holders.Count; i++)
+        {
+            var h = holders[i];
+            if (h == null || !GodotObject.IsInstanceValid(h) || !h.HasPotion) continue;
+            h.Potion = null;
+            RestoreEmptyIcon(h);
+        }
+
+        // 4. 通过 PotionCmd 从左到右重新获取（不搬节点，创建新实例）
+        for (var i = 0; i < models.Count; i++)
+        {
+            var mutable = models[i].ToMutable();
+            TaskHelper.RunSafely(PotionCmd.TryToProcure(mutable, player, i));
+        }
+
+        ShunLogger.Info("药水填充", $"{models.Count} 个药水已前移");
     }
 
-    private static void EnsureEntropicBrew(NPotionContainer container)
+    /// <summary>
+    ///     确保药水带中存在至少一瓶混沌药水（EntropicBrew）。
+    ///     已有时跳过；无时空栏位自动补。
+    /// </summary>
+    private static void EnsureEntropicBrew(
+        NPotionContainer container,
+        List<NPotionHolder> holders,
+        Player player)
     {
-        var player = PlayerField?.GetValue(container) as Player;
-        if (player == null) return;
-
-        var holders = HoldersField?.GetValue(container) as List<NPotionHolder>;
-        if (holders == null) return;
-
-        // 已有混沌药水则跳过
+        // 已有则跳过
         foreach (var h in holders)
         {
-            if (!GodotObject.IsInstanceValid(h) || !h.HasPotion) continue;
-            if (h.Potion!.Model.GetType().Name == ChaosPotionName)
+            if (h == null || !GodotObject.IsInstanceValid(h) || !h.HasPotion || h.Potion == null)
+                continue;
+            if (h.Potion.Model.GetType().Name == ChaosPotionName)
                 return;
         }
 
         // 找第一个空栏位
-        var emptyIndex = -1;
+        var emptyIdx = -1;
         for (var i = 0; i < holders.Count; i++)
-            if (GodotObject.IsInstanceValid(holders[i]) && !holders[i].HasPotion)
-            {
-                emptyIndex = i;
-                break;
-            }
+        {
+            var h = holders[i];
+            if (h == null || !GodotObject.IsInstanceValid(h) || h.HasPotion) continue;
+            emptyIdx = i;
+            break;
+        }
 
-        if (emptyIndex < 0) return; // 栏位已满
+        if (emptyIdx < 0) return; // 满了
 
-        // 从药水池中找混沌药水
         var options = PotionFactory.GetPotionOptions(player, Array.Empty<PotionModel>());
         var chaos = options.FirstOrDefault(p => p.GetType().Name == ChaosPotionName);
         if (chaos == null)
         {
-            ShunLogger.Warn("混沌药水", "药水池中无混沌药水");
+            ShunLogger.Warn("混沌药水", "药水池中无 EntropicBrew");
             return;
         }
 
-        ShunLogger.Info("混沌药水", $"自动补充到栏位 {emptyIndex}");
-        var mutable = chaos.ToMutable();
-        TaskHelper.RunSafely(PotionCmd.TryToProcure(mutable, player, emptyIndex));
+        ShunLogger.Info("混沌药水", $"→ 栏位 {emptyIdx}");
+        TaskHelper.RunSafely(PotionCmd.TryToProcure(chaos.ToMutable(), player, emptyIdx));
+    }
+
+    // ═══════════════════════════════════════════════
+    //  工具方法
+    // ═══════════════════════════════════════════════
+
+    private static void RestoreEmptyIcon(NPotionHolder holder)
+    {
+        try
+        {
+            if (EmptyIconField?.GetValue(holder) is CanvasItem icon)
+                icon.Modulate = Colors.White;
+        }
+        catch
+        {
+            // 非关键
+        }
     }
 }
