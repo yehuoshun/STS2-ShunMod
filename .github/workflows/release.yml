@@ -72,27 +72,14 @@ jobs:
           ls -la publish/
           cd publish && zip -r ../STS2-ShunMod.zip .
 
-      - name: Auto-bump version & create tag
+      - name: Get version & create tag
         id: ver
         run: |
-          CUR=$(python3 -c "import json; d=json.load(open('STS2-ShunMod.json')); print(d['version'])")
-          MAJOR=$(echo "${CUR#v}" | cut -d. -f1)
-          MINOR=$(echo "${CUR#v}" | cut -d. -f2)
-          PATCH=$(echo "${CUR#v}" | cut -d. -f3)
-          NEW=$((PATCH + 1))
-          V="v${MAJOR}.${MINOR}.${NEW}"
+          V=$(python3 -c "import json; d=json.load(open('STS2-ShunMod.json')); print(d['version'])")
+          echo "tagging: $V"
 
-          echo "bump: $CUR → $V"
-
-          # 更新 json 版本号
-          python3 -c "import json; d=json.load(open('STS2-ShunMod.json')); d['version']='${V}'; json.dump(d, open('STS2-ShunMod.json','w'), indent=2, ensure_ascii=False)"
-
-          # 提交版本号变更 + 打 tag
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add STS2-ShunMod.json
-          git commit -m "chore: bump to ${V}" || echo "no changes to commit"
-          git push origin HEAD:main
           git tag -a "$V" -m "Release $V"
           git push origin "$V"
           echo "TAG=$V" >> $GITHUB_OUTPUT

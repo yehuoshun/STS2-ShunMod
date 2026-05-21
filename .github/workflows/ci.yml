@@ -9,8 +9,31 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
+
+      - name: Auto-bump version
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          MSG=$(git log -1 --pretty=%B)
+          if echo "$MSG" | grep -q "^chore: bump to"; then
+            echo "⏭️ 跳过（bump 提交本身不触发再次 bump）"
+            exit 0
+          fi
+          CUR=$(python3 -c "import json; d=json.load(open('STS2-ShunMod.json')); print(d['version'])")
+          MAJOR=$(echo "${CUR#v}" | cut -d. -f1)
+          MINOR=$(echo "${CUR#v}" | cut -d. -f2)
+          PATCH=$(echo "${CUR#v}" | cut -d. -f3)
+          NEW=$((PATCH + 1))
+          V="v${MAJOR}.${MINOR}.${NEW}"
+          python3 -c "import json; d=json.load(open('STS2-ShunMod.json')); d['version']='${V}'; json.dump(d, open('STS2-ShunMod.json','w'), indent=2, ensure_ascii=False)"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add STS2-ShunMod.json
+          git commit -m "chore: bump to ${V}" || echo "no changes"
+          git push origin HEAD:main
 
       - name: Setup .NET 9.0
         uses: actions/setup-dotnet@v4
