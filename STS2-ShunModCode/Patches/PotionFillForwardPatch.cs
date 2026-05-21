@@ -6,6 +6,7 @@ using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Factories;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Potions;
 using MegaCrit.Sts2.Core.Nodes.Potions;
 using STS2_ShunMod.Core;
 
@@ -54,8 +55,6 @@ internal static class PotionFillForward_Initialize
 // ═══════════════════════════════════════════════
 internal static class PotionFillForwardLogic
 {
-    private const string ChaosPotionName = "EntropicBrew";
-
     // ── NPotionContainer ──
     private static readonly FieldInfo? HoldersField =
         AccessTools.Field(typeof(NPotionContainer), "_holders");
@@ -174,7 +173,7 @@ internal static class PotionFillForwardLogic
         {
             if (h == null || !GodotObject.IsInstanceValid(h) || !h.HasPotion || h.Potion == null)
                 continue;
-            if (h.Potion.Model.GetType().Name == ChaosPotionName)
+            if (h.Potion.Model is EntropicBrew)
                 return;
         }
 
@@ -189,11 +188,28 @@ internal static class PotionFillForwardLogic
 
         if (emptyIdx < 0) return;
 
-        var options = PotionFactory.GetPotionOptions(player, Array.Empty<PotionModel>());
-        var chaos = options.FirstOrDefault(p => p.GetType().Name == ChaosPotionName);
+        // 直接用 ModelDb + 类型 — 绕过 PotionFactory 池限制
+        PotionModel? chaos = null;
+        try
+        {
+            var id = ModelDb.GetId(typeof(EntropicBrew));
+            chaos = ModelDb.GetByIdOrNull<PotionModel>(id);
+        }
+        catch (Exception ex)
+        {
+            ShunLogger.Warn("混沌药水", $"ModelDb 失败: {ex.Message}，回退 PotionFactory");
+        }
+
+        // 回退：PotionFactory
         if (chaos == null)
         {
-            ShunLogger.Warn("混沌药水", "药水池中无 EntropicBrew");
+            var options = PotionFactory.GetPotionOptions(player, Array.Empty<PotionModel>());
+            chaos = options.FirstOrDefault(p => p is EntropicBrew);
+        }
+
+        if (chaos == null)
+        {
+            ShunLogger.Warn("混沌药水", "无法获取 EntropicBrew");
             return;
         }
 
