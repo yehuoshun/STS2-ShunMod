@@ -165,8 +165,9 @@ internal static class PotionFillForwardLogic
         for (var i = 0; i < models.Count; i++)
         {
             var index = i;
-            // 不调 .ToMutable()——TryToProcure 内部会处理克隆
-            TaskHelper.RunSafely(PotionCmd.TryToProcure(models[i], player, index));
+            // 从 canonical 模型创建新鲜 mutable clone，避免二次 ToMutable 导致的 MutableModelException
+            var mutable = models[i].ToMutable();
+            TaskHelper.RunSafely(PotionCmd.TryToProcure(mutable, player, index));
         }
 
         ShunLogger.Info("药水填充", $"{models.Count} 个药水已前移");
@@ -219,7 +220,8 @@ internal static class PotionFillForwardLogic
         }
 
         ShunLogger.Info("混沌药水", $"→ 栏位 {emptyIdx}");
-        TaskHelper.RunSafely(PotionCmd.TryToProcure(chaos, player, emptyIdx));
+        var mutable = chaos.ToMutable();
+        TaskHelper.RunSafely(PotionCmd.TryToProcure(mutable, player, emptyIdx));
     }
 
     private static void ClearPotion(NPotionHolder holder)
