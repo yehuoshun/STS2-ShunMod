@@ -1,17 +1,34 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading;
 
 namespace STS2_ShunMod.Core;
 
 /// <summary>
+///     日志级别。
+///     Minimal = 只输出 ERROR
+///     Normal  = ERROR + WARN + INFO（默认）
+///     Verbose = 全部（含 DEBUG + TRACE）
+/// </summary>
+public enum LogLevel
+{
+    Minimal,
+    Normal,
+    Verbose
+}
+
+/// <summary>
 ///     独立日志 — 写入 Mods/STS2-ShunMod/logs/ 目录，与游戏本体日志分离。
+///     支持 <c>debug-config.json</c> 控制日志级别，修改后重启游戏生效。
 /// </summary>
 public static class ShunLogger
 {
     private static readonly object _lock = new();
     private static string? _logPath;
+    private static string? _configPath;
+    private static LogLevel _level = LogLevel.Normal;
 
     /// <summary>
     ///     日志文件路径（懒初始化，延迟到 mod 目录可确定时）
@@ -22,35 +39,83 @@ public static class ShunLogger
         {
             if (_logPath != null) return _logPath;
 
-            // 从 DLL 位置推算 mod 根目录
             var dllDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
                          ?? AppContext.BaseDirectory;
+
+            // 配置文件路径
+            _configPath = Path.Combine(dllDir, "debug-config.json");
+            LoadConfig();
 
             var logsDir = Path.Combine(dllDir, "logs");
             Directory.CreateDirectory(logsDir);
 
-            // 按日期分文件，避免单文件爆炸
             var date = DateTime.Now.ToString("yyyy-MM-dd");
             _logPath = Path.Combine(logsDir, $"shunmod-{date}.log");
             return _logPath;
         }
     }
 
-    public static void Info(string patch, string msg) => Write("INFO", patch, msg);
-    public static void Warn(string patch, string msg) => Write("WARN", patch, msg);
-    public static void Error(string patch, string msg) => Write("ERROR", patch, msg);
-    public static void Error(string patch, Exception ex)
+    /// <summary>
+    ///     当前日志级别（可通过 debug-config.json 配置）
+    /// </summary>
+    public static LogLevel CurrentLevel => _level;
+
+    private static void LoadConfig()
     {
-        Write("ERROR", patch, $"{ex.GetType().Name}: {ex.Message}");
-        // 堆栈单独一行，方便追踪调用链
-        if (ex.StackTrace != null)
-            Write("TRACE", patch, ex.StackTrace);
+        try
+        {
+            if (_configPath == null || !File.Exists(_configPath)) return;
+
+            var json = File.ReadAllText(_configPath);
+            using var doc = JsonDocument.Parse(json);
+            if (doc.RootElement.TryGetProperty("logLevel", out var el) && el.ValueKind == JsonValueKind.String)
+            {
+                if (Enum.TryParse<LogLevel>(el.GetString(), ignoreCase: true, out var parsed))
+                    _level = parsed;
+            }
+        }
+        catch
+        {
+            // 配置解析失败用默认值，不炸游戏
+        }
     }
 
     /// <summary>
-    ///     记录状态快照，用于排查"为什么没触发"类的 bug。
+    ///     运行时重新读取配置（无需重启游戏）
     /// </summary>
-    public static void Debug(string patch, string msg) => Write("DEBUG", patch, msg);
+    public static void ReloadConfig()
+    {
+        LoadConfig();
+        Info("ShunLogger", $"日志级别切换至 {_level}");
+    }
+
+    public static void Info(string patch, string msg)
+    {
+        if (_level >= LogLevel.Normal) Write("INFO", patch, msg);
+    }
+
+    public static void Warn(string patch, string msg)
+    {
+        if (_level >= LogLevel.Normal) Write("WARN", patch, msg);
+    }
+
+    public static void Error(string patch, string msg)
+    {
+        // ERROR 永远输出
+        Write("ERROR", patch, msg);
+    }
+
+    public static void Error(string patch, Exception ex)
+    {
+        Write("ERROR", patch, $"{ex.GetType().Name}: {ex.Message}");
+        if (ex.StackTrace != null && _level >= LogLevel.Verbose)
+            Write("TRACE", patch, ex.StackTrace);
+    }
+
+    public static void Debug(string patch, string msg)
+    {
+        if (_level >= LogLevel.Verbose) Write("DEBUG", patch, msg);
+    }
 
     private static void Write(string level, string patch, string msg)
     {
@@ -75,6 +140,6 @@ public static class ShunLogger
     /// </summary>
     public static void Summary(string modId)
     {
-        Info(modId, "══════════ 日志已启动 ══════════");
+        Info(modId, $"══════════ 日志已启动 (级别: {_level}) ══════════");
     }
 }

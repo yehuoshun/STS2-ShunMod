@@ -153,16 +153,31 @@ dotnet build
 
 模组日志独立写入 `Mods/STS2-ShunMod/logs/shunmod-YYYY-MM-DD.log`，与游戏本体日志分离。
 
+### 日志级别
+
+在 `Mods/STS2-ShunMod/` 下创建 `debug-config.json` 控制输出量：
+
+```json
+{ "logLevel": "Minimal" }
 ```
-[10:30:01.234] [INFO] [STS2-ShunMod] Harmony PatchAll 完成，共 12 个方法已注入
+
+| `logLevel` | 输出内容 | 适用场景 |
+|---|---|---|
+| `Minimal` | 只输出 ERROR | 正常玩游戏，零打扰 |
+| `Normal` | ERROR + WARN + INFO（**默认**） | 日常开发，看补丁触发情况 |
+| `Verbose` | 全部（含 DEBUG 状态快照 + TRACE 堆栈） | 追 bug |
+
+不创建此文件 = 默认 Normal。修改后**重启游戏**生效。
+
+### 日志样例
+
+```
+[10:30:01.234] [INFO] [STS2-ShunMod] ══════════ 日志已启动 (级别: Normal) ══════════
 [10:30:01.456] [INFO] [无限升级/TargetMethods] 扫描到 28 个 MaxUpgradeLevel getter
-[10:35:22.789] [INFO] [无限附魔/Enchant] card=Strike type=MegaCrit.Sts2.Core.Models.Enchantments.StrengthEnchantmentModel amount=3
+[10:35:22.789] [INFO] [无限附魔/Enchant] 叠加: card=Strike type=StrengthEnchantment amount=3
 [10:35:22.790] [ERROR] [无限升级/反序列化] NullReferenceException: ...
+[10:35:22.791] [TRACE] [无限升级/反序列化]    at STS2_ShunMod.Patches.InfiniteUpgrade_Deserialize.Finalizer(...)
 ```
-
-日志级别：INFO（正常触发）、WARN（异常但可恢复）、ERROR（异常/报错）。
-
-出问题时直接看最后一个报错在哪个 patch，不用翻游戏本体日志。
 
 ---
 
