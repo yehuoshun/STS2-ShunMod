@@ -45,34 +45,46 @@ public static class InfiniteEnchant_Enchant
     [HarmonyPrefix]
     private static bool Prefix(EnchantmentModel m, CardModel card, decimal amount)
     {
-        m.AssertMutable();
-
-        if (!Store.TryGetValue(card, out var dict))
-            Store[card] = dict = new Dictionary<string, EnchantmentModel>();
-
-        var key = m.GetType().FullName!;
-
-        if (dict.TryGetValue(key, out var ex))
+        try
         {
-            ex.Amount += (int)amount;
-        }
-        else
-        {
-            m.Amount = (int)amount;
-            dict[key] = m;
-            card.EnchantInternal(m, amount);
-        }
+            m.AssertMutable();
 
-        // 全量重刷所有附魔效果
-        foreach (var e in dict.Values)
-        {
-            ShunLogger.Info("无限附魔/Enchant", $"card={card.GetType().Name} type={key} amount={e.Amount}");
-            if (card.Enchantment != e) Prop.SetValue(card, e);
-            e.ModifyCard();
-        }
-        Prop.SetValue(card, dict.Values.First());
-        card.FinalizeUpgradeInternal();
+            if (!Store.TryGetValue(card, out var dict))
+                Store[card] = dict = new Dictionary<string, EnchantmentModel>();
 
-        return false;
+            var key = m.GetType().FullName!;
+
+            if (dict.TryGetValue(key, out var ex))
+            {
+                ex.Amount += (int)amount;
+                ShunLogger.Info("无限附魔/Enchant", $"叠加: card={card.GetType().Name} type={key} amount={ex.Amount}");
+            }
+            else
+            {
+                m.Amount = (int)amount;
+                dict[key] = m;
+                card.EnchantInternal(m, amount);
+                ShunLogger.Info("无限附魔/Enchant", $"新增: card={card.GetType().Name} type={key} amount={m.Amount}");
+            }
+
+            // 全量重刷所有附魔效果
+            foreach (var e in dict.Values)
+            {
+                if (card.Enchantment != e) Prop.SetValue(card, e);
+                e.ModifyCard();
+            }
+
+            Prop.SetValue(card, dict.Values.First());
+            card.FinalizeUpgradeInternal();
+
+            ShunLogger.Debug("无限附魔/状态", $"Store 共 {Store.Count} 张卡，当前卡 {card.GetType().Name} 有 {dict.Count} 种附魔");
+
+            return false;
+        }
+        catch (Exception ex)
+        {
+            ShunLogger.Error("无限附魔/Enchant", ex);
+            return true; // 炸了就走原版单附魔逻辑，别让游戏崩
+        }
     }
 }

@@ -42,16 +42,23 @@ public static class ShowTotalDamage_Description
 
     private static void Postfix(CardModel __instance, ref string __result)
     {
-        int replays = GetReplayMethod?.Invoke(__instance, null) as int? ?? 0;
-        if (replays <= 0) return;
+        try
+        {
+            int replays = GetReplayMethod?.Invoke(__instance, null) as int? ?? 0;
+            if (replays <= 0) return;
 
-        var perHit = GetDamageValue(__instance);
-        if (perHit <= 0) return;
+            var perHit = GetDamageValue(__instance);
+            if (perHit <= 0) return;
 
-        int totalHits = replays + 1;
-        decimal total = perHit * totalHits;
+            int totalHits = replays + 1;
+            decimal total = perHit * totalHits;
 
-        __result += $"\n[color=#ffcc00]({perHit} × {totalHits} = {total} total damage)[/color]";
-        ShunLogger.Info("总伤害", $"{__instance.GetType().Name}: {perHit}×{totalHits}={total}");
+            __result += $"\n[color=#ffcc00]({perHit} × {totalHits} = {total} total damage)[/color]";
+            ShunLogger.Info("总伤害", $"{__instance.GetType().Name}: {perHit}×{totalHits}={total}");
+        }
+        catch (Exception ex)
+        {
+            ShunLogger.Error("总伤害", ex);
+        }
     }
 }

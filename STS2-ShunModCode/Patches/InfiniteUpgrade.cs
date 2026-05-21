@@ -76,22 +76,31 @@ public static class InfiniteUpgrade_MaxUpgradeLevel
     [HarmonyPostfix]
     private static void Postfix(CardModel __instance, ref int __result)
     {
-        // 读档时：FromSerializable 循环调用 UpgradeInternal()，
-        // 每次 CurrentUpgradeLevel++ 的 setter 会检查 MaxUpgradeLevel。
-        // 如果栈中有存档等级，临时抬高以通过检查。
-        var savedLevel = UpgradeSerializationContext.Peek();
-        if (savedLevel > __result && savedLevel > __instance.CurrentUpgradeLevel)
+        try
         {
-            __result = savedLevel;
-            return;
-        }
+            // 读档时：FromSerializable 循环调用 UpgradeInternal()，
+            // 每次 CurrentUpgradeLevel++ 的 setter 会检查 MaxUpgradeLevel。
+            // 如果栈中有存档等级，临时抬高以通过检查。
+            var savedLevel = UpgradeSerializationContext.Peek();
+            if (savedLevel > __result && savedLevel > __instance.CurrentUpgradeLevel)
+            {
+                var old = __result;
+                __result = savedLevel;
+                ShunLogger.Info("无限升级/MaxUpgrade", $"读档模式: {__instance.GetType().Name} {old} → {__result}");
+                return;
+            }
 
-        // 常规运行时：移除升级上限
-        if (__result > 0 && __result < UpgradeConst.MaxUpgradeCap)
+            // 常规运行时：移除升级上限
+            if (__result > 0 && __result < UpgradeConst.MaxUpgradeCap)
+            {
+                var old = __result;
+                __result = UpgradeConst.MaxUpgradeCap;
+                ShunLogger.Info("无限升级/MaxUpgrade", $"{__instance.GetType().Name}: {old} → {__result}");
+            }
+        }
+        catch (Exception ex)
         {
-            var old = __result;
-            __result = UpgradeConst.MaxUpgradeCap;
-            ShunLogger.Info("无限升级/MaxUpgrade", $"{__instance.GetType().Name}: {old} → {__result}");
+            ShunLogger.Error("无限升级/MaxUpgrade", ex);
         }
     }
 }

@@ -56,10 +56,17 @@ public static class BlockRetentionPrepareForNextTurnPatch
 
     private static void Postfix(object __instance, int __state)
     {
-        if (__state <= 0 || !CreatureReflection.IsPlayer(__instance))
-            return;
+        try
+        {
+            if (__state <= 0 || !CreatureReflection.IsPlayer(__instance))
+                return;
 
-        CreatureReflection.SetBlock(__instance, __state);
-        ShunLogger.Info("格挡保留/回合结束", $"恢复格挡: {__state}");
+            CreatureReflection.SetBlock(__instance, __state);
+            ShunLogger.Info("格挡保留/回合结束", $"恢复格挡: {__state}");
+        }
+        catch (Exception ex)
+        {
+            ShunLogger.Error("格挡保留/回合结束", ex);
+        }
     }
 }

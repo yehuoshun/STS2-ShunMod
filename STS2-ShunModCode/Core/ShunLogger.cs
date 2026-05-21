@@ -39,7 +39,18 @@ public static class ShunLogger
     public static void Info(string patch, string msg) => Write("INFO", patch, msg);
     public static void Warn(string patch, string msg) => Write("WARN", patch, msg);
     public static void Error(string patch, string msg) => Write("ERROR", patch, msg);
-    public static void Error(string patch, Exception ex) => Write("ERROR", patch, $"{ex.GetType().Name}: {ex.Message}");
+    public static void Error(string patch, Exception ex)
+    {
+        Write("ERROR", patch, $"{ex.GetType().Name}: {ex.Message}");
+        // 堆栈单独一行，方便追踪调用链
+        if (ex.StackTrace != null)
+            Write("TRACE", patch, ex.StackTrace);
+    }
+
+    /// <summary>
+    ///     记录状态快照，用于排查"为什么没触发"类的 bug。
+    /// </summary>
+    public static void Debug(string patch, string msg) => Write("DEBUG", patch, msg);
 
     private static void Write(string level, string patch, string msg)
     {
