@@ -215,10 +215,7 @@ public class ShunModRelicExchange : EventModel
             {
                 if (ench == null)
                     continue;
-                // 检查是否有可附魔的卡牌（已拥有此附魔的卡牌排除）
-                var enchType = ench.GetType().FullName!;
-                if (!deck.Any(c => ench.CanEnchant(c)
-                                   && !InfiniteEnchant_Enchant.HasType(c, enchType)))
+                if (!deck.Any(c => ench.CanEnchant(c)))
                     continue;
 
                 var e = ench;
@@ -229,8 +226,7 @@ public class ShunModRelicExchange : EventModel
                 {
                     var picked = await CardSelectCmd.FromDeckGeneric(player!,
                         new CardSelectorPrefs(CardSelectorPrefs.EnchantSelectionPrompt, 1, 1),
-                        filter: c => e.CanEnchant(c)
-                                     && !InfiniteEnchant_Enchant.HasType(c, enchType));
+                        filter: c => e.CanEnchant(c));
                     if (!picked.Any())
                     {
                         Refresh();
@@ -238,32 +234,7 @@ public class ShunModRelicExchange : EventModel
                     }
                     var mutableEnch = (EnchantmentModel)e.MutableClone();
                     var card = picked.First();
-
-                    // 无限附魔逻辑
-                    if (!InfiniteEnchant_Enchant.Store.TryGetValue(card, out var dict))
-                        InfiniteEnchant_Enchant.Store[card] = dict = new Dictionary<string, EnchantmentModel>();
-
-                    var typeKey = mutableEnch.GetType().FullName!;
-
-                    if (dict.TryGetValue(typeKey, out var existing))
-                        existing.Amount += 1;
-                    else
-                    {
-                        mutableEnch.Amount = 1;
-                        dict[typeKey] = mutableEnch;
-                        card.EnchantInternal(mutableEnch, 1);
-                    }
-
-                    // 全量重刷所有附魔效果
-                    var prop2 = typeof(CardModel).GetProperty("Enchantment",
-                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!;
-                    foreach (var e2 in dict.Values)
-                    {
-                        if (card.Enchantment != e2) prop2.SetValue(card, e2);
-                        e2.ModifyCard();
-                    }
-                    prop2.SetValue(card, dict.Values.First());
-                    card.FinalizeUpgradeInternal();
+                    await CardCmd.Enchant(mutableEnch, card, 1);
                     await RelicCmd.Remove(lose);
                     Refresh();
                 }, key, tips));
