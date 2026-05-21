@@ -2,11 +2,11 @@ using System.Collections.Generic;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
+using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Rewards;
 using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.Models.RelicPools;
-using STS2_ShunMod.Core;
 using STS2_ShunMod.Core.Registration;
 
 namespace STS2_ShunMod.Relics;
@@ -18,7 +18,7 @@ namespace STS2_ShunMod.Relics;
 [Pool(typeof(SharedRelicPool))]
 public sealed class ShunModBossTrophy : RelicModel
 {
-    public override RelicRarity Rarity => RelicRarity.Boss;
+    public override RelicRarity Rarity => RelicRarity.Rare;
 
     public override bool TryModifyRewards(Player player, List<Reward> rewards, AbstractRoom? room)
     {
