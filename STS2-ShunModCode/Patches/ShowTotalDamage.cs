@@ -1,4 +1,5 @@
 using HarmonyLib;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Models;
 using STS2_ShunMod.Core;
@@ -17,7 +18,7 @@ namespace STS2_ShunMod.Patches;
 // ════════════════════════════════════════════════════════
 
 [HarmonyPatch(typeof(CardModel), "GetDescriptionForPile",
-    [typeof(PileType), typeof(Creature)])]
+    typeof(PileType), typeof(Creature))]
 public static class ShowTotalDamage_Description
 {
     [HarmonyPostfix]
