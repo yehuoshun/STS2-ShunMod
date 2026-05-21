@@ -12,8 +12,7 @@ using STS2_ShunMod.Core.Registration;
 namespace STS2_ShunMod.Relics;
 
 /// <summary>
-///     首领奖杯 — Boss 遗物。
-///     击杀 Boss 后，最大生命值 +25%。
+///     首领奖杯 — 击杀 Boss 后最大生命值 +25%。
 /// </summary>
 [Pool(typeof(SharedRelicPool))]
 public sealed class ShunModBossTrophy : RelicModel
@@ -31,7 +30,6 @@ public sealed class ShunModBossTrophy : RelicModel
         if (gain > 0)
             TaskHelper.RunSafely(CreatureCmd.GainMaxHp(Owner.Creature, gain));
 
-        // 不改奖励，只触发 HP 增长
         return false;
     }
 }
