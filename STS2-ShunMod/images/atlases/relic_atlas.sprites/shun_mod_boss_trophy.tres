@@ -1,6 +1,6 @@
 [gd_resource type="AtlasTexture" load_steps=2 format=3]
 
-[ext_resource type="Texture2D" path="res://STS2-ShunMod/images/relics/shun_mod_boss_trophy.png" id="1"]
+[ext_resource type="Texture2D" path="res://STS2-ShunMod/images/relics/shun_mod_boss_trophy/shun_mod_boss_trophy.png" id="1"]
 
 [resource]
 atlas = ExtResource("1")
