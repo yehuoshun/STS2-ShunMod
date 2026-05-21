@@ -21,6 +21,7 @@
 
 | 名称 | 稀有度 | 效果 |
 |---|---|---|
+| 🏆 首领奖杯 | 稀有 | 击杀 Boss 后最大生命值 +25%。 |
 
 ---
 
@@ -60,6 +61,8 @@ STS2-ShunMod/
 │   ├── MainFile.cs                 # Mod 入口（Harmony + 自动注册）
 │   ├── Cards/
 │   │   └── SuperApotheosis.cs      # 超级神化卡牌
+│   ├── Relics/
+│   │   └── ShunModBossTrophy.cs    # 首领奖杯遗物
 │   ├── Events/
 │   │   └── ShunModRelicExchange.cs   # 遗物交易所
 │   ├── Core/
