@@ -109,13 +109,18 @@ internal static class PotionFillForwardLogic
 
     private static void CompactIfNeeded(List<NPotionHolder> holders, Player player)
     {
+        // 收集现有药水的 canonical 模型（不直接用 h.Potion.Model，
+        // 因为它可能是之前 Compact 产生的 mutable clone，再次 ToMutable 会炸）
         var models = new List<PotionModel>();
         for (var i = 0; i < holders.Count; i++)
         {
             var h = holders[i];
             if (h == null || !GodotObject.IsInstanceValid(h)) continue;
             if (!h.HasPotion || h.Potion == null) continue;
-            models.Add(h.Potion.Model);
+            // 从 ModelDb 取 canonical 版本，避免 mutable 链
+            var canonical = ModelDb.GetByIdOrNull<PotionModel>(h.Potion.Model.Id);
+            if (canonical != null)
+                models.Add(canonical);
         }
 
         if (models.Count == 0) return;
@@ -160,8 +165,8 @@ internal static class PotionFillForwardLogic
         for (var i = 0; i < models.Count; i++)
         {
             var index = i;
-            var mutable = models[i].ToMutable();
-            TaskHelper.RunSafely(PotionCmd.TryToProcure(mutable, player, index));
+            // 不调 .ToMutable()——TryToProcure 内部会处理克隆
+            TaskHelper.RunSafely(PotionCmd.TryToProcure(models[i], player, index));
         }
 
         ShunLogger.Info("药水填充", $"{models.Count} 个药水已前移");
@@ -214,7 +219,7 @@ internal static class PotionFillForwardLogic
         }
 
         ShunLogger.Info("混沌药水", $"→ 栏位 {emptyIdx}");
-        TaskHelper.RunSafely(PotionCmd.TryToProcure(chaos.ToMutable(), player, emptyIdx));
+        TaskHelper.RunSafely(PotionCmd.TryToProcure(chaos, player, emptyIdx));
     }
 
     private static void ClearPotion(NPotionHolder holder)
