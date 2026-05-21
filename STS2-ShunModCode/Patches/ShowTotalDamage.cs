@@ -10,8 +10,10 @@ namespace STS2_ShunMod.Patches;
 // 多段卡 / X 卡在描述末尾追加总伤害 = 单段伤害 × 段数
 // 中英双语显示
 //
-// 源码：public string GetDescriptionForPile(PileType, Creature?)
-//       内部调用 private GetDescriptionForPile(PileType, DescriptionPreviewType, Creature?)
+// 段数来源（三者乘积）：
+//   1) 原生 HitCount（DynamicVars.Repeat / CalculatedHits）
+//   2) 重放次数（GetEnchantedReplayCount + 1）
+// 当总段数 > 1 时才追加显示。
 // ════════════════════════════════════════════════════════
 
 [HarmonyPatch(typeof(CardModel), "GetDescriptionForPile",
@@ -23,13 +25,16 @@ public static class ShowTotalDamage_Description
     {
         try
         {
-            var replays = __instance.GetEnchantedReplayCount();
-            if (replays <= 0) return;
-
             var perHit = GetDamageValue(__instance);
             if (perHit <= 0) return;
 
-            var totalHits = replays + 1;
+            var nativeHits = GetNativeHitCount(__instance);
+            var replays = __instance.GetEnchantedReplayCount();
+            var totalHits = nativeHits * (replays + 1);
+
+            // 总段数 ≤ 1 无需显示
+            if (totalHits <= 1) return;
+
             var total = perHit * totalHits;
 
             // 中英双语：total damage / 总伤害
@@ -50,5 +55,22 @@ public static class ShowTotalDamage_Description
         if (card.DynamicVars.TryGetValue("Damage", out dv) && dv.PreviewValue > 0)
             return dv.PreviewValue;
         return 0;
+    }
+
+    /// <summary>
+    ///     获取卡牌原生段数。
+    ///     STS2 多段卡通过 DynamicVars.Repeat 或 CalculatedHits 声明段数。
+    /// </summary>
+    private static int GetNativeHitCount(CardModel card)
+    {
+        // 方式一：DynamicVars.Repeat — 如 GunkUp / Peck
+        if (card.DynamicVars.TryGetValue("Repeat", out var dv) && dv.PreviewValue > 0)
+            return (int)dv.PreviewValue;
+
+        // 方式二：CalculatedHits — 如 HelixDrill / LunarBlast / PullFromBelow / Radiate
+        if (card.DynamicVars.TryGetValue("CalculatedHits", out dv) && dv.PreviewValue > 0)
+            return (int)dv.PreviewValue;
+
+        return 1;
     }
 }

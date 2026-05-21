@@ -21,7 +21,7 @@ public static class InfiniteEnchant_CanEnchant
     /// <summary>
     ///     源码：virtual bool CanEnchant(CardModel card)
     /// </summary>
-    private static MethodBase TargetMethod()
+    private static MethodBase? TargetMethod()
     {
         var types = new[] { typeof(CardModel) };
         var method = AccessTools.Method(typeof(EnchantmentModel), "CanEnchant", types);
@@ -32,7 +32,7 @@ public static class InfiniteEnchant_CanEnchant
         }
 
         ShunLogger.Warn("无限附魔/CanEnchant", "未找到 CanEnchant(CardModel)，补丁跳过");
-        return null!;
+        return null;
     }
 
     [HarmonyPostfix]
@@ -70,7 +70,7 @@ public static class InfiniteEnchant_Enchant
         }
 
         ShunLogger.Warn("无限附魔/Enchant", $"未找到 CardCmd.Enchant(EnchantmentModel, CardModel, decimal)，补丁跳过");
-        return null!;
+        return null;
     }
 
     [HarmonyPrefix]
