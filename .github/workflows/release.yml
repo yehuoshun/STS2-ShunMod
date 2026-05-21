@@ -87,15 +87,79 @@ jobs:
       - name: Generate release notes
         run: |
           PREV=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+          # 过滤掉版本号 bump 提交
+          if [ -n "$PREV" ]; then
+            LOG=$(git log ${PREV}..HEAD --pretty=format:"%s|||%h|||%H" --reverse | grep -v "^chore: bump to")
+          else
+            LOG=$(git log --pretty=format:"%s|||%h|||%H" --reverse | grep -v "^chore: bump to")
+          fi
+
+          # 按前缀分类
+          FEATS=$(echo "$LOG" | grep "^feat" || true)
+          FIXES=$(echo "$LOG" | grep "^fix" || true)
+          REFACTORS=$(echo "$LOG" | grep "^refactor" || true)
+          DOCS=$(echo "$LOG" | grep "^docs" || true)
+          CHORES=$(echo "$LOG" | grep "^chore" || true)
+          OTHERS=$(echo "$LOG" | grep -v "^feat\|^fix\|^refactor\|^docs\|^chore" || true)
+
+          fmt() {
+            echo "$1" | while IFS='|||' read -r msg hash full; do
+              [ -z "$msg" ] && continue
+              echo "- ${msg#feat: }${msg#fix: }${msg#refactor: }${msg#docs: }${msg#chore: } ([${hash}](https://github.com/${{ github.repository }}/commit/${full}))"
+            done
+          }
+
           {
+            echo "## 🚀 安装"
+            echo ""
+            echo "下载 \`STS2-ShunMod.zip\`，解压到 \`Mods/STS2-ShunMod/\`，启动游戏。"
+            echo ""
+            echo "---"
+            echo ""
+            V=$(python3 -c "import json; d=json.load(open('STS2-ShunMod.json')); print(d['version'])")
+            echo "## ⚠️ 已知问题"
+            echo ""
+            echo "- 无"
+            echo ""
+            echo "---"
+            echo ""
             echo "## 更新内容"
             echo ""
             if [ -n "$PREV" ]; then
-              echo "自 $PREV 以来的更改："
+              echo "> 自 \`$PREV\` 以来的更改"
               echo ""
-              git log ${PREV}..HEAD --pretty=format:"- %s ([%h](https://github.com/${{ github.repository }}/commit/%H))" --reverse
-            else
-              git log --pretty=format:"- %s ([%h](https://github.com/${{ github.repository }}/commit/%H))" --reverse
+            fi
+
+            if [ -n "$FEATS" ]; then
+              echo "### ✨ 新功能"
+              fmt "$FEATS"
+              echo ""
+            fi
+            if [ -n "$FIXES" ]; then
+              echo "### 🐛 修复"
+              fmt "$FIXES"
+              echo ""
+            fi
+            if [ -n "$REFACTORS" ]; then
+              echo "### ♻️ 重构"
+              fmt "$REFACTORS"
+              echo ""
+            fi
+            if [ -n "$DOCS" ]; then
+              echo "### 📝 文档"
+              fmt "$DOCS"
+              echo ""
+            fi
+            if [ -n "$CHORES" ]; then
+              echo "### 🔧 杂项"
+              fmt "$CHORES"
+              echo ""
+            fi
+            if [ -n "$OTHERS" ]; then
+              echo "### 📦 其他"
+              fmt "$OTHERS"
+              echo ""
             fi
           } > release_notes.md
 
