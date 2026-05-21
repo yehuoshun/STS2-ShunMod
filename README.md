@@ -13,7 +13,7 @@
 
 | 名称 | 费用 | 稀有度 | 类型 | 效果 |
 |---|---|---|---|---|
-| 超级神化 | 2→1 | 稀有·无色 | 技能 | 升级战斗中所有卡牌，同时升级牌组中所有可升级卡牌。消耗。 |
+| 超级神化 | 2→1 | 稀有·无色 | 技能 | 升级战斗中所有卡牌，同时升级牌组中所有可升级卡牌。 |
 
 ---
 
@@ -36,6 +36,7 @@
 | 🔄 药水填充前移 | 使用/丢弃药水后，后方药水自动向前填充空位。 |
 | 🌀 混沌药水保底 | 药水栏始终至少有一个混沌药水。开局/使用/丢弃后自动补充。 |
 | 💥 显示总伤害 | 多段卡/X卡在卡牌描述末尾显示总伤害（单段伤害 × 段数）。 |
+| ⚔️ 君王之剑增强 | SovereignBlade 唯一、不可消耗、任何牌打出后自动抽回手牌。 |
 
 ---
 
@@ -74,14 +75,20 @@ STS2-ShunMod/
 │   │       ├── PoolAttribute.cs    # [Pool] 特性
 │   │       ├── AssemblyScanner.cs  # 安全类型扫描
 │   │       └── ContentRegistry.cs  # 扫描 + 注册
-│   ├── Patches/
-│   │   ├── ShunModEventRegistry.cs  # 自定义事件注入 AllSharedEvents
-│   │   ├── InfiniteUpgrade.cs      # 无限升级（MaxUpgradeLevel）
-│   │   ├── InfiniteEnchant.cs      # 无限附魔（多种附魔共存 + 叠层）
-│   │   ├── BlockRetentionPatch.cs  # 格挡保留
-│   │   ├── HardenedShellPatch.cs   # 硬化外壳修复
-│   │   ├── PotionFillForwardPatch.cs  # 药水填充前移 + 混沌药水保底
-│   │   ├── ShowTotalDamage.cs      # 显示总伤害（多段卡/X卡）
+│   └── Patches/
+│       ├── Cards/
+│       │   ├── InfiniteUpgrade.cs      # 无限升级
+│       │   ├── InfiniteEnchant.cs      # 无限附魔
+│       │   └── SovereignBladePatch.cs  # 君王之剑增强
+│       ├── Combat/
+│       │   ├── BlockRetentionPatch.cs  # 格挡保留
+│       │   ├── HardenedShellPatch.cs   # 硬化外壳修复
+│       │   └── ShowTotalDamage.cs      # 显示总伤害
+│       ├── Events/
+│       │   ├── ShunModEventRegistry.cs  # 事件注册
+│       │   └── EventPortraitRedirectPatch.cs  # 事件肖像重定向
+│       └── Potions/
+│           └── PotionFillForwardPatch.cs  # 药水填充 + 混沌药水保底
 ├── STS2-ShunMod/                   # Godot 资源
 │   ├── cards/                      # 卡牌美术
 │   └── localization/               # 本地化（中/英）
