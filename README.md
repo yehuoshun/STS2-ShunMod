@@ -155,10 +155,13 @@ dotnet build
 
 ### 日志级别
 
-在 `Mods/STS2-ShunMod/logs/` 下创建 `debug-config.json` 控制输出量：
+在 `STS2-ShunMod.json` 中加 `"logLevel"` 字段控制输出量：
 
 ```json
-{ "logLevel": "Minimal" }
+{
+  "id": "STS2-ShunMod",
+  "logLevel": "Minimal"
+}
 ```
 
 | `logLevel` | 输出内容 | 适用场景 |
@@ -167,7 +170,7 @@ dotnet build
 | `Normal` | ERROR + WARN + INFO（**默认**） | 日常开发，看补丁触发情况 |
 | `Verbose` | 全部（含 DEBUG 状态快照 + TRACE 堆栈） | 追 bug |
 
-不创建此文件 = 默认 Normal。修改后**重启游戏**生效。
+不设此字段 = 默认 Normal。修改后**重启游戏**生效。
 
 ### 日志样例
 

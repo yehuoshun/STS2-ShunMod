@@ -45,8 +45,8 @@ public static class ShunLogger
             var logsDir = Path.Combine(dllDir, "logs");
             Directory.CreateDirectory(logsDir);
 
-            // 配置文件放 logs/ 子目录，避免游戏扫描根目录 json 时报错
-            _configPath = Path.Combine(logsDir, "debug-config.json");
+            // 从 mod 自带的 STS2-ShunMod.json 读取配置，不加新文件
+            _configPath = Path.Combine(dllDir, "STS2-ShunMod.json");
             LoadConfig();
 
             var date = DateTime.Now.ToString("yyyy-MM-dd");
