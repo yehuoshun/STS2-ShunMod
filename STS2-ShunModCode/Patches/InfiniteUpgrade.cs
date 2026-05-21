@@ -134,9 +134,12 @@ internal static class InfiniteUpgrade_SerializationContext
 /// </summary>
 internal static class InfiniteUpgrade_Safety
 {
-    // 抽牌敏感方法名：如果卡牌 override 了这些方法，升级可能引发抽牌链
+    // 抽牌敏感方法名：只检查与抽牌直接相关的方法。
+    // OnPlay/OnTurnEndInHand 不在此列——它们需要 IL 字节码分析
+    // 才能判断是否真正调用了抽牌命令（参照 STS2Plus MethodReferencesDrawFlow），
+    // 简化实现中不做分析，让这些卡牌通过。
     private static readonly string[] DrawSensitiveMethods =
-        ["OnPlay", "OnTurnEndInHand", "BeforeHandDraw", "AfterCardDrawn", "ModifyHandDraw"];
+        ["BeforeHandDraw", "AfterCardDrawn", "ModifyHandDraw"];
 
     private static readonly object SyncRoot = new();
     private static readonly Dictionary<Type, bool> DrawSensitiveCache = new();
