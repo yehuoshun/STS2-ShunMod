@@ -46,6 +46,9 @@ public static class InfiniteEnchant_CanEnchant
 }
 
 /// Patch 2 — Enchant 多附魔存储 + 全量重刷
+/// [DISABLED] Harmony 对 static decimal 参数 Prefix 有兼容问题，PatchAll 直接炸。
+/// 保留 CanEnchant 补丁（始终返回 true）暂时足够。
+/*
 [HarmonyPatch]
 public static class InfiniteEnchant_Enchant
 {
@@ -122,3 +125,4 @@ public static class InfiniteEnchant_Enchant
         }
     }
 }
+*/
