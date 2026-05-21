@@ -57,7 +57,16 @@ public static class InfiniteUpgrade_MaxUpgradeLevel
         }
 
         // 2. 子类 override — 覆盖显式覆写了 getter 的卡牌（如原版降级卡可能有特殊逻辑）
-        foreach (var type in typeof(CardModel).Assembly.GetTypes())
+        //    必须处理 ReflectionTypeLoadException：IL2CPP 等平台某些类型加载失败会炸 GetTypes()
+        Type[] allTypes;
+        try { allTypes = typeof(CardModel).Assembly.GetTypes(); }
+        catch (ReflectionTypeLoadException e)
+        {
+            allTypes = e.Types.Where(t => t != null).Cast<Type>().ToArray();
+            ShunLogger.Warn("无限升级/TargetMethods", $"ReflectionTypeLoadException, 可用类型 {allTypes.Length}");
+        }
+
+        foreach (var type in allTypes)
         {
             if (type.IsAbstract || !typeof(CardModel).IsAssignableFrom(type))
                 continue;
@@ -70,7 +79,7 @@ public static class InfiniteUpgrade_MaxUpgradeLevel
             }
         }
 
-        ShunLogger.Info("无限升级/TargetMethods", $"扫描到 {count} 个 MaxUpgradeLevel getter");
+        ShunLogger.Info("无限升级/TargetMethods", $"扫描到 {count} 个 MaxUpgradeLevel getter（基类+{count - 1}子类）");
     }
 
     [HarmonyPostfix]

@@ -15,11 +15,44 @@ namespace STS2_ShunMod.Patches;
 ///     药水填充前移 + 混沌药水保底。
 ///     使用/丢弃后后方药水向前填充，若无混沌药水则自动补充。
 ///
-///     实现机制：不搬 Godot 节点（避免场景树竞态），
-///     而是收集模型 → 清除栏位 → 通过 PotionCmd.TryToProcure 重新获取。
+///     三个独立类分别 Patch RemoveUsed / Discard / Initialize，
+///     共用 PotionFillForwardLogic 处理实际逻辑。
 /// </summary>
-[HarmonyPatchCategory("Gameplay")]
-internal static class PotionFillForwardPatch
+
+// ──────────────────────────────────────────
+//  Patch 1: RemoveUsed（使用药水后）
+// ──────────────────────────────────────────
+[HarmonyPatch(typeof(NPotionContainer), "RemoveUsed")]
+internal static class PotionFillForward_RemoveUsed
+{
+    [HarmonyPostfix]
+    private static void Postfix(NPotionContainer __instance) => PotionFillForwardLogic.OnPotionChanged(__instance);
+}
+
+// ──────────────────────────────────────────
+//  Patch 2: Discard（丢弃药水后）
+// ──────────────────────────────────────────
+[HarmonyPatch(typeof(NPotionContainer), "Discard")]
+internal static class PotionFillForward_Discard
+{
+    [HarmonyPostfix]
+    private static void Postfix(NPotionContainer __instance) => PotionFillForwardLogic.OnPotionChanged(__instance);
+}
+
+// ──────────────────────────────────────────
+//  Patch 3: Initialize（开局初始化）
+// ──────────────────────────────────────────
+[HarmonyPatch(typeof(NPotionContainer), "Initialize")]
+internal static class PotionFillForward_Initialize
+{
+    [HarmonyPostfix]
+    private static void Postfix(NPotionContainer __instance) => PotionFillForwardLogic.OnPotionChanged(__instance);
+}
+
+// ═══════════════════════════════════════════════
+//  共享逻辑
+// ═══════════════════════════════════════════════
+internal static class PotionFillForwardLogic
 {
     private const string ChaosPotionName = "EntropicBrew";
 
@@ -31,8 +64,6 @@ internal static class PotionFillForwardPatch
         AccessTools.Field(typeof(NPotionContainer), "_player");
 
     // ── NPotionHolder ──
-    // Potion setter 是 private { get; private set; }，必须用反射；
-    // 回退到 backing field 以防 PropertySetter 找不到
     private static readonly MethodInfo? PotionSetter =
         AccessTools.PropertySetter(typeof(NPotionHolder), "Potion");
 
@@ -44,27 +75,7 @@ internal static class PotionFillForwardPatch
 
     private static bool _validated;
 
-    // ═══════════════════════════════════════════════
-    //  Harmony Patches
-    // ═══════════════════════════════════════════════
-
-    [HarmonyPatch(typeof(NPotionContainer), "RemoveUsed")]
-    [HarmonyPostfix]
-    private static void OnRemoveUsed(NPotionContainer __instance) => OnPotionChanged(__instance);
-
-    [HarmonyPatch(typeof(NPotionContainer), "Discard")]
-    [HarmonyPostfix]
-    private static void OnDiscard(NPotionContainer __instance) => OnPotionChanged(__instance);
-
-    [HarmonyPatch(typeof(NPotionContainer), "Initialize")]
-    [HarmonyPostfix]
-    private static void OnInitialize(NPotionContainer __instance) => OnPotionChanged(__instance);
-
-    // ═══════════════════════════════════════════════
-    //  核心逻辑
-    // ═══════════════════════════════════════════════
-
-    private static void OnPotionChanged(NPotionContainer container)
+    internal static void OnPotionChanged(NPotionContainer container)
     {
         try
         {
@@ -97,12 +108,8 @@ internal static class PotionFillForwardPatch
             $"PotionSetter={PotionSetter != null}, PotionBacking={PotionBackingField != null}");
     }
 
-    /// <summary>
-    ///     收集所有药水模型 → 清除所有栏位 → 重新从左获取。
-    /// </summary>
     private static void CompactIfNeeded(List<NPotionHolder> holders, Player player)
     {
-        // 1. 收集药水模型（从左到右，跳过空栏）
         var models = new List<PotionModel>();
         for (var i = 0; i < holders.Count; i++)
         {
@@ -114,7 +121,6 @@ internal static class PotionFillForwardPatch
 
         if (models.Count == 0) return;
 
-        // 2. 检测是否有间隙
         var found = 0;
         var needCompact = false;
         for (var i = 0; i < holders.Count; i++)
@@ -127,11 +133,14 @@ internal static class PotionFillForwardPatch
             { needCompact = true; break; }
         }
 
-        if (!needCompact) return;
+        if (!needCompact)
+        {
+            ShunLogger.Debug("药水填充", $"无间隙，{models.Count} 个药水已连续");
+            return;
+        }
 
         ShunLogger.Info("药水填充", $"检测到间隙 → 整理 {models.Count} 个药水");
 
-        // 3. 清除所有 holder 的药水
         for (var i = 0; i < holders.Count; i++)
         {
             var h = holders[i];
@@ -140,7 +149,6 @@ internal static class PotionFillForwardPatch
             var potion = h.Potion;
             ClearPotion(h);
 
-            // 清理孤立的 NPotion 节点
             if (potion != null && GodotObject.IsInstanceValid(potion))
             {
                 h.RemoveChildSafely(potion);
@@ -150,7 +158,6 @@ internal static class PotionFillForwardPatch
             RestoreEmptyIcon(h);
         }
 
-        // 4. 从左到右重新获取
         for (var i = 0; i < models.Count; i++)
         {
             var index = i;
@@ -161,9 +168,6 @@ internal static class PotionFillForwardPatch
         ShunLogger.Info("药水填充", $"{models.Count} 个药水已前移");
     }
 
-    /// <summary>
-    ///     确保药水带中存在至少一瓶混沌药水（EntropicBrew）。
-    /// </summary>
     private static void EnsureEntropicBrew(List<NPotionHolder> holders, Player player)
     {
         foreach (var h in holders)
@@ -197,14 +201,6 @@ internal static class PotionFillForwardPatch
         TaskHelper.RunSafely(PotionCmd.TryToProcure(chaos.ToMutable(), player, emptyIdx));
     }
 
-    // ═══════════════════════════════════════════════
-    //  工具方法
-    // ═══════════════════════════════════════════════
-
-    /// <summary>
-    ///     清除 holder 中的药水引用。
-    ///     优先用 PropertySetter 反射，回退到 backing field。
-    /// </summary>
     private static void ClearPotion(NPotionHolder holder)
     {
         try
