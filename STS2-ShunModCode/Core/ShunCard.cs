@@ -37,8 +37,8 @@ public abstract class ShunCard : CardModel
     /// <param name="type">卡牌类型（攻击 / 技能 / 能力）</param>
     /// <param name="rarity">稀有度</param>
     /// <param name="target">目标类型</param>
-    protected ShunCard(int baseCost, CardType type, CardRarity rarity, TargetType target, bool showInLibrary = true)
-        : base(baseCost, type, rarity, target, showInLibrary)
+    protected ShunCard(int baseCost, CardType type, CardRarity rarity, TargetType target)
+        : base(baseCost, type, rarity, target)
     {
     }
 

@@ -1,91 +1,77 @@
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Cards;
 using STS2_ShunMod.Core;
 
 namespace STS2_ShunMod.Patches;
 
 /// <summary>
-///     君王之剑 — 全局效果补丁。
-///     1. 禁止消化/复制
-///     2. 任何卡牌打出后，若君王之剑在任意牌堆中则抽到手牌
+///     君王之剑（SovereignBlade）增强补丁。
+///     1. 唯一 — 不可复制
+///     2. 不可消耗
+///     3. 任何牌打出后，若君王之剑在任意牌堆中则抽到手牌
 /// </summary>
-internal static class KingsSwordPatch
+internal static class SovereignBladePatch
 {
-    // ══════════════════════════ 禁止消化 ══════════════════════════
+    // ══════════════════════════ 禁止消耗 ══════════════════════════
 
-    /// <summary>拦截 CardCmd.Exhaust，君王之剑不可消化</summary>
     [HarmonyPatch(typeof(CardCmd), nameof(CardCmd.Exhaust), typeof(PlayerChoiceContext), typeof(CardModel),
         typeof(bool), typeof(bool))]
     [HarmonyPrefix]
-    private static bool Exhaust_Prefix(PlayerChoiceContext ctx, CardModel card, bool causedByEthereal, bool skipVisuals)
+    private static bool Exhaust_Prefix(CardModel card)
     {
-        if (card is ShunModKingsSword)
-        {
-            ShunLogger.Debug("君王之剑", "拦截消化");
-            return false; // 跳过消化
-        }
+        if (card is SovereignBlade)
+            return false; // 不可消耗
+        return true;
+    }
 
+    // ══════════════════════════ 禁止复制 ══════════════════════════
+
+    [HarmonyPatch(typeof(CardCmd), "Duplicate")]
+    [HarmonyPrefix]
+    private static bool Duplicate_Prefix(CardModel card)
+    {
+        if (card is SovereignBlade)
+            return false; // 不可复制
         return true;
     }
 
     // ══════════════════════════ 任何牌打出后抽回 ══════════════════════════
 
     /// <summary>
-    ///     Patch 所有 CardModel 子类的 OnPlayCore 内部调用的 AfterCardPlayed。
-    ///     直接 Patch CardModel.PlayCard 的末尾段太复杂，改为 Patch
-    ///     CombatManager 的 CardPlayFinished 之后的流程。
+    ///     Patch CardModel.PlayCard — 任何卡牌打出后，搜索所有牌堆中的 SovereignBlade 并抽回。
     /// </summary>
     [HarmonyPatch(typeof(CardModel), "PlayCard")]
     [HarmonyPostfix]
     private static async void PlayCard_Postfix(CardModel __instance)
     {
-        // 仅处理打出者是自己拥有者的情况
         var owner = __instance.Owner;
         if (owner == null) return;
+        if (__instance is SovereignBlade) return; // 自己打出不管
 
-        // 跳过君王之剑自己
-        if (__instance is ShunModKingsSword) return;
-
-        // 在持有者的所有牌堆中搜索君王之剑
-        var card = FindKingsSword(owner);
-        if (card == null) return;
-
-        // 抽到手牌
-        if (card.Pile != null && card.Pile.Type != PileType.Hand)
-            await CardPileCmd.Add(card, PileType.Hand);
-    }
-
-    // ══════════════════════════ 禁止复制 ══════════════════════════
-
-    /// <summary>拦截卡片复制指令</summary>
-    [HarmonyPatch(typeof(CardCmd), "Duplicate")]
-    [HarmonyPrefix]
-    private static bool Duplicate_Prefix(CardModel card)
-    {
-        if (card is ShunModKingsSword)
-            return false; // 不可复制
-
-        return true;
-    }
-
-    // ══════════════════════════ 工具方法 ══════════════════════════
-
-    private static ShunModKingsSword? FindKingsSword(PlayerModel owner)
-    {
-        var piles = new[] { PileType.Draw, PileType.Discard, PileType.Exhaust };
-        foreach (var pileType in piles)
+        // 在所有牌堆中找君王之剑
+        SovereignBlade? blade = null;
+        foreach (var pileType in new[] { PileType.Draw, PileType.Discard, PileType.Hand })
         {
             var pile = pileType.GetPile(owner);
             if (pile == null) continue;
             foreach (var c in pile.Cards)
-                if (c is ShunModKingsSword sword)
-                    return sword;
+            {
+                if (c is SovereignBlade sb)
+                {
+                    blade = sb;
+                    break;
+                }
+            }
+            if (blade != null) break;
         }
-        return null;
+
+        if (blade == null || blade.Pile?.Type == PileType.Hand) return;
+
+        ShunLogger.Debug("君王之剑", $"从 {blade.Pile?.Type} 抽回手牌");
+        await CardPileCmd.Add(blade, PileType.Hand);
     }
 }
