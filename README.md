@@ -64,6 +64,7 @@ STS2-ShunMod/
 │   │   └── ShunModRelicExchange.cs   # 遗物交易所
 │   ├── Core/
 │   │   ├── ShunCard.cs             # 卡牌基类（链式配置）
+│   │   ├── ShunLogger.cs           # 独立日志（logs/shunmod-YYYY-MM-DD.log）
 │   │   ├── CreatureReflection.cs   # Creature 反射工具
 │   │   ├── RelicHelper.cs          # 遗物反射工具
 │   │   └── Registration/           # 自动注册系统
@@ -145,6 +146,23 @@ dotnet build
 ```
 
 产物输出到 `.godot/mono/temp/bin/Release/`。
+
+---
+
+## 调试
+
+模组日志独立写入 `Mods/STS2-ShunMod/logs/shunmod-YYYY-MM-DD.log`，与游戏本体日志分离。
+
+```
+[10:30:01.234] [INFO] [STS2-ShunMod] Harmony PatchAll 完成，共 12 个方法已注入
+[10:30:01.456] [INFO] [无限升级/TargetMethods] 扫描到 28 个 MaxUpgradeLevel getter
+[10:35:22.789] [INFO] [无限附魔/Enchant] card=Strike type=MegaCrit.Sts2.Core.Models.Enchantments.StrengthEnchantmentModel amount=3
+[10:35:22.790] [ERROR] [无限升级/反序列化] NullReferenceException: ...
+```
+
+日志级别：INFO（正常触发）、WARN（异常但可恢复）、ERROR（异常/报错）。
+
+出问题时直接看最后一个报错在哪个 patch，不用翻游戏本体日志。
 
 ---
 

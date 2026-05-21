@@ -4,6 +4,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
+using STS2_ShunMod.Core;
 
 namespace STS2_ShunMod.Patches;
 
@@ -51,5 +52,6 @@ public static class ShowTotalDamage_Description
         decimal total = perHit * totalHits;
 
         __result += $"\n[color=#ffcc00]({perHit} × {totalHits} = {total} total damage)[/color]";
+        ShunLogger.Info("总伤害", $"{__instance.GetType().Name}: {perHit}×{totalHits}={total}");
     }
 }

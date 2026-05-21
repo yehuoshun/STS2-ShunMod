@@ -60,5 +60,6 @@ public static class BlockRetentionPrepareForNextTurnPatch
             return;
 
         CreatureReflection.SetBlock(__instance, __state);
+        ShunLogger.Info("格挡保留/回合结束", $"恢复格挡: {__state}");
     }
 }

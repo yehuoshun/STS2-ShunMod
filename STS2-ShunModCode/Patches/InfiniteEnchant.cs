@@ -2,6 +2,7 @@ using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Models;
+using STS2_ShunMod.Core;
 
 namespace STS2_ShunMod.Patches;
 
@@ -19,7 +20,14 @@ namespace STS2_ShunMod.Patches;
 [HarmonyPatch(typeof(EnchantmentModel), nameof(EnchantmentModel.CanEnchant))]
 public static class InfiniteEnchant_CanEnchant
 {
-    private static void Postfix(ref bool __result) => __result = true;
+    private static void Postfix(ref bool __result)
+    {
+        if (!__result)
+        {
+            __result = true;
+            ShunLogger.Info("无限附魔/CanEnchant", "强制返回 true");
+        }
+    }
 }
 
 [HarmonyPatch(typeof(CardCmd), nameof(CardCmd.Enchant), typeof(EnchantmentModel), typeof(CardModel), typeof(decimal))]
@@ -58,6 +66,7 @@ public static class InfiniteEnchant_Enchant
         // 全量重刷所有附魔效果
         foreach (var e in dict.Values)
         {
+            ShunLogger.Info("无限附魔/Enchant", $"card={card.GetType().Name} type={key} amount={e.Amount}");
             if (card.Enchantment != e) Prop.SetValue(card, e);
             e.ModifyCard();
         }

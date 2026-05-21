@@ -46,10 +46,15 @@ public static class InfiniteUpgrade_MaxUpgradeLevel
 {
     private static IEnumerable<MethodBase> TargetMethods()
     {
+        var count = 0;
+
         // 1. 基类 virtual getter — 覆盖所有未显式 override 的卡牌
         var baseGetter = AccessTools.PropertyGetter(typeof(CardModel), nameof(CardModel.MaxUpgradeLevel));
         if (baseGetter != null)
+        {
+            count++;
             yield return baseGetter;
+        }
 
         // 2. 子类 override — 覆盖显式覆写了 getter 的卡牌（如原版降级卡可能有特殊逻辑）
         foreach (var type in typeof(CardModel).Assembly.GetTypes())
@@ -59,8 +64,13 @@ public static class InfiniteUpgrade_MaxUpgradeLevel
 
             var getter = AccessTools.PropertyGetter(type, nameof(CardModel.MaxUpgradeLevel));
             if (getter != null && getter.DeclaringType == type)
+            {
+                count++;
                 yield return getter;
+            }
         }
+
+        ShunLogger.Info("无限升级/TargetMethods", $"扫描到 {count} 个 MaxUpgradeLevel getter");
     }
 
     [HarmonyPostfix]
@@ -79,7 +89,9 @@ public static class InfiniteUpgrade_MaxUpgradeLevel
         // 常规运行时：移除升级上限
         if (__result > 0 && __result < UpgradeConst.MaxUpgradeCap)
         {
+            var old = __result;
             __result = UpgradeConst.MaxUpgradeCap;
+            ShunLogger.Info("无限升级/MaxUpgrade", $"{__instance.GetType().Name}: {old} → {__result}");
         }
     }
 }
@@ -95,7 +107,10 @@ public static class InfiniteUpgrade_IsUpgradable
     private static void Postfix(CardModel __instance, ref bool __result)
     {
         if (!__result && __instance is ShunCard)
+        {
             __result = true;
+            ShunLogger.Info("无限升级/IsUpgradable", $"{__instance.GetType().Name} 兜底强制可升级");
+        }
     }
 }
 
@@ -121,13 +136,18 @@ public static class InfiniteUpgrade_Deserialize
     private static void Prefix(SerializableCard save)
     {
         if (save.CurrentUpgradeLevel > 1)
+        {
             UpgradeSerializationContext.Push(save.CurrentUpgradeLevel);
+            ShunLogger.Info("无限升级/反序列化", $"Push 存档等级={save.CurrentUpgradeLevel}");
+        }
     }
 
     [HarmonyFinalizer]
     private static Exception? Finalizer(Exception? __exception)
     {
         UpgradeSerializationContext.Pop();
+        if (__exception != null)
+            ShunLogger.Error("无限升级/反序列化", __exception);
         return __exception;
     }
 }

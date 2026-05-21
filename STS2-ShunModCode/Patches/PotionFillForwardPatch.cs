@@ -7,6 +7,7 @@ using MegaCrit.Sts2.Core.Factories;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Nodes.Potions;
+using STS2_ShunMod.Core;
 
 namespace STS2_ShunMod.Patches;
 
@@ -59,6 +60,7 @@ internal static class PotionFillForwardPatch
         var holders = HoldersField?.GetValue(container) as List<NPotionHolder>;
         if (holders == null) return;
 
+        var moved = 0;
         for (var i = 0; i < holders.Count; i++)
         {
             if (holders[i] == null || !GodotObject.IsInstanceValid(holders[i]))
@@ -79,9 +81,13 @@ internal static class PotionFillForwardPatch
                 if (EmptyIconField?.GetValue(holders[j]) is CanvasItem emptyIcon)
                     emptyIcon.Modulate = Colors.White;
                 holders[i].AddPotion(potion!);
+                moved++;
                 break;
             }
         }
+
+        if (moved > 0)
+            ShunLogger.Info("药水填充", $"前移 {moved} 个药水");
     }
 
     private static void EnsureEntropicBrew(NPotionContainer container)
@@ -114,8 +120,13 @@ internal static class PotionFillForwardPatch
         // 从药水池中找混沌药水
         var options = PotionFactory.GetPotionOptions(player, Array.Empty<PotionModel>());
         var chaos = options.FirstOrDefault(p => p.GetType().Name == ChaosPotionName);
-        if (chaos == null) return;
+        if (chaos == null)
+        {
+            ShunLogger.Warn("混沌药水", "药水池中无混沌药水");
+            return;
+        }
 
+        ShunLogger.Info("混沌药水", $"自动补充到栏位 {emptyIndex}");
         var mutable = chaos.ToMutable();
         TaskHelper.RunSafely(PotionCmd.TryToProcure(mutable, player, emptyIndex));
     }

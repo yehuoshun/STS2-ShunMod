@@ -2,6 +2,7 @@ using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
+using STS2_ShunMod.Core;
 using STS2_ShunMod.Core.Registration;
 
 namespace STS2_ShunMod;
@@ -35,13 +36,19 @@ public static class MainFile
     /// <exception cref="Exception">Harmony 补丁或内容注册失败时捕获并记录日志</exception>
     public static void Initialize()
     {
+        ShunLogger.Summary(ModId);
+
         try
         {
             _harmony.PatchAll();
+            ShunLogger.Info(ModId, $"Harmony PatchAll 完成，共 {_harmony.GetPatchedMethods().Count()} 个方法已注入");
+
             ContentRegistry.RegisterAll(Assembly.GetExecutingAssembly());
+            ShunLogger.Info(ModId, "内容注册完成");
         }
         catch (Exception e)
         {
+            ShunLogger.Error(ModId, e);
             Log.Error(ModId + " - 加载失败");
             Log.Error(e.Message);
             return;
