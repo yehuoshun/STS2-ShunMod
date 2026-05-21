@@ -18,25 +18,20 @@ namespace STS2_ShunMod.Patches;
 [HarmonyPatch]
 public static class InfiniteEnchant_CanEnchant
 {
+    /// <summary>
+    ///     源码：virtual bool CanEnchant(CardModel card)
+    /// </summary>
     private static MethodBase TargetMethod()
     {
-        // 优先尝试属性 getter
-        var getter = AccessTools.PropertyGetter(typeof(EnchantmentModel), "CanEnchant");
-        if (getter != null)
-        {
-            ShunLogger.Info("无限附魔/CanEnchant", "匹配 CanEnchant getter");
-            return getter;
-        }
-
-        // 回退到无参方法
-        var method = AccessTools.Method(typeof(EnchantmentModel), "CanEnchant", Type.EmptyTypes);
+        var types = new[] { typeof(CardModel) };
+        var method = AccessTools.Method(typeof(EnchantmentModel), "CanEnchant", types);
         if (method != null)
         {
-            ShunLogger.Info("无限附魔/CanEnchant", "匹配 CanEnchant() 方法");
+            ShunLogger.Info("无限附魔/CanEnchant", "匹配 CanEnchant(CardModel)");
             return method;
         }
 
-        ShunLogger.Warn("无限附魔/CanEnchant", "未找到目标，补丁跳过");
+        ShunLogger.Warn("无限附魔/CanEnchant", "未找到 CanEnchant(CardModel)，补丁跳过");
         return null!;
     }
 

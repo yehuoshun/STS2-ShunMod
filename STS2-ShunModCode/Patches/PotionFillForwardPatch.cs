@@ -28,6 +28,9 @@ internal static class PotionFillForwardPatch
         AccessTools.Field(typeof(NPotionContainer), "_player");
 
     // ── NPotionHolder ──
+    private static readonly MethodInfo? PotionSetter =
+        AccessTools.PropertySetter(typeof(NPotionHolder), "Potion");
+
     private static readonly FieldInfo EmptyIconField =
         AccessTools.Field(typeof(NPotionHolder), "_emptyIcon");
 
@@ -115,12 +118,21 @@ internal static class PotionFillForwardPatch
 
         ShunLogger.Info("药水填充", $"检测到间隙 → 整理 {models.Count} 个药水");
 
-        // 3. 清除所有 holder（Potion setter 负责内部清理，无需手动 RemoveChild）
+        // 3. 清除所有 holder（Potion setter 是 private，用反射）
         for (var i = 0; i < holders.Count; i++)
         {
             var h = holders[i];
             if (h == null || !GodotObject.IsInstanceValid(h) || !h.HasPotion) continue;
-            h.Potion = null;
+
+            var potion = h.Potion;
+            PotionSetter?.Invoke(h, [null]);
+            // 清理孤立的 NPotion 节点
+            if (potion != null)
+            {
+                h.RemoveChildSafely(potion);
+                potion.QueueFreeSafely();
+            }
+
             RestoreEmptyIcon(h);
         }
 
