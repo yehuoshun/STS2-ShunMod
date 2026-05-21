@@ -10,7 +10,7 @@ namespace STS2_ShunMod.Patches;
 // 无限升级系统 — 参考 STS2Plus UnlimitedGrowth 实现
 //
 // Patch 1: MaxUpgradeLevel getter → TargetMethods 拉到 99
-// Patch 2: IsUpgradable getter → ShunCard 强制可升级（兜底）
+// Patch 2: IsUpgradable → ShunCard 强制可升级（兜底）
 // Patch 3: FromSerializable → 保留存档升级等级
 // ════════════════════════════════════════════════════════
 
@@ -106,12 +106,35 @@ public static class InfiniteUpgrade_MaxUpgradeLevel
 }
 
 /// <summary>
-///     Patch 2（兜底）: 直接拦截 IsUpgradable getter。
+///     Patch 2（兜底）: 直接拦截 IsUpgradable。
+///     优先属性 getter，回退到无参方法。
 ///     当 Patch 1 因版本 API 变化未命中时，确保 ShunCard 始终可升级。
 /// </summary>
-[HarmonyPatch(typeof(CardModel), nameof(CardModel.IsUpgradable), MethodType.Getter)]
+[HarmonyPatch]
 public static class InfiniteUpgrade_IsUpgradable
 {
+    private static MethodBase? TargetMethod()
+    {
+        // 优先属性 getter
+        var getter = AccessTools.PropertyGetter(typeof(CardModel), "IsUpgradable");
+        if (getter != null)
+        {
+            ShunLogger.Info("无限升级/IsUpgradable", "匹配 IsUpgradable getter");
+            return getter;
+        }
+
+        // 回退到无参方法
+        var method = AccessTools.Method(typeof(CardModel), "IsUpgradable", Type.EmptyTypes);
+        if (method != null)
+        {
+            ShunLogger.Info("无限升级/IsUpgradable", "匹配 IsUpgradable() 方法");
+            return method;
+        }
+
+        ShunLogger.Warn("无限升级/IsUpgradable", "未找到目标，补丁跳过");
+        return null;
+    }
+
     [HarmonyPostfix]
     private static void Postfix(CardModel __instance, ref bool __result)
     {
@@ -138,9 +161,32 @@ public static class InfiniteUpgrade_IsUpgradable
 ///     所以 Prefix 把存档等级 Push 到 Context，
 ///     Postfix（Patch 1）读到后临时抬高 MaxUpgradeLevel 以通过校验。
 /// </summary>
-[HarmonyPatch(typeof(CardModel), nameof(CardModel.FromSerializable))]
+[HarmonyPatch]
 public static class InfiniteUpgrade_Deserialize
 {
+    private static MethodBase? TargetMethod()
+    {
+        var types = new[] { typeof(SerializableCard) };
+        var method = AccessTools.Method(typeof(CardModel), "FromSerializable", types);
+
+        if (method != null)
+        {
+            ShunLogger.Info("无限升级/反序列化", $"目标: CardModel.FromSerializable(SerializableCard)");
+            return method;
+        }
+
+        // 回退：可能的其他签名
+        method = AccessTools.Method(typeof(CardModel), "FromSerializable");
+        if (method != null)
+        {
+            ShunLogger.Info("无限升级/反序列化", $"模糊匹配: {method}");
+            return method;
+        }
+
+        ShunLogger.Warn("无限升级/反序列化", "未找到目标，补丁跳过");
+        return null;
+    }
+
     [HarmonyPrefix]
     private static void Prefix(SerializableCard save)
     {
