@@ -224,14 +224,12 @@ public class ShunModRelicExchange : EventModel
     }
 
     /// <summary>
-    ///     优先选择头环（Circlet）作为付出的遗物。50% 概率选头环，50% 随机。
+    ///     有头环时百分百选头环，否则随机。
     /// </summary>
     private static RelicModel PreferCirclet(List<RelicModel> available)
     {
         var circlet = available.FirstOrDefault(r => r.GetType().Name == "Circlet");
-        if (circlet != null && Rnd.NextDouble() < 0.5)
-            return circlet;
-        return available[Rnd.Next(available.Count)];
+        return circlet ?? available[Rnd.Next(available.Count)];
     }
 
     // ════════════════════════════════════ 选项 ════════════════════════════════════
