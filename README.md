@@ -36,6 +36,7 @@
 | 🔄 药水填充前移 | 使用/丢弃药水后，后方药水自动向前填充空位。 |
 | 🌀 混沌药水保底 | 药水栏始终至少有一个混沌药水。开局/使用/丢弃后自动补充。 |
 | 💥 显示总伤害 | 多段卡/X卡在卡牌描述末尾显示总伤害（单段伤害 × 段数）。 |
+| ⚔️ 锻造拉回 | 所有 Forge 行为自动将非手牌的 SovereignBlade 拉回手牌。 |
 
 ---
 
@@ -82,7 +83,8 @@ STS2-ShunMod/
 │       ├── Combat/
 │       │   ├── BlockRetentionPatch.cs  # 格挡保留
 │       │   ├── HardenedShellPatch.cs   # 硬化外壳修复
-│       │   └── ShowTotalDamage.cs      # 显示总伤害
+│       │   ├── ShowTotalDamage.cs      # 显示总伤害
+│       │   └── ForgePullBladesToHandPatch.cs  # 锻造拉回 SovereignBlade
 │       ├── Events/
 │       │   ├── ShunModEventRegistry.cs  # 事件注册
 │       │   └── EventPortraitRedirectPatch.cs  # 事件肖像重定向
