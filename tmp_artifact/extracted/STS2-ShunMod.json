@@ -1,0 +1,12 @@
+{
+  "id": "STS2-ShunMod",
+  "name": "STS2-ShunMod",
+  "author": "yehuoshun",
+  "description": "Shun's Slay the Spire 2 Mod - Native",
+  "version": "v0.0.351",
+  "has_pck": true,
+  "has_dll": true,
+  "dependencies": [],
+  "affects_gameplay": true,
+  "_comment": "logLevel 可选: Minimal(只ERROR) / Normal(默认,INFO+WARN+ERROR) / Verbose(含DEBUG+堆栈)"
+}

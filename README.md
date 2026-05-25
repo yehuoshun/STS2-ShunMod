@@ -22,6 +22,7 @@
 | 名称 | 稀有度 | 效果 |
 |---|---|---|
 | 🏆 首领奖杯 | 稀有 | 击杀 Boss 后最大生命值 +25%。 |
+| 🌿 丰饶叶 | 稀有 | 每场战斗开始时，用随机药水填满所有空药水栏位。 |
 
 ---
 
@@ -64,6 +65,7 @@ STS2-ShunMod/
 │   │   └── SuperApotheosis.cs      # 超级神化卡牌
 │   ├── Relics/
 │   │   └── ShunModBossTrophy.cs    # 首领奖杯遗物
+│   │   └── ShunModBountifulFrond.cs # 丰饶叶遗物
 │   ├── Events/
 │   │   └── ShunModRelicExchange.cs   # 遗物交易所
 │   ├── Core/
