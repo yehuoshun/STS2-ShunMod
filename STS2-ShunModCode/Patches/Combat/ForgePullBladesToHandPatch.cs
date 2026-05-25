@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
@@ -25,11 +23,8 @@ public static class ForgePullBladesToHandPatch
     private static async void Postfix(Task<IEnumerable<SovereignBlade>> __result, Player player)
     {
         await __result;
-
+        
         if (player.PlayerCombatState == null)
-            return;
-
-        if (CombatManager.Instance?.IsOverOrEnding != false)
             return;
 
         var blades = player.PlayerCombatState.AllCards
