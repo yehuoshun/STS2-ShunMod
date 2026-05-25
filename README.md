@@ -160,7 +160,7 @@ dotnet build
 
 ## 调试
 
-模组日志独立写入 `Mods/STS2-ShunMod/logs/shunmod-YYYY-MM-DD.log`，与游戏本体日志分离。
+模组日志写入游戏统一目录 `%AppData%/SlayTheSpire2/logs/shunmod-YYYY-MM-DD.log`，与游戏本体日志合并，方便玩家查找。
 
 ### 日志级别
 
