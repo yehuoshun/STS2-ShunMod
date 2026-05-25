@@ -14,3 +14,4 @@ logs/-e
 # Build artifacts
 artifact.zip
 tmp_artifact/
+tmp_original.png
