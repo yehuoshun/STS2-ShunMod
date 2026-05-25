@@ -31,12 +31,10 @@
 |---|---|
 | ♾️ 无限升级 | 卡牌可无限次升级。 |
 | 🛠️ 硬化外壳修复 | 修正硬化外壳能力的减伤数值。 |
-| ✨ 无限附魔 | 卡牌可同时拥有多种附魔并叠加层数。 |
 | 🛡️ 格挡保留 | 格挡永不归零。 |
 | 🔄 药水填充前移 | 使用/丢弃药水后，后方药水自动向前填充空位。 |
 | 🌀 混沌药水保底 | 药水栏始终至少有一个混沌药水。开局/使用/丢弃后自动补充。 |
 | 💥 显示总伤害 | 多段卡/X卡在卡牌描述末尾显示总伤害（单段伤害 × 段数）。 |
-| ⚔️ 君王之剑增强 | SovereignBlade 唯一、不可消耗、任何牌打出后自动抽回手牌。 |
 
 ---
 
@@ -77,9 +75,7 @@ STS2-ShunMod/
 │   │       └── ContentRegistry.cs  # 扫描 + 注册
 │   └── Patches/
 │       ├── Cards/
-│       │   ├── InfiniteUpgrade.cs      # 无限升级
-│       │   ├── InfiniteEnchant.cs      # 无限附魔
-│       │   └── SovereignBladePatch.cs  # 君王之剑增强
+│       │   └── InfiniteUpgrade.cs      # 无限升级
 │       ├── Combat/
 │       │   ├── BlockRetentionPatch.cs  # 格挡保留
 │       │   ├── HardenedShellPatch.cs   # 硬化外壳修复
@@ -187,7 +183,6 @@ dotnet build
 ```
 [10:30:01.234] [INFO] [STS2-ShunMod] ══════════ 日志已启动 (级别: Normal) ══════════
 [10:30:01.456] [INFO] [无限升级/TargetMethods] 扫描到 28 个 MaxUpgradeLevel getter
-[10:35:22.789] [INFO] [无限附魔/Enchant] 叠加: card=Strike type=StrengthEnchantment amount=3
 [10:35:22.790] [ERROR] [无限升级/反序列化] NullReferenceException: ...
 [10:35:22.791] [TRACE] [无限升级/反序列化]    at STS2_ShunMod.Patches.InfiniteUpgrade_Deserialize.Finalizer(...)
 ```
