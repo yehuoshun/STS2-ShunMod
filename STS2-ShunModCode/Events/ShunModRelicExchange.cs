@@ -38,6 +38,7 @@ public class ShunModRelicExchange : EventModel
         "Clone",
         "Goopy",
         "Momentum",
+        "Inky",
     };
 
     private EnchantmentModel? _enchantA;
