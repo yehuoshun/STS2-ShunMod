@@ -7,6 +7,7 @@ using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Rewards;
 using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.Models.RelicPools;
+using STS2_ShunMod.Core;
 using STS2_ShunMod.Core.Registration;
 
 namespace STS2_ShunMod.Relics;
@@ -20,17 +21,16 @@ public sealed class ShunModBossTrophy : RelicModel
     public override RelicRarity Rarity => RelicRarity.Rare;
 
     /// <summary>
-    ///     覆盖图标路径：ImageHelper.GetImagePath 默认走 res://images/…，
-    ///     mod 资源在 res://STS2-ShunMod/images/…，必须显式带 mod 前缀。
+    ///     覆盖图标路径，走 ShunImageHelper 统一生成。
     /// </summary>
     public override string PackedIconPath =>
-        $"res://{MainFile.ModId}/images/atlases/relic_atlas.sprites/{IconBaseName}.tres";
+        ShunImageHelper.RelicPackedIcon(IconBaseName);
 
     protected override string PackedIconOutlinePath =>
-        $"res://{MainFile.ModId}/images/atlases/relic_outline_atlas.sprites/{IconBaseName}.tres";
+        ShunImageHelper.RelicOutlineIcon(IconBaseName);
 
     protected override string BigIconPath =>
-        $"res://{MainFile.ModId}/images/relics/{IconBaseName}/{IconBaseName}.png";
+        ShunImageHelper.RelicBigIcon(IconBaseName);
 
     public override bool TryModifyRewards(Player player, List<Reward> rewards, AbstractRoom? room)
     {

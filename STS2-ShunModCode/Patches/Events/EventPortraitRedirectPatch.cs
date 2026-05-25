@@ -18,7 +18,7 @@ public static class EventPortraitRedirectPatch
     private static bool Prefix(EventModel __instance, ref Texture2D? __result)
     {
         var modId = __instance.Id.Entry;
-        var modPath = $"res://STS2-ShunMod/images/events/{modId.ToLowerInvariant()}.png";
+        var modPath = ShunImageHelper.EventImage(modId.ToLowerInvariant());
 
         if (!ResourceLoader.Exists(modPath))
             return true; // 不是我们的 mod 事件，走原逻辑

@@ -12,6 +12,7 @@ using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Runs;
+using STS2_ShunMod.Core;
 
 using STS2_ShunMod.Patches;
 
@@ -40,7 +41,7 @@ public class ShunModRelicExchange : EventModel
     public override IEnumerable<string> GetAssetPaths(IRunState runState)
     {
         var paths = base.GetAssetPaths(runState).ToList();
-        var modPath = $"res://STS2-ShunMod/images/events/{Id.Entry.ToLowerInvariant()}.png";
+        var modPath = ShunImageHelper.EventImage(Id.Entry.ToLowerInvariant());
         var defaultPath = ImageHelper.GetImagePath($"events/{Id.Entry.ToLowerInvariant()}.png");
         var i = paths.IndexOf(defaultPath);
         if (i >= 0) paths[i] = modPath;

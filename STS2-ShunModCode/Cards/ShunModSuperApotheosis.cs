@@ -38,7 +38,7 @@ public class ShunModSuperApotheosis : ShunCard
     ///     卡牌肖像资源路径（手牌/牌组中小图）。
     /// </summary>
     public override string PortraitPath =>
-        "res://STS2-ShunMod/images/packed/card_portraits/colorless/superapotheosis.png";
+        ShunImageHelper.CardPortrait("colorless", "superapotheosis");
 
     /// <summary>
     ///     打出效果：升级当前战斗中所有卡牌 + 牌组中所有可升级卡牌。

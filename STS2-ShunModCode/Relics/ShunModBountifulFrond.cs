@@ -18,13 +18,13 @@ public sealed class ShunModBountifulFrond : RelicModel
     public override RelicRarity Rarity => RelicRarity.Rare;
 
     public override string PackedIconPath =>
-        $"res://{MainFile.ModId}/images/atlases/relic_atlas.sprites/{IconBaseName}.tres";
+        ShunImageHelper.RelicPackedIcon(IconBaseName);
 
     protected override string PackedIconOutlinePath =>
-        $"res://{MainFile.ModId}/images/atlases/relic_outline_atlas.sprites/{IconBaseName}.tres";
+        ShunImageHelper.RelicOutlineIcon(IconBaseName);
 
     protected override string BigIconPath =>
-        $"res://{MainFile.ModId}/images/relics/{IconBaseName}/{IconBaseName}.png";
+        ShunImageHelper.RelicBigIcon(IconBaseName);
 
     public override async Task AfterPlayerTurnStart(PlayerChoiceContext choiceContext, Player player)
     {
