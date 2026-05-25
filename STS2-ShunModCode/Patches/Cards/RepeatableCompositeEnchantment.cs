@@ -1,5 +1,6 @@
 using System.Text.Json;
 using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Enchantments;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.HoverTips;
@@ -350,7 +351,8 @@ public sealed class RepeatableCompositeEnchantment : EnchantmentModel
 
     internal void RefreshStatus()
     {
-        // EnchantmentStatus: 0=Active, 1=Consumed
-        Status = _innerEnchantments.Any(e => (int)e.Status == 0) ? 0 : 1;
+        Status = _innerEnchantments.Any(e => e.Status == EnchantmentStatus.Normal)
+            ? EnchantmentStatus.Normal
+            : EnchantmentStatus.Disabled;
     }
 }
