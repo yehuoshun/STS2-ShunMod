@@ -215,7 +215,7 @@ public class ShunModRelicExchange : EventModel
 
     private static bool IsTradeable(RelicModel r)
     {
-        return TradeableRarities.Contains(r.Rarity) && r.GetType().Name != "Circlet";
+        return TradeableRarities.Contains(r.Rarity);
     }
 
     // ════════════════════════════════════ 选项 ════════════════════════════════════
