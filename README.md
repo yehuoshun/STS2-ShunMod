@@ -231,6 +231,7 @@ data_sts2_windows_x86_64/0Harmony.dll
 - **[STS2Plus](https://github.com/StephenSHorton/STS2Plus)**
 - **[YuWanCard / 鱼丸](https://github.com/YuWan886/Sts2-YuWanCard)**
 - **[B站作者](https://space.bilibili.com/349329876530196)**
+- **[onakasuitanie](https://space.bilibili.com/3493298765301961?spm_id_from=333.788.upinfo.detail.click)**
 
 ---
 
