@@ -207,13 +207,13 @@ data_sts2_windows_x86_64/0Harmony.dll
 
 ### 发布流程
 
-推送代码到 main 分支后，手动触发构建：
+**手动发布**（不再绑定 push）：
 
 **仓库 → Actions → Build & Release → Run workflow**
 
-CI 自动完成：编译 → Godot 导出 .pck → 打包 ZIP → 成功后自动 bump 版本号并打 tag → 创建 GitHub Release 上传 ZIP。
+手动触发后：编译 → Godot 导出 .pck → 打包 ZIP → 创建 GitHub Release 上传 ZIP + NexusMods。
 
-> ⚠️ 只有 ZIP 打包成功才会打 tag，不会产出空 tag。
+> 💡 日常 push 只跑 CI 编译 + 自动 bump 版本号，不打包不发布。
 
 ---
 
@@ -230,6 +230,7 @@ CI 自动完成：编译 → Godot 导出 .pck → 打包 ZIP → 成功后自�
 
 - **[STS2Plus](https://github.com/StephenSHorton/STS2Plus)**
 - **[YuWanCard / 鱼丸](https://github.com/YuWan886/Sts2-YuWanCard)**
+- **[B站作者](https://space.bilibili.com/349329876530196)**
 
 ---
 
