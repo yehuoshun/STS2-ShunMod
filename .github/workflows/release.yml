@@ -72,16 +72,11 @@ jobs:
           ls -la publish/
           cd publish && zip -r ../STS2-ShunMod.zip .
 
-      - name: Get version & create tag
+      - name: Get version
         id: ver
         run: |
           V=$(python3 -c "import json; d=json.load(open('STS2-ShunMod.json')); print(d['version'])")
-          echo "tagging: $V"
-
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "$V" -m "Release $V"
-          git push origin "$V"
+          echo "version: $V"
           echo "TAG=$V" >> $GITHUB_OUTPUT
 
       - name: Generate release notes
