@@ -49,17 +49,27 @@ jobs:
             --dir deps \
             --pattern "*.dll" \
             --repo "${{ github.repository }}" \
-            --clobber 2>/dev/null || echo "⚠️ 缺少游戏 DLL，跳过编译"
+            --clobber 2>/dev/null
+
+      - name: Check deps
+        run: |
+          if [ ! -f deps/sts2.dll ]; then
+            echo ""
+            echo "=============================================="
+            echo "  deps release 不存在或缺少 sts2.dll！"
+            echo "  请在本地构建后上传游戏 DLL 到 deps release："
+            echo "    gh release create deps --title deps sts2.dll 0Harmony.dll"
+            echo "=============================================="
+            exit 1
+          fi
 
       - name: Restore
         run: dotnet restore STS2-ShunMod.csproj
 
       - name: Build DLL
-        if: hashFiles('deps/sts2.dll') != ''
         run: dotnet build STS2-ShunMod.csproj -c Release -p:Sts2DataDir="$(realpath deps)" --no-restore
 
       - name: Export .pck
-        if: hashFiles('deps/sts2.dll') != ''
         run: |
           echo "=== 下载 Godot 4.5.1 Mono ==="
           GODOT_URL="https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_mono_linux_x86_64.zip"
@@ -73,7 +83,6 @@ jobs:
           ls -la STS2-ShunMod.pck 2>/dev/null || echo "⚠️ 导出失败"
 
       - name: Package
-        if: hashFiles('deps/sts2.dll') != ''
         run: |
           BUILD_DIR=.godot/mono/temp/bin/Release
           mkdir -p publish

@@ -19,6 +19,19 @@ public sealed class ShunModBossTrophy : RelicModel
 {
     public override RelicRarity Rarity => RelicRarity.Rare;
 
+    /// <summary>
+    ///     覆盖图标路径：ImageHelper.GetImagePath 默认走 res://images/…，
+    ///     mod 资源在 res://STS2-ShunMod/images/…，必须显式带 mod 前缀。
+    /// </summary>
+    public override string PackedIconPath =>
+        $"res://{MainFile.ModId}/images/atlases/relic_atlas.sprites/{IconBaseName}.tres";
+
+    protected override string PackedIconOutlinePath =>
+        $"res://{MainFile.ModId}/images/atlases/relic_outline_atlas.sprites/{IconBaseName}.tres";
+
+    protected override string BigIconPath =>
+        $"res://{MainFile.ModId}/images/relics/{IconBaseName}/{IconBaseName}.png";
+
     public override bool TryModifyRewards(Player player, List<Reward> rewards, AbstractRoom? room)
     {
         if (player != Owner || room == null || room.RoomType != RoomType.Boss)
