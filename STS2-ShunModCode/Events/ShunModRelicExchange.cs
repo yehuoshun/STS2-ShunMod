@@ -150,10 +150,11 @@ public class ShunModRelicExchange : EventModel
         _gainRelic = RollRandomRelic();
 
         if (available.Count >= 2)
-            do
-            {
-                _loseRelic2 = PreferCirclet(available);
-            } while (_loseRelic2 == _loseRelic1);
+        {
+            var remaining = new List<RelicModel>(available);
+            remaining.Remove(_loseRelic1);
+            _loseRelic2 = PreferCirclet(remaining);
+        }
 
         // 滚动 3 种不同附魔
         RollThreeEnchants();
