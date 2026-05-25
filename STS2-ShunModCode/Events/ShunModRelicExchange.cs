@@ -248,7 +248,7 @@ public class ShunModRelicExchange : EventModel
                     }
                     var mutableEnch = (EnchantmentModel)e.MutableClone();
                     var card = picked.First();
-                    CardCmd.Enchant(mutableEnch, card, 1);
+                    CardCmd.Enchant(mutableEnch, card, 5);
                     await RelicCmd.Remove(lose);
                     Refresh();
                 }, key, tips));
