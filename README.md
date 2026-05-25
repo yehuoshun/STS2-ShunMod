@@ -192,31 +192,6 @@ dotnet build
 
 ---
 
-## 发布
-
-### 首次：上传游戏依赖
-
-在 GitHub Releases 创建 tag 为 `deps` 的 release，上传游戏目录下的：
-
-```
-data_sts2_windows_x86_64/sts2.dll
-data_sts2_windows_x86_64/0Harmony.dll
-```
-
-只做一次，之后 CI 自动拉取。
-
-### 发布流程
-
-**手动发布**（不再绑定 push）：
-
-**仓库 → Actions → Build & Release → Run workflow**
-
-手动触发后：编译 → Godot 导出 .pck → 打包 ZIP → 创建 GitHub Release 上传 ZIP + NexusMods。
-
-> 💡 日常 push 只跑 CI 编译 + 自动 bump 版本号，不打包不发布。
-
----
-
 ## 技术栈
 
 - **游戏引擎** Godot 4.5 (.NET)

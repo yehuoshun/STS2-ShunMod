@@ -21,6 +21,23 @@ namespace STS2_ShunMod.Patches;
     typeof(PileType), typeof(Creature))]
 public static class ShowTotalDamage_Description
 {
+    /// <summary>
+    ///     Patch 前验证目标方法是否存在。不存在则写日志，避免静默跳过。
+    /// </summary>
+    private static bool Prepare()
+    {
+        var method = AccessTools.Method(typeof(CardModel), "GetDescriptionForPile",
+            [typeof(PileType), typeof(Creature)]);
+        if (method == null)
+        {
+            ShunLogger.Error("总伤害", "❌ 未找到 CardModel.GetDescriptionForPile(PileType, Creature)，补丁跳过！游戏 API 可能已变更。");
+            return false;
+        }
+
+        ShunLogger.Info("总伤害", "✅ 已绑定 GetDescriptionForPile");
+        return true;
+    }
+
     [HarmonyPostfix]
     private static void Postfix(CardModel __instance, ref string __result)
     {
@@ -45,7 +62,9 @@ public static class ShowTotalDamage_Description
         }
         catch (Exception ex)
         {
-            ShunLogger.Error("总伤害", ex);
+            ShunLogger.Error("总伤害", $"❌ Postfix 异常: {ex.GetType().Name}: {ex.Message}");
+            if (ex.StackTrace != null)
+                ShunLogger.Error("总伤害", ex.StackTrace);
         }
     }
 
