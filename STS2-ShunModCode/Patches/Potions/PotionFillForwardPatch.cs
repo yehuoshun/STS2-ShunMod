@@ -176,8 +176,8 @@ internal static class PotionFillForwardLogic
 
             if (potion != null && GodotObject.IsInstanceValid(potion))
             {
-                h.RemoveChildSafely(potion);
-                potion.QueueFreeSafely();
+                h.RemoveChild(potion);
+                potion.QueueFree();
             }
 
             RestoreEmptyIcon(h);
