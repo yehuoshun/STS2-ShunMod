@@ -10,4 +10,7 @@ packages/
 .editorconfig
 *.user
 Directory.Build.props
-logs/
+logs/-e 
+# Build artifacts
+artifact.zip
+tmp_artifact/
