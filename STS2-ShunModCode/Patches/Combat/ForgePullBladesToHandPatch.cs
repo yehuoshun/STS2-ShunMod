@@ -1,4 +1,7 @@
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
@@ -22,26 +25,36 @@ public static class ForgePullBladesToHandPatch
     [HarmonyPostfix]
     private static async void Postfix(Task<IEnumerable<SovereignBlade>> __result, Player player)
     {
-        await __result;
-        
-        if (player.PlayerCombatState == null)
-            return;
-
-        var blades = player.PlayerCombatState.AllCards
-            .OfType<SovereignBlade>()
-            .Where(b =>
-            {
-                var pile = b.Pile;
-                return pile != null && pile.Type != PileType.Hand;
-            })
-            .ToList();
-
-        foreach (var blade in blades)
+        try
         {
-            await CardPileCmd.Add(blade, PileType.Hand);
-        }
+            await __result;
 
-        if (blades.Count > 0)
-            ShunLogger.Debug("锻造拉回", $"回收 {blades.Count} 张 SovereignBlade 到手牌");
+            if (player.PlayerCombatState == null)
+                return;
+
+            if (CombatManager.Instance?.IsOverOrEnding != false)
+                return;
+
+            var blades = player.PlayerCombatState.AllCards
+                .OfType<SovereignBlade>()
+                .Where(b =>
+                {
+                    var pile = b.Pile;
+                    return pile != null && pile.Type != PileType.Hand;
+                })
+                .ToList();
+
+            foreach (var blade in blades)
+            {
+                await CardPileCmd.Add(blade, PileType.Hand);
+            }
+
+            if (blades.Count > 0)
+                ShunLogger.Debug("锻造拉回", $"回收 {blades.Count} 张 SovereignBlade 到手牌");
+        }
+        catch (Exception ex)
+        {
+            ShunLogger.Error("锻造拉回", ex);
+        }
     }
 }
