@@ -202,14 +202,17 @@ public sealed class RepeatableCompositeEnchantment : EnchantmentModel
 
     // ══════════════════════════ 效果计算 ══════════════════════════
 
-    public override void ModifyCard()
+    /// <summary>
+    ///     0.99 起 OnEnchant 替代 ModifyCard 作为附魔挂载回调。
+    /// </summary>
+    protected override void OnEnchant()
     {
         EnsureBindings();
         foreach (var e in _innerEnchantments)
             e.ModifyCard();
     }
 
-    public override void ClearInternal()
+    public new void ClearInternal()
     {
         Unsubscribe();
         foreach (var e in _innerEnchantments)
@@ -219,38 +222,50 @@ public sealed class RepeatableCompositeEnchantment : EnchantmentModel
         base.ClearInternal();
     }
 
-    protected override void DeepCloneFields(EnchantmentModel clone)
+    protected override void DeepCloneFields()
     {
-        base.DeepCloneFields(clone);
-        if (clone is RepeatableCompositeEnchantment c)
-        {
-            c._innerEnchantments = _innerEnchantments
-                .Select(e => (EnchantmentModel)e.ClonePreservingMutability())
-                .ToList();
-            c.Amount = c._innerEnchantments.Count;
-            c.RefreshStatus();
-        }
+        base.DeepCloneFields();
+        _innerEnchantments = _innerEnchantments
+            .Select(e => (EnchantmentModel)e.ClonePreservingMutability())
+            .ToList();
+        Amount = _innerEnchantments.Count;
+        _subscribed = new List<EnchantmentModel>();
+        RefreshStatus();
     }
 
-    protected override decimal CalculateFinalBlock(decimal originalBlock, ValueProp props)
+    public override decimal EnchantBlockAdditive(decimal originalBlock, ValueProp props)
     {
-        var result = originalBlock;
+        EnsureBindings();
+        var total = 0m;
         foreach (var e in _innerEnchantments)
-        {
-            result += e.EnchantBlockAdditive(result, props);
-            result *= e.EnchantBlockMultiplicative(result, props);
-        }
+            total += e.EnchantBlockAdditive(originalBlock, props);
+        return total;
+    }
+
+    public override decimal EnchantBlockMultiplicative(decimal originalBlock, ValueProp props)
+    {
+        EnsureBindings();
+        var result = 1m;
+        foreach (var e in _innerEnchantments)
+            result *= e.EnchantBlockMultiplicative(originalBlock, props);
         return result;
     }
 
-    protected override decimal CalculateFinalDamage(decimal originalDamage, ValueProp props)
+    public override decimal EnchantDamageAdditive(decimal originalDamage, ValueProp props)
     {
-        var result = originalDamage;
+        EnsureBindings();
+        var total = 0m;
         foreach (var e in _innerEnchantments)
-        {
-            result += e.EnchantDamageAdditive(result, props);
-            result *= e.EnchantDamageMultiplicative(result, props);
-        }
+            total += e.EnchantDamageAdditive(originalDamage, props);
+        return total;
+    }
+
+    public override decimal EnchantDamageMultiplicative(decimal originalDamage, ValueProp props)
+    {
+        EnsureBindings();
+        var result = 1m;
+        foreach (var e in _innerEnchantments)
+            result *= e.EnchantDamageMultiplicative(originalDamage, props);
         return result;
     }
 
