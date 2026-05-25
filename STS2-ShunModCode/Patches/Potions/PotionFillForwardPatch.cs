@@ -73,9 +73,12 @@ internal static class PotionFillForwardLogic
         AccessTools.Field(typeof(NPotionHolder), "_emptyIcon");
 
     private static bool _validated;
+    private static bool _isProcessing;
 
     internal static void OnPotionChanged(NPotionContainer container)
     {
+        if (_isProcessing) return;
+        _isProcessing = true;
         try
         {
             ValidateReflection();
@@ -94,6 +97,10 @@ internal static class PotionFillForwardLogic
         catch (Exception ex)
         {
             ShunLogger.Error("药水填充", ex);
+        }
+        finally
+        {
+            _isProcessing = false;
         }
     }
 
