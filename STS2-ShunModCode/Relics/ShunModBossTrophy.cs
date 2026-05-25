@@ -20,15 +20,6 @@ public sealed class ShunModBossTrophy : RelicModel
 {
     public override RelicRarity Rarity => RelicRarity.Rare;
 
-    /// <summary>
-    ///     覆盖图标路径，走 ShunImageHelper 统一生成。
-    /// </summary>
-    public override string PackedIconPath =>
-        ShunImageHelper.RelicPackedIcon(IconBaseName);
-
-    protected override string PackedIconOutlinePath =>
-        ShunImageHelper.RelicOutlineIcon(IconBaseName);
-
     protected override string BigIconPath =>
         ShunImageHelper.RelicBigIcon(IconBaseName);
 

@@ -5,6 +5,7 @@ using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Factories;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.RelicPools;
+using STS2_ShunMod.Core;
 using STS2_ShunMod.Core.Registration;
 
 namespace STS2_ShunMod.Relics;
@@ -16,12 +17,6 @@ namespace STS2_ShunMod.Relics;
 public sealed class ShunModBountifulFrond : RelicModel
 {
     public override RelicRarity Rarity => RelicRarity.Rare;
-
-    public override string PackedIconPath =>
-        ShunImageHelper.RelicPackedIcon(IconBaseName);
-
-    protected override string PackedIconOutlinePath =>
-        ShunImageHelper.RelicOutlineIcon(IconBaseName);
 
     protected override string BigIconPath =>
         ShunImageHelper.RelicBigIcon(IconBaseName);
