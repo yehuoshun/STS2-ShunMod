@@ -19,13 +19,10 @@ namespace STS2_ShunMod.Patches;
 /// <summary>
 ///     药水填充前移 + 混沌药水保底。
 ///     使用/丢弃后后方药水向前填充，若无混沌药水则自动补充。
-///
-///     三个独立类分别 Patch RemoveUsed / Discard / Initialize，
-///     共用 PotionFillForwardLogic 处理实际逻辑。
 /// </summary>
 
 // ──────────────────────────────────────────
-//  Patch 1: RemoveUsed（使用药水后）
+//  Patch 1: RemoveUsed
 // ──────────────────────────────────────────
 [HarmonyPatch(typeof(NPotionContainer), "RemoveUsed")]
 internal static class PotionFillForward_RemoveUsed
@@ -35,7 +32,7 @@ internal static class PotionFillForward_RemoveUsed
 }
 
 // ──────────────────────────────────────────
-//  Patch 2: Discard（丢弃药水后）
+//  Patch 2: Discard
 // ──────────────────────────────────────────
 [HarmonyPatch(typeof(NPotionContainer), "Discard")]
 internal static class PotionFillForward_Discard
@@ -45,7 +42,7 @@ internal static class PotionFillForward_Discard
 }
 
 // ──────────────────────────────────────────
-//  Patch 3: Initialize（开局初始化）
+//  Patch 3: Initialize
 // ──────────────────────────────────────────
 [HarmonyPatch(typeof(NPotionContainer), "Initialize")]
 internal static class PotionFillForward_Initialize
@@ -59,20 +56,14 @@ internal static class PotionFillForward_Initialize
 // ═══════════════════════════════════════════════
 internal static class PotionFillForwardLogic
 {
-    // ── NPotionContainer ──
     private static readonly FieldInfo? HoldersField =
         AccessTools.Field(typeof(NPotionContainer), "_holders");
-
     private static readonly FieldInfo? PlayerField =
         AccessTools.Field(typeof(NPotionContainer), "_player");
-
-    // ── NPotionHolder ──
     private static readonly MethodInfo? PotionSetter =
         AccessTools.PropertySetter(typeof(NPotionHolder), "Potion");
-
     private static readonly FieldInfo? PotionBackingField =
         AccessTools.Field(typeof(NPotionHolder), "<Potion>k__BackingField");
-
     private static readonly FieldInfo? EmptyIconField =
         AccessTools.Field(typeof(NPotionHolder), "_emptyIcon");
 
@@ -97,8 +88,9 @@ internal static class PotionFillForwardLogic
 
             LogPotionState(holders, "变动前");
 
-            await CompactIfNeeded(holders, player);
-            EnsureEntropicBrew(holders, player);
+            var models = CollectModels(holders);
+            await CompactIfNeeded(holders, player, models);
+            await EnsureChaos(holders, player, models);
 
             LogPotionState(holders, "变动后");
         }
@@ -116,18 +108,14 @@ internal static class PotionFillForwardLogic
     {
         if (_validated) return;
         _validated = true;
-
         ShunLogger.Info("药水填充/反射",
             $"HoldersField={HoldersField != null}, PlayerField={PlayerField != null}, " +
             $"PotionSetter={PotionSetter != null}, PotionBacking={PotionBackingField != null}");
     }
 
-    /// <summary>
-    ///     检测间隙 → 清空所有药水 → 按序重建（await 确保重建完成后再继续）。
-    /// </summary>
-    private static async Task CompactIfNeeded(List<NPotionHolder> holders, Player player)
+    /// <summary>收集所有 holder 中的药水 canonical 模型。</summary>
+    private static List<PotionModel> CollectModels(List<NPotionHolder> holders)
     {
-        // 1. 收集现有药水的 canonical 模型
         var models = new List<PotionModel>();
         for (var i = 0; i < holders.Count; i++)
         {
@@ -138,10 +126,15 @@ internal static class PotionFillForwardLogic
             if (canonical != null)
                 models.Add(canonical);
         }
+        return models;
+    }
 
+    /// <summary>检测间隙 → 清空重建（await 串行，避免竞态）。</summary>
+    private static async Task CompactIfNeeded(List<NPotionHolder> holders, Player player, List<PotionModel> models)
+    {
         if (models.Count == 0) return;
 
-        // 2. 检测间隙
+        // 检测间隙
         var found = 0;
         var hasGap = false;
         for (var i = 0; i < holders.Count; i++)
@@ -153,111 +146,89 @@ internal static class PotionFillForwardLogic
             else if (found < models.Count)
             {
                 hasGap = true;
-                ShunLogger.Debug("药水填充/间隙检测", $"间隙位置: [{i}] 为空, 前面有药水 (已有 {found}/{models.Count})");
+                ShunLogger.Debug("药水填充/间隙检测", $"间隙 [{i}], 已有 {found}/{models.Count}");
                 break;
             }
         }
 
         if (!hasGap)
         {
-            ShunLogger.Debug("药水填充", $"无间隙，{models.Count} 个药水已连续");
+            ShunLogger.Debug("药水填充", $"无间隙, {models.Count} 个连续");
             return;
         }
 
-        ShunLogger.Info("药水填充", $"检测到间隙 → 重建 {models.Count} 个药水");
+        ShunLogger.Info("药水填充", $"间隙 → 重建 {models.Count} 个");
 
-        // 3. 清除所有现有药水
+        // 清空
         for (var i = 0; i < holders.Count; i++)
         {
             var h = holders[i];
             if (h == null || !GodotObject.IsInstanceValid(h) || !h.HasPotion) continue;
-
             var potion = h.Potion;
             ClearPotion(h);
-
             if (potion != null && GodotObject.IsInstanceValid(potion))
             {
                 h.RemoveChild(potion);
                 potion.QueueFree();
             }
-
             RestoreEmptyIcon(h);
         }
 
-        // 4. 按序重建（await 每个，确保完成后才继续）
+        // 重建（串行 await）
         for (var i = 0; i < models.Count; i++)
         {
             ShunLogger.Debug("药水填充/重建", $"→ [{i}] {models[i].GetType().Name}");
-            var mutable = models[i].ToMutable();
-            await PotionCmd.TryToProcure(mutable, player, i);
+            await PotionCmd.TryToProcure(models[i].ToMutable(), player, i);
         }
 
-        ShunLogger.Info("药水填充", $"{models.Count} 个药水已前移");
+        ShunLogger.Info("药水填充", $"{models.Count} 个已前移");
     }
 
-    private static void EnsureEntropicBrew(List<NPotionHolder> holders, Player player)
+    /// <summary>保底混沌药水 — 基于 models 计算位置，不依赖 holder 状态（避免异步竞态）。</summary>
+    private static async Task EnsureChaos(List<NPotionHolder> holders, Player player, List<PotionModel> models)
     {
-        // 检查是否已有混沌药水
-        foreach (var h in holders)
+        // 已有混沌药水
+        if (models.Any(m => m is EntropicBrew))
         {
-            if (h == null || !GodotObject.IsInstanceValid(h) || !h.HasPotion || h.Potion == null)
-                continue;
-            if (h.Potion.Model is EntropicBrew)
-            {
-                ShunLogger.Debug("混沌药水", "已存在，跳过补充");
-                return;
-            }
-        }
-
-        // 找第一个空槽
-        var emptyIdx = -1;
-        for (var i = 0; i < holders.Count; i++)
-        {
-            var h = holders[i];
-            if (h == null || !GodotObject.IsInstanceValid(h) || h.HasPotion) continue;
-            emptyIdx = i;
-            break;
-        }
-
-        if (emptyIdx < 0)
-        {
-            ShunLogger.Debug("混沌药水", "无空槽位，跳过补充");
+            ShunLogger.Debug("混沌药水", "已存在，跳过");
             return;
         }
 
-        // 获取 EntropicBrew
-        PotionModel? chaos = null;
+        // 无空槽
+        if (models.Count >= holders.Count)
+        {
+            ShunLogger.Debug("混沌药水", "无空槽，跳过");
+            return;
+        }
+
+        // chaos 放在最后
+        var chaosIdx = models.Count;
+        ShunLogger.Info("混沌药水", $"→ 栏位 {chaosIdx}");
+
+        var chaos = GetChaosModel(player);
+        if (chaos == null) return;
+
+        await PotionCmd.TryToProcure(chaos.ToMutable(), player, chaosIdx);
+        models.Add(chaos); // 同步 models 避免重复补充
+    }
+
+    private static PotionModel? GetChaosModel(Player player)
+    {
         try
         {
             var id = ModelDb.GetId(typeof(EntropicBrew));
-            chaos = ModelDb.GetByIdOrNull<PotionModel>(id);
-            ShunLogger.Debug("混沌药水", $"ModelDb 获取: {(chaos != null ? "成功" : "失败")}");
+            return ModelDb.GetByIdOrNull<PotionModel>(id);
         }
         catch (Exception ex)
         {
-            ShunLogger.Warn("混沌药水", $"ModelDb 失败: {ex.Message}，回退 PotionFactory");
+            ShunLogger.Warn("混沌药水", $"ModelDb: {ex.Message}");
         }
 
-        if (chaos == null)
-        {
-            var options = PotionFactory.GetPotionOptions(player, Array.Empty<PotionModel>());
-            chaos = options.FirstOrDefault(p => p is EntropicBrew);
-            ShunLogger.Debug("混沌药水", $"PotionFactory 回退: {(chaos != null ? "成功" : "失败")}");
-        }
-
-        if (chaos == null)
-        {
-            ShunLogger.Warn("混沌药水", "无法获取 EntropicBrew");
-            return;
-        }
-
-        ShunLogger.Info("混沌药水", $"→ 栏位 {emptyIdx} (共 {holders.Count} 栏位, 已有 {holders.Count(h => h.HasPotion)} 个药水)");
-        var mutable = chaos.ToMutable();
-        // 混沌药水用 fire-and-forget 即可，不影响主流程
-        _ = PotionCmd.TryToProcure(mutable, player, emptyIdx);
+        var options = PotionFactory.GetPotionOptions(player, Array.Empty<PotionModel>());
+        return options.FirstOrDefault(p => p is EntropicBrew);
     }
 
-    // ── 药水状态日志 ──
+    // ── 日志 ──
 
     private static void LogPotionState(List<NPotionHolder> holders, string tag)
     {
@@ -266,18 +237,12 @@ internal static class PotionFillForwardLogic
         {
             var h = holders[i];
             if (h == null || !GodotObject.IsInstanceValid(h))
-            {
                 parts.Add($"[{i}]=无效");
-                continue;
-            }
-            if (!h.HasPotion || h.Potion == null || !GodotObject.IsInstanceValid(h.Potion))
-            {
+            else if (!h.HasPotion || h.Potion == null || !GodotObject.IsInstanceValid(h.Potion))
                 parts.Add($"[{i}]=空");
-                continue;
-            }
-            parts.Add($"[{i}]={h.Potion.Model.GetType().Name}");
+            else
+                parts.Add($"[{i}]={h.Potion.Model.GetType().Name}");
         }
-
         ShunLogger.Info("药水填充/状态", $"{tag}: {string.Join(", ", parts)}");
     }
 
@@ -287,24 +252,11 @@ internal static class PotionFillForwardLogic
     {
         try
         {
-            if (PotionSetter != null)
-            {
-                PotionSetter.Invoke(holder, [null]);
-                return;
-            }
-
-            if (PotionBackingField != null)
-            {
-                PotionBackingField.SetValue(holder, null);
-                return;
-            }
-
-            ShunLogger.Warn("药水填充", "PotionSetter 和 backing field 均不可用");
+            if (PotionSetter != null) { PotionSetter.Invoke(holder, [null]); return; }
+            if (PotionBackingField != null) { PotionBackingField.SetValue(holder, null); return; }
+            ShunLogger.Warn("药水填充", "PotionSetter / backing 均不可用");
         }
-        catch (Exception ex)
-        {
-            ShunLogger.Error("药水填充/ClearPotion", ex);
-        }
+        catch (Exception ex) { ShunLogger.Error("药水填充/ClearPotion", ex); }
     }
 
     private static void RestoreEmptyIcon(NPotionHolder holder)
@@ -314,9 +266,6 @@ internal static class PotionFillForwardLogic
             if (EmptyIconField?.GetValue(holder) is CanvasItem icon)
                 icon.Modulate = Colors.White;
         }
-        catch
-        {
-            // 非关键
-        }
+        catch { /* 非关键 */ }
     }
 }
