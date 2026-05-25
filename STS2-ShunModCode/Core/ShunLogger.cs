@@ -20,8 +20,8 @@ public enum LogLevel
 }
 
 /// <summary>
-///     日志写入游戏统一目录 %AppData%/SlayTheSpire2/logs/，
-///     与游戏本体日志合并，方便玩家查找。
+///     日志独立写入 Mods/STS2-ShunMod/logs/shunmod-YYYY-MM-DD.log，
+///     与游戏本体日志分离。
 ///     支持 STS2-ShunMod.json 的 logLevel 字段控制日志级别。
 /// </summary>
 public static class ShunLogger
@@ -46,8 +46,8 @@ public static class ShunLogger
             _configPath = Path.Combine(dllDir, "STS2-ShunMod.json");
             LoadConfig();
 
-            // 日志输出到游戏统一目录 %AppData%/SlayTheSpire2/logs/
-            var logsDir = GetGameLogsDir(dllDir);
+            // 日志输出到 Mods/STS2-ShunMod/logs/
+            var logsDir = Path.Combine(dllDir, "logs");
             Directory.CreateDirectory(logsDir);
 
             var date = DateTime.Now.ToString("yyyy-MM-dd");
@@ -134,29 +134,6 @@ public static class ShunLogger
                 // 日志写入失败不能炸游戏
             }
         }
-    }
-
-    /// <summary>
-    ///     获取游戏日志目录。优先 %AppData%/SlayTheSpire2/logs，失败回退到 mod 目录。
-    /// </summary>
-    private static string GetGameLogsDir(string fallbackDir)
-    {
-        try
-        {
-            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            if (!string.IsNullOrEmpty(appData))
-            {
-                var dir = Path.Combine(appData, "SlayTheSpire2", "logs");
-                Directory.CreateDirectory(dir); // 确保可写
-                return dir;
-            }
-        }
-        catch
-        {
-            // AppData 不可用时回退
-        }
-
-        return Path.Combine(fallbackDir, "logs");
     }
 
     /// <summary>
