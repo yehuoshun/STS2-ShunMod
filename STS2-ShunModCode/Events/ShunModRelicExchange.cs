@@ -35,6 +35,7 @@ public class ShunModRelicExchange : EventModel
         "Vigorous",
         "Swift",
         "Glam",
+        "Clone",
     };
 
     private EnchantmentModel? _enchantA;
