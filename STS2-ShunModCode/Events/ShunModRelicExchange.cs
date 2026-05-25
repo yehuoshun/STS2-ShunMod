@@ -33,7 +33,8 @@ public class ShunModRelicExchange : EventModel
         "Steady",
         "TezcatarasEmber",
         "Vigorous",
-        "Swift"
+        "Swift",
+        "Glam",
     };
 
     private EnchantmentModel? _enchantA;
