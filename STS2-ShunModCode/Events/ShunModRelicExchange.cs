@@ -152,13 +152,27 @@ public class ShunModRelicExchange : EventModel
         }
     }
 
+    /// <summary>附魔黑名单 — 不会在交易所随机出现。</summary>
+    private static readonly HashSet<string> EnchantBlacklist = new()
+    {
+        "PerfectFit",
+        "RoyallyApproved",
+        "SlumberingEssence",
+        "Sown",
+        "Steady",
+        "TezcatarasEmber",
+        "Vigorous",
+        "Swift",
+    };
+
     private static List<EnchantmentModel> GetEnchantPool()
     {
         return typeof(EnchantmentModel).Assembly.GetTypes()
             .Where(t => !t.IsAbstract && typeof(EnchantmentModel).IsAssignableFrom(t)
                                       && t.Name != "EnchantmentModel"
                                       && t.Name != "DeprecatedEnchantment"
-                                      && t.Name != "MockFreeEnchantment")
+                                      && t.Name != "MockFreeEnchantment"
+                                      && !EnchantBlacklist.Contains(t.Name))
             .Select(t => ModelDb.GetByIdOrNull<EnchantmentModel>(ModelDb.GetId(t)))
             .OfType<EnchantmentModel>().ToList();
     }

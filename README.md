@@ -44,7 +44,7 @@
 
 | 名称 | 说明 |
 |---|---|
-| 🏪 遗物交易所 | ①随机遗物换随机遗物 ②随机遗物换卡牌附魔 ③扣5HP刷新 ④退出。可反复交易直到退出 |
+| 🏪 遗物交易所 | ①随机遗物换随机遗物 ②随机遗物换卡牌附魔（黑名单: PerfectFit/RoyallyApproved/SlumberingEssence/Sown/Steady/TezcatarasEmber/Vigorous/Swift）③扣5HP刷新 ④退出。可反复交易直到退出 |
 
 ---
 
