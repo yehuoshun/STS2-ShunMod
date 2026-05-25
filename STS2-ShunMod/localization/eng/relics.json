@@ -2,5 +2,5 @@
   "SHUN_MOD_BOSS_TROPHY.title": "Boss Trophy",
   "SHUN_MOD_BOSS_TROPHY.description": "Upon killing a Boss, increase Max HP by 25%.",
   "SHUN_MOD_BOUNTIFUL_FROND.title": "Bountiful Frond",
-  "SHUN_MOD_BOUNTIFUL_FROND.description": "At the start of each combat, fill your empty potion slots with random potions."
+  "SHUN_MOD_BOUNTIFUL_FROND.description": "At the start of each turn, fill your empty potion slots with random potions."
 }
