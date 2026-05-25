@@ -1,6 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Events;
 using MegaCrit.Sts2.Core.Helpers;
@@ -141,13 +145,14 @@ public class ShunModRelicExchange : EventModel
         var available = player.Relics.Where(IsTradeable).ToList();
         if (available.Count == 0) return;
 
-        _loseRelic1 = available[Rnd.Next(available.Count)];
+        // 优先头环作为付出的遗物
+        _loseRelic1 = PreferCirclet(available);
         _gainRelic = RollRandomRelic();
 
         if (available.Count >= 2)
             do
             {
-                _loseRelic2 = available[Rnd.Next(available.Count)];
+                _loseRelic2 = PreferCirclet(available);
             } while (_loseRelic2 == _loseRelic1);
 
         // 滚动 3 种不同附魔
@@ -216,6 +221,17 @@ public class ShunModRelicExchange : EventModel
     private static bool IsTradeable(RelicModel r)
     {
         return TradeableRarities.Contains(r.Rarity);
+    }
+
+    /// <summary>
+    ///     优先选择头环（Circlet）作为付出的遗物。50% 概率选头环，50% 随机。
+    /// </summary>
+    private static RelicModel PreferCirclet(List<RelicModel> available)
+    {
+        var circlet = available.FirstOrDefault(r => r.GetType().Name == "Circlet");
+        if (circlet != null && Rnd.NextDouble() < 0.5)
+            return circlet;
+        return available[Rnd.Next(available.Count)];
     }
 
     // ════════════════════════════════════ 选项 ════════════════════════════════════
