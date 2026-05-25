@@ -26,7 +26,7 @@ public static class ForgePullBladesToHandPatch
     {
         await __result;
 
-        if (CombatManager.Instance.IsOverOrEnding)
+        if (CombatManager.Instance?.IsOverOrEnding != false)
             return;
 
         var blades = player.PlayerCombatState.AllCards
