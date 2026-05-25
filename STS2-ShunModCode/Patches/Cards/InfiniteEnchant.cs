@@ -1,36 +1,30 @@
 using System.Reflection;
 using HarmonyLib;
-using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Models;
 using STS2_ShunMod.Core;
 
 namespace STS2_ShunMod.Patches;
 
 /// <summary>
-///     无限附魔系统 — 卡牌可同时拥有多种附魔，同类叠加层数。
+///     无限附魔系统 — 通过 RepeatableCompositeEnchantment 包装器实现多附魔。
 ///
-///     STS2 原生只支持单附魔（card.Enchantment），本系统通过 Harmony
-///     拦截 CardCmd.Enchant，用 Dictionary 管理多附魔，并在每次操作后
-///     遍历全部附魔依次调 ModifyCard + FinalizeUpgradeInternal 叠加效果。
+///     Patch 1: CanEnchant 始终返回 true（任何卡牌都可被附魔）
+///     Patch 2: 拦截 EnchantInternal，已有附魔时路由到复合包装器
 /// </summary>
 
 /// Patch 1 — CanEnchant 始终返回 true
 [HarmonyPatch]
 public static class InfiniteEnchant_CanEnchant
 {
-    /// <summary>
-    ///     源码：virtual bool CanEnchant(CardModel card)
-    /// </summary>
     private static MethodBase? TargetMethod()
     {
-        var types = new[] { typeof(CardModel) };
-        var method = AccessTools.Method(typeof(EnchantmentModel), "CanEnchant", types);
+        var method = AccessTools.Method(typeof(EnchantmentModel), "CanEnchant", [typeof(CardModel)]);
         if (method != null)
         {
             ShunLogger.Info("无限附魔/CanEnchant", "匹配 CanEnchant(CardModel)");
             return method;
         }
-
         ShunLogger.Warn("无限附魔/CanEnchant", "未找到 CanEnchant(CardModel)，补丁跳过");
         return null;
     }
@@ -38,91 +32,63 @@ public static class InfiniteEnchant_CanEnchant
     [HarmonyPostfix]
     private static void Postfix(ref bool __result)
     {
-        if (!__result)
-        {
-            __result = true;
-        }
+        if (!__result) __result = true;
     }
 }
 
-/// Patch 2 — Enchant 多附魔存储 + 全量重刷
-/// [DISABLED] Harmony 对 static decimal 参数 Prefix 有兼容问题，PatchAll 直接炸。
-/// 保留 CanEnchant 补丁（始终返回 true）暂时足够。
-/*
-[HarmonyPatch]
-public static class InfiniteEnchant_Enchant
+/// Patch 2 — EnchantInternal 拦截，路由到复合附魔
+[HarmonyPatch(typeof(CardModel), nameof(CardModel.EnchantInternal))]
+public static class InfiniteEnchant_EnchantInternal
 {
-    internal static readonly Dictionary<CardModel, Dictionary<string, EnchantmentModel>> Store =
-        new(ReferenceEqualityComparer.Instance);
-
-    internal static bool HasType(CardModel card, string typeFullName) =>
-        Store.TryGetValue(card, out var d) && d.ContainsKey(typeFullName);
-
-    private static readonly PropertyInfo? Prop =
+    private static readonly PropertyInfo? EnchantmentProp =
         AccessTools.Property(typeof(CardModel), "Enchantment");
 
-    private static MethodBase? TargetMethod()
-    {
-        var types = new[] { typeof(EnchantmentModel), typeof(CardModel), typeof(decimal) };
-        var method = AccessTools.Method(typeof(CardCmd), "Enchant", types);
-
-        if (method != null)
-        {
-            ShunLogger.Info("无限附魔/Enchant", $"目标: CardCmd.Enchant({string.Join(", ", types.Select(t => t.Name))})");
-            return method;
-        }
-
-        ShunLogger.Warn("无限附魔/Enchant", $"未找到 CardCmd.Enchant(EnchantmentModel, CardModel, decimal)，补丁跳过");
-        return null;
-    }
-
     [HarmonyPrefix]
-    private static bool Prefix(EnchantmentModel m, CardModel card, decimal amount)
+    private static bool Prefix(CardModel __instance, EnchantmentModel enchantment, decimal amount)
     {
+        var existing = __instance.Enchantment;
+
+        // 无附魔 → 走原版
+        if (existing == null) return true;
+
         try
         {
-            m.AssertMutable();
-
-            if (!Store.TryGetValue(card, out var dict))
-                Store[card] = dict = new Dictionary<string, EnchantmentModel>();
-
-            var key = m.GetType().FullName!;
-
-            if (dict.TryGetValue(key, out var ex))
+            // 已有复合附魔 → 直接叠加
+            if (existing is RepeatableCompositeEnchantment composite)
             {
-                ex.Amount += (int)amount;
-                ShunLogger.Info("无限附魔/Enchant", $"叠加: card={card.GetType().Name} type={key} amount={ex.Amount}");
-            }
-            else
-            {
-                m.Amount = (int)amount;
-                dict[key] = m;
-                card.EnchantInternal(m, amount);
-                ShunLogger.Info("无限附魔/Enchant", $"新增: card={card.GetType().Name} type={key} amount={m.Amount}");
+                composite.AddOrStack(enchantment, amount);
+                ShunLogger.Debug("无限附魔",
+                    $"复合叠加: {enchantment.GetType().Name} → {composite.InnerEnchantments.Count}种");
+                return false;
             }
 
-            // 全量重刷所有附魔效果
-            foreach (var e in dict.Values)
-            {
-                if (card.Enchantment != e && Prop != null)
-                    Prop.SetValue(card, e);
-                e.ModifyCard();
-            }
+            // 已有原版附魔 → 升级为复合包装器
+            ShunLogger.Info("无限附魔",
+                $"升级为复合: {existing.GetType().Name} + {enchantment.GetType().Name}");
 
-            if (Prop != null)
-                Prop.SetValue(card, dict.Values.First());
+            var wrapper = new RepeatableCompositeEnchantment();
 
-            card.FinalizeUpgradeInternal();
+            // 绑定到卡牌（先设 card.Enchantment 再 ApplyInternal）
+            EnchantmentProp?.SetValue(__instance, wrapper);
+            wrapper.ApplyInternal(__instance, 1);
 
-            ShunLogger.Debug("无限附魔/状态", $"Store={Store.Count}卡, 当前={dict.Count}种");
+            // 导入旧附魔
+            wrapper.ImportExisting(existing);
 
-            return false; // 跳过原版 Enchant
+            // 添加新附魔
+            wrapper.AddOrStack(enchantment, amount);
+
+            // 统一应用所有内部附魔效果
+            wrapper.ModifyCard();
+            __instance.FinalizeUpgradeInternal();
+            __instance.DynamicVars.RecalculateForUpgradeOrEnchant();
+
+            return false;
         }
         catch (Exception ex)
         {
-            ShunLogger.Error("无限附魔/Enchant", ex);
-            return true; // 炸了走原版单附魔，别崩游戏
+            ShunLogger.Error("无限附魔/EnchantInternal", ex);
+            return true; // 炸了走原版，别崩游戏
         }
     }
 }
-*/

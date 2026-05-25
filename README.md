@@ -30,6 +30,7 @@
 | 名称 | 说明 |
 |---|---|
 | ♾️ 无限升级 | 卡牌可无限次升级。 |
+| ✨ 无限附魔 | 卡牌可同时拥有多种附魔，同类叠加层数。通过复合包装器实现。 |
 | 🛠️ 硬化外壳修复 | 修正硬化外壳能力的减伤数值。 |
 | 🛡️ 格挡保留 | 格挡永不归零。 |
 | 🔄 药水填充前移 | 使用/丢弃药水后，后方药水自动向前填充空位。 |
@@ -75,7 +76,9 @@ STS2-ShunMod/
 │   │       └── ContentRegistry.cs  # 扫描 + 注册
 │   └── Patches/
 │       ├── Cards/
-│       │   └── InfiniteUpgrade.cs      # 无限升级
+│       │   ├── InfiniteUpgrade.cs      # 无限升级
+│       │   ├── InfiniteEnchant.cs      # 无限附魔
+│       │   └── RepeatableCompositeEnchantment.cs  # 复合附魔包装器
 │       ├── Combat/
 │       │   ├── BlockRetentionPatch.cs  # 格挡保留
 │       │   ├── HardenedShellPatch.cs   # 硬化外壳修复
