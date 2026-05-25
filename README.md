@@ -31,11 +31,8 @@
 | 名称 | 说明 |
 |---|---|
 | ♾️ 无限升级 | 卡牌可无限次升级。 |
-| ✨ 无限附魔 | 卡牌可同时拥有多种附魔，同类叠加层数。通过复合包装器实现。 |
 | 🛠️ 硬化外壳修复 | 修正硬化外壳能力的减伤数值。 |
 | 🛡️ 格挡保留 | 格挡永不归零。 |
-| 🔄 药水填充前移 | 使用/丢弃药水后，后方药水自动向前填充空位。 |
-| 🌀 混沌药水保底 | 药水栏始终至少有一个混沌药水。开局/使用/丢弃后自动补充。 |
 | 💥 显示总伤害 | 多段卡/X卡在卡牌描述末尾显示总伤害（单段伤害 × 段数）。 |
 | ⚔️ 锻造拉回 | 所有 Forge 行为自动将非手牌的 SovereignBlade 拉回手牌。 |
 
@@ -80,8 +77,7 @@ STS2-ShunMod/
 │   └── Patches/
 │       ├── Cards/
 │       │   ├── InfiniteUpgrade.cs      # 无限升级
-│       │   ├── InfiniteEnchant.cs      # 无限附魔
-│       │   └── RepeatableCompositeEnchantment.cs  # 复合附魔包装器
+│       │   └── InfiniteUpgrade.cs      # 无限升级
 │       ├── Combat/
 │       │   ├── BlockRetentionPatch.cs  # 格挡保留
 │       │   ├── HardenedShellPatch.cs   # 硬化外壳修复
@@ -90,8 +86,6 @@ STS2-ShunMod/
 │       ├── Events/
 │       │   ├── ShunModEventRegistry.cs  # 事件注册
 │       │   └── EventPortraitRedirectPatch.cs  # 事件肖像重定向
-│       └── Potions/
-│           └── PotionFillForwardPatch.cs  # 药水填充 + 混沌药水保底
 ├── STS2-ShunMod/                   # Godot 资源
 │   ├── cards/                      # 卡牌美术
 │   └── localization/               # 本地化（中/英）
