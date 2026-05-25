@@ -20,8 +20,8 @@ public enum LogLevel
 }
 
 /// <summary>
-///     日志独立写入 Mods/STS2-ShunMod/logs/shunmod-YYYY-MM-DD.log，
-///     与游戏本体日志分离。
+///     日志写入游戏统一目录 {UserData}/logs/shunmod-YYYY-MM-DD.log，
+///     与游戏本体日志合并，方便玩家查找。
 ///     支持 STS2-ShunMod.json 的 logLevel 字段控制日志级别。
 /// </summary>
 public static class ShunLogger
@@ -32,7 +32,7 @@ public static class ShunLogger
     private static LogLevel _level = LogLevel.Normal;
 
     /// <summary>
-    ///     日志文件路径（懒初始化，延迟到 mod 目录可确定时）
+    ///     日志文件路径（懒初始化）
     /// </summary>
     private static string LogPath
     {
@@ -46,8 +46,9 @@ public static class ShunLogger
             _configPath = Path.Combine(dllDir, "STS2-ShunMod.json");
             LoadConfig();
 
-            // 日志输出到 Mods/STS2-ShunMod/logs/
-            var logsDir = Path.Combine(dllDir, "logs");
+            // 日志写入游戏统一目录 {UserData}/logs/
+            var gameDataDir = Godot.OS.GetUserDataDir();
+            var logsDir = Path.Combine(gameDataDir, "logs");
             Directory.CreateDirectory(logsDir);
 
             var date = DateTime.Now.ToString("yyyy-MM-dd");

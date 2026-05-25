@@ -67,7 +67,7 @@ STS2-ShunMod/
 │   │   └── ShunModRelicExchange.cs   # 遗物交易所
 │   ├── Core/
 │   │   ├── ShunCard.cs             # 卡牌基类（链式配置）
-│   │   ├── ShunLogger.cs           # 独立日志（logs/shunmod-YYYY-MM-DD.log）
+│   │   ├── ShunLogger.cs           # 日志写入游戏目录 logs/shunmod-YYYY-MM-DD.log
 │   │   ├── CreatureReflection.cs   # Creature 反射工具
 │   │   ├── RelicHelper.cs          # 遗物反射工具
 │   │   └── Registration/           # 自动注册系统
@@ -160,7 +160,7 @@ dotnet build
 
 ## 调试
 
-模组日志独立写入 `Mods/STS2-ShunMod/logs/shunmod-YYYY-MM-DD.log`，与游戏本体日志分离。
+模组日志写入游戏统一目录 `{游戏存档}/logs/shunmod-YYYY-MM-DD.log`（Windows: `%AppData%/SlayTheSpire2/logs/`），与游戏本体日志合并，方便查找。
 
 ### 日志级别
 
