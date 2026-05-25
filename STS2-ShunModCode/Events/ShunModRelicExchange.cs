@@ -1,9 +1,6 @@
-using System.Collections.Generic;
 using System.Reflection;
 using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
-using MegaCrit.Sts2.Core.Entities.Creatures;
-using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Events;
 using MegaCrit.Sts2.Core.Helpers;
@@ -14,8 +11,6 @@ using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Runs;
 using STS2_ShunMod.Core;
 
-using STS2_ShunMod.Patches;
-
 namespace STS2_ShunMod.Events;
 
 /// <summary>
@@ -24,16 +19,42 @@ namespace STS2_ShunMod.Events;
 public class ShunModRelicExchange : EventModel
 {
     private static readonly Random Rnd = new();
+
     private static readonly HashSet<RelicRarity> TradeableRarities =
         [RelicRarity.Common, RelicRarity.Uncommon, RelicRarity.Rare, RelicRarity.Shop];
+
+    /// <summary>附魔黑名单 — 不会在交易所随机出现。</summary>
+    private static readonly HashSet<string> EnchantBlacklist = new()
+    {
+        "PerfectFit",
+        "RoyallyApproved",
+        "SlumberingEssence",
+        "Sown",
+        "Steady",
+        "TezcatarasEmber",
+        "Vigorous",
+        "Swift"
+    };
+
+    private EnchantmentModel? _enchantA;
+    private EnchantmentModel? _enchantB;
+    private RelicModel? _gainRelic;
 
     // ════════════════════════════════════ 状态 ════════════════════════════════════
 
     private RelicModel? _loseRelic1;
-    private RelicModel? _gainRelic;
     private RelicModel? _loseRelic2;
-    private EnchantmentModel? _enchantA;
-    private EnchantmentModel? _enchantB;
+
+    // ════════════════════════════════════ DynamicVars ════════════════════════════════════
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+    [
+        new StringVar("LOSE_RELIC_1"),
+        new StringVar("GAIN_RELIC"),
+        new StringVar("LOSE_RELIC_2"),
+        new StringVar("ENCHANT_NAME_A"),
+        new StringVar("ENCHANT_NAME_B")
+    ];
 
 
     // ════════════════════════════════════ 背景图 ════════════════════════════════════
@@ -49,17 +70,6 @@ public class ShunModRelicExchange : EventModel
         return paths;
     }
 
-    // ════════════════════════════════════ DynamicVars ════════════════════════════════════
-
-    protected override IEnumerable<DynamicVar> CanonicalVars =>
-    [
-        new StringVar("LOSE_RELIC_1", ""),
-        new StringVar("GAIN_RELIC", ""),
-        new StringVar("LOSE_RELIC_2", ""),
-        new StringVar("ENCHANT_NAME_A", ""),
-        new StringVar("ENCHANT_NAME_B", "")
-    ];
-
     public override void CalculateVars()
     {
         if (Owner == null) return;
@@ -74,7 +84,6 @@ public class ShunModRelicExchange : EventModel
         SetStr("LOSE_RELIC_2", Resolve(_loseRelic2?.Title));
         SetStr("ENCHANT_NAME_A", Resolve(_enchantA?.Title));
         SetStr("ENCHANT_NAME_B", Resolve(_enchantB?.Title));
-
     }
 
     // ════════════════════════════════════ LocString 解析 ════════════════════════════════════
@@ -82,10 +91,22 @@ public class ShunModRelicExchange : EventModel
     private static string Resolve(LocString? loc)
     {
         if (loc == null) return "?";
-        try { return loc.GetRawText(); }
-        catch (LocException) { }
-        try { return loc.GetFormattedText(); }
-        catch (LocException) { }
+        try
+        {
+            return loc.GetRawText();
+        }
+        catch (LocException)
+        {
+        }
+
+        try
+        {
+            return loc.GetFormattedText();
+        }
+        catch (LocException)
+        {
+        }
+
         return "?";
     }
 
@@ -119,8 +140,10 @@ public class ShunModRelicExchange : EventModel
         _gainRelic = RollRandomRelic();
 
         if (available.Count >= 2)
-            do { _loseRelic2 = available[Rnd.Next(available.Count)]; }
-            while (_loseRelic2 == _loseRelic1);
+            do
+            {
+                _loseRelic2 = available[Rnd.Next(available.Count)];
+            } while (_loseRelic2 == _loseRelic1);
 
         // 滚动 3 种不同附魔
         RollThreeEnchants();
@@ -132,18 +155,19 @@ public class ShunModRelicExchange : EventModel
         if (pool.Count == 0) return;
 
         var rolled = new HashSet<string>();
-        for (int i = 0; i < 2 && rolled.Count < pool.Count; i++)
+        for (var i = 0; i < 2 && rolled.Count < pool.Count; i++)
         {
             var e = pool[Rnd.Next(pool.Count)];
             var key = e.GetType().FullName!;
             // 不重复
-            int tries = 0;
+            var tries = 0;
             while (rolled.Contains(key) && tries < 10)
             {
                 e = pool[Rnd.Next(pool.Count)];
                 key = e.GetType().FullName!;
                 tries++;
             }
+
             rolled.Add(key);
             switch (i)
             {
@@ -152,19 +176,6 @@ public class ShunModRelicExchange : EventModel
             }
         }
     }
-
-    /// <summary>附魔黑名单 — 不会在交易所随机出现。</summary>
-    private static readonly HashSet<string> EnchantBlacklist = new()
-    {
-        "PerfectFit",
-        "RoyallyApproved",
-        "SlumberingEssence",
-        "Sown",
-        "Steady",
-        "TezcatarasEmber",
-        "Vigorous",
-        "Swift",
-    };
 
     private static List<EnchantmentModel> GetEnchantPool()
     {
@@ -181,7 +192,10 @@ public class ShunModRelicExchange : EventModel
     private static RelicModel? RollRandomRelic()
     {
         IEnumerable<RelicModel> all;
-        try { all = ModelDb.AllRelics; }
+        try
+        {
+            all = ModelDb.AllRelics;
+        }
         catch
         {
             all = typeof(RelicModel).Assembly.GetTypes()
@@ -189,16 +203,22 @@ public class ShunModRelicExchange : EventModel
                 .Select(t => ModelDb.GetByIdOrNull<RelicModel>(ModelDb.GetId(t)))
                 .OfType<RelicModel>();
         }
+
         var pool = all.Where(IsTradeable).ToList();
         return pool.Count > 0 ? pool[Rnd.Next(pool.Count)] : null;
     }
 
-    private static bool IsTradeable(RelicModel r) =>
-        TradeableRarities.Contains(r.Rarity) && r.GetType().Name != "Circlet";
+    private static bool IsTradeable(RelicModel r)
+    {
+        return TradeableRarities.Contains(r.Rarity) && r.GetType().Name != "Circlet";
+    }
 
     // ════════════════════════════════════ 选项 ════════════════════════════════════
 
-    protected override IReadOnlyList<EventOption> GenerateInitialOptions() => BuildOptions();
+    protected override IReadOnlyList<EventOption> GenerateInitialOptions()
+    {
+        return BuildOptions();
+    }
 
     private IReadOnlyList<EventOption> BuildOptions()
     {
@@ -208,7 +228,8 @@ public class ShunModRelicExchange : EventModel
         // OPT_1: 遗物 → 遗物
         if (_loseRelic1 != null && _gainRelic != null)
         {
-            var lose = _loseRelic1; var gain = _gainRelic;
+            var lose = _loseRelic1;
+            var gain = _gainRelic;
             var tips = new List<IHoverTip>();
             tips.AddRange(lose.HoverTips);
             tips.AddRange(gain.HoverTips);
@@ -241,12 +262,13 @@ public class ShunModRelicExchange : EventModel
                 {
                     var picked = await CardSelectCmd.FromDeckGeneric(player!,
                         new CardSelectorPrefs(CardSelectorPrefs.EnchantSelectionPrompt, 1, 1),
-                        filter: c => e.CanEnchant(c));
+                        c => e.CanEnchant(c));
                     if (!picked.Any())
                     {
                         Refresh();
                         return;
                     }
+
                     var mutableEnch = (EnchantmentModel)e.MutableClone();
                     var card = picked.First();
                     CardCmd.Enchant(mutableEnch, card, 5);
@@ -258,24 +280,25 @@ public class ShunModRelicExchange : EventModel
 
         // OPT_3: 扣血刷新
         if (player != null && player.Relics.Any(IsTradeable))
-        {
             list.Add(Opt(async () =>
             {
                 player.Creature.LoseHpInternal(5, 0);
                 Refresh();
             }, "OPT_3"));
-        }
 
         // OPT_4: 离开
         list.Add(new EventOption(this, async () =>
-            SetEventFinished(L10NLookup("pages.CLOSE.description")),
+                SetEventFinished(L10NLookup("pages.CLOSE.description")),
             $"{Id.Entry}.pages.INITIAL.options.OPT_4"));
 
         return list;
     }
 
-    private EventOption Opt(Func<Task> cb, string key, IEnumerable<IHoverTip>? hoverTips = null) =>
-        new(this, cb, $"{Id.Entry}.pages.INITIAL.options.{key}", hoverTips ?? Array.Empty<IHoverTip>());
+    private EventOption Opt(Func<Task> cb, string key, IEnumerable<IHoverTip>? hoverTips = null)
+    {
+        return new EventOption(this, cb, $"{Id.Entry}.pages.INITIAL.options.{key}",
+            hoverTips ?? Array.Empty<IHoverTip>());
+    }
 
     /// <summary>交易/刷新后：重新 Roll → 写 DynamicVars → SetEventState</summary>
     private void Refresh()

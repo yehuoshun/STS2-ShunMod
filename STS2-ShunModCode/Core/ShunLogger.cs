@@ -1,8 +1,7 @@
-using System;
-using System.IO;
 using System.Reflection;
 using System.Text.Json;
-using System.Threading;
+using Godot;
+using Environment = System.Environment;
 
 namespace STS2_ShunMod.Core;
 
@@ -29,7 +28,6 @@ public static class ShunLogger
     private static readonly object _lock = new();
     private static string? _logPath;
     private static string? _configPath;
-    private static LogLevel _level = LogLevel.Normal;
 
     /// <summary>
     ///     日志文件路径（懒初始化）
@@ -47,7 +45,7 @@ public static class ShunLogger
             LoadConfig();
 
             // 日志写入游戏统一目录 {UserData}/logs/
-            var gameDataDir = Godot.OS.GetUserDataDir();
+            var gameDataDir = OS.GetUserDataDir();
             var logsDir = Path.Combine(gameDataDir, "logs");
             Directory.CreateDirectory(logsDir);
 
@@ -60,7 +58,7 @@ public static class ShunLogger
     /// <summary>
     ///     当前日志级别（可通过 debug-config.json 配置）
     /// </summary>
-    public static LogLevel CurrentLevel => _level;
+    public static LogLevel CurrentLevel { get; private set; } = LogLevel.Normal;
 
     private static void LoadConfig()
     {
@@ -71,10 +69,8 @@ public static class ShunLogger
             var json = File.ReadAllText(_configPath);
             using var doc = JsonDocument.Parse(json);
             if (doc.RootElement.TryGetProperty("logLevel", out var el) && el.ValueKind == JsonValueKind.String)
-            {
-                if (Enum.TryParse<LogLevel>(el.GetString(), ignoreCase: true, out var parsed))
-                    _level = parsed;
-            }
+                if (Enum.TryParse<LogLevel>(el.GetString(), true, out var parsed))
+                    CurrentLevel = parsed;
         }
         catch
         {
@@ -88,17 +84,17 @@ public static class ShunLogger
     public static void ReloadConfig()
     {
         LoadConfig();
-        Info("ShunLogger", $"日志级别切换至 {_level}");
+        Info("ShunLogger", $"日志级别切换至 {CurrentLevel}");
     }
 
     public static void Info(string patch, string msg)
     {
-        if (_level >= LogLevel.Normal) Write("INFO", patch, msg);
+        if (CurrentLevel >= LogLevel.Normal) Write("INFO", patch, msg);
     }
 
     public static void Warn(string patch, string msg)
     {
-        if (_level >= LogLevel.Normal) Write("WARN", patch, msg);
+        if (CurrentLevel >= LogLevel.Normal) Write("WARN", patch, msg);
     }
 
     public static void Error(string patch, string msg)
@@ -110,13 +106,13 @@ public static class ShunLogger
     public static void Error(string patch, Exception ex)
     {
         Write("ERROR", patch, $"{ex.GetType().Name}: {ex.Message}");
-        if (ex.StackTrace != null && _level >= LogLevel.Verbose)
+        if (ex.StackTrace != null && CurrentLevel >= LogLevel.Verbose)
             Write("TRACE", patch, ex.StackTrace);
     }
 
     public static void Debug(string patch, string msg)
     {
-        if (_level >= LogLevel.Verbose) Write("DEBUG", patch, msg);
+        if (CurrentLevel >= LogLevel.Verbose) Write("DEBUG", patch, msg);
     }
 
     private static void Write(string level, string patch, string msg)
@@ -142,6 +138,6 @@ public static class ShunLogger
     /// </summary>
     public static void Summary(string modId)
     {
-        Info(modId, $"══════════ 日志已启动 (级别: {_level}) ══════════");
+        Info(modId, $"══════════ 日志已启动 (级别: {CurrentLevel}) ══════════");
     }
 }

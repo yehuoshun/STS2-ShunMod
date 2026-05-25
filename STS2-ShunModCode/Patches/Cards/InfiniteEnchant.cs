@@ -1,6 +1,5 @@
 using System.Reflection;
 using HarmonyLib;
-using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Models;
 using STS2_ShunMod.Core;
 
@@ -8,11 +7,9 @@ namespace STS2_ShunMod.Patches;
 
 /// <summary>
 ///     无限附魔系统 — 通过 RepeatableCompositeEnchantment 包装器实现多附魔。
-///
 ///     Patch 1: CanEnchant 始终返回 true（任何卡牌都可被附魔）
 ///     Patch 2: 拦截 EnchantInternal，已有附魔时路由到复合包装器
 /// </summary>
-
 /// Patch 1 — CanEnchant 始终返回 true
 [HarmonyPatch]
 public static class InfiniteEnchant_CanEnchant
@@ -25,6 +22,7 @@ public static class InfiniteEnchant_CanEnchant
             ShunLogger.Info("无限附魔/CanEnchant", "匹配 CanEnchant(CardModel)");
             return method;
         }
+
         ShunLogger.Warn("无限附魔/CanEnchant", "未找到 CanEnchant(CardModel)，补丁跳过");
         return null;
     }

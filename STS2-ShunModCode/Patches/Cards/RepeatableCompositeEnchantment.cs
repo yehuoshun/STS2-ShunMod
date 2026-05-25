@@ -7,13 +7,11 @@ using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Saves.Runs;
 using MegaCrit.Sts2.Core.ValueProps;
-using STS2_ShunMod.Core;
 
 namespace STS2_ShunMod.Patches;
 
 /// <summary>
 ///     复合附魔 — 将多个附魔包装为一个 EnchantmentModel，实现无限附魔。
-///
 ///     原理：
 ///     1. 作为 EnchantmentModel 子类挂在 card.Enchantment 上
 ///     2. 内部维护 List&lt;EnchantmentModel&gt; 存储所有实际附魔
@@ -46,14 +44,16 @@ public sealed class RepeatableCompositeEnchantment : EnchantmentModel
                 Amount = 0;
                 return;
             }
+
             var arr = JsonSerializer.Deserialize<SerializableEnchantment[]>(value);
             if (arr == null)
             {
                 Amount = 0;
                 return;
             }
+
             foreach (var s in arr)
-                _innerEnchantments.Add(EnchantmentModel.FromSerializable(s));
+                _innerEnchantments.Add(FromSerializable(s));
             Amount = _innerEnchantments.Count;
             RefreshStatus();
         }
@@ -69,8 +69,6 @@ public sealed class RepeatableCompositeEnchantment : EnchantmentModel
             return _innerEnchantments;
         }
     }
-
-    public override bool CanEnchant(CardModel card) => false;
 
     public override bool HasExtraCardText => false;
 
@@ -129,6 +127,11 @@ public sealed class RepeatableCompositeEnchantment : EnchantmentModel
         }
     }
 
+    public override bool CanEnchant(CardModel card)
+    {
+        return false;
+    }
+
     // ══════════════════════════ 查询 ══════════════════════════
 
     public EnchantmentModel? GetLead()
@@ -160,7 +163,9 @@ public sealed class RepeatableCompositeEnchantment : EnchantmentModel
         EnsureCompositeCard();
 
         if (!enchantment.HasCard)
+        {
             enchantment.ApplyInternal(Card, enchantment.Amount);
+        }
         else if (enchantment.Card != Card)
         {
             enchantment.ClearInternal();
@@ -329,6 +334,7 @@ public sealed class RepeatableCompositeEnchantment : EnchantmentModel
                 if (e.HasCard) e.ClearInternal();
                 e.ApplyInternal(Card, e.Amount);
             }
+
             Subscribe(e);
         }
     }
@@ -347,7 +353,10 @@ public sealed class RepeatableCompositeEnchantment : EnchantmentModel
         _subscribed.Clear();
     }
 
-    private void OnStatusChanged() => RefreshStatus();
+    private void OnStatusChanged()
+    {
+        RefreshStatus();
+    }
 
     internal void RefreshStatus()
     {

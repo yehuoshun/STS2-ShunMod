@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
@@ -44,10 +40,7 @@ public static class ForgePullBladesToHandPatch
                 })
                 .ToList();
 
-            foreach (var blade in blades)
-            {
-                await CardPileCmd.Add(blade, PileType.Hand);
-            }
+            foreach (var blade in blades) await CardPileCmd.Add(blade, PileType.Hand);
 
             if (blades.Count > 0)
                 ShunLogger.Debug("锻造拉回", $"回收 {blades.Count} 张 SovereignBlade 到手牌");

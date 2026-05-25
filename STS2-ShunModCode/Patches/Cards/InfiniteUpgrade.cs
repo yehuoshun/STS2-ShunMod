@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Models;
@@ -58,7 +56,7 @@ public static class InfiniteUpgrade_MaxUpgrade
             __result = UpgradeCap;
 
         // ═══ 反序列化支持：读档时恢复超出原始上限的等级 ═══
-        int serializedLevel = InfiniteUpgrade_SerializationContext.Peek();
+        var serializedLevel = InfiniteUpgrade_SerializationContext.Peek();
         if (serializedLevel > __result &&
             InfiniteUpgrade_Safety.ShouldAllowSerializedUpgrade(__instance, __result, serializedLevel))
         {
@@ -67,12 +65,10 @@ public static class InfiniteUpgrade_MaxUpgrade
         }
 
         // ═══ 运行时升级支持：当前等级可能因其他 mod/机制超出原始上限 ═══
-        int currentLevel = __instance.CurrentUpgradeLevel;
+        var currentLevel = __instance.CurrentUpgradeLevel;
         if (currentLevel > __result &&
             InfiniteUpgrade_Safety.ShouldAllowObservedUpgrade(__instance, __result, currentLevel))
-        {
             __result = currentLevel;
-        }
     }
 }
 
@@ -87,7 +83,7 @@ public static class InfiniteUpgrade_Deserialize
 {
     private static void Prefix(SerializableCard save)
     {
-        int level = InfiniteUpgrade_Safety.PrepareSerializableUpgradeLevel(save);
+        var level = InfiniteUpgrade_Safety.PrepareSerializableUpgradeLevel(save);
         InfiniteUpgrade_SerializationContext.Push(level);
     }
 
@@ -106,8 +102,7 @@ public static class InfiniteUpgrade_Deserialize
 /// </summary>
 internal static class InfiniteUpgrade_SerializationContext
 {
-    [ThreadStatic]
-    private static Stack<int>? _stack;
+    [ThreadStatic] private static Stack<int>? _stack;
 
     public static void Push(int upgradeLevel)
     {
@@ -172,13 +167,13 @@ internal static class InfiniteUpgrade_Safety
     /// </summary>
     public static int PrepareSerializableUpgradeLevel(SerializableCard save)
     {
-        int level = Math.Max(0, save.CurrentUpgradeLevel);
+        var level = Math.Max(0, save.CurrentUpgradeLevel);
         if (level == 0 || save.Id == null) return level;
 
         var card = ResolveCanonicalCard(save.Id);
         if (card == null) return level;
 
-        int originalMax = Math.Max(0, card.MaxUpgradeLevel);
+        var originalMax = Math.Max(0, card.MaxUpgradeLevel);
         if (level <= originalMax) return level;
 
         // 安全检查：不安全的卡牌钳制回原始上限
@@ -204,7 +199,7 @@ internal static class InfiniteUpgrade_Safety
                 return cached;
         }
 
-        bool sensitive = false;
+        var sensitive = false;
         for (var t = cardType; t != null && typeof(CardModel).IsAssignableFrom(t); t = t.BaseType)
         {
             foreach (var methodName in DrawSensitiveMethods)
@@ -217,10 +212,15 @@ internal static class InfiniteUpgrade_Safety
                     break;
                 }
             }
+
             if (sensitive) break;
         }
 
-        lock (SyncRoot) { DrawSensitiveCache[cardType] = sensitive; }
+        lock (SyncRoot)
+        {
+            DrawSensitiveCache[cardType] = sensitive;
+        }
+
         return sensitive;
     }
 
@@ -231,6 +231,7 @@ internal static class InfiniteUpgrade_Safety
         {
             if (!ClampedWarnings.Add(key)) return;
         }
+
         ShunLogger.Warn("无限升级", $"读档钳制 {card.Id} 升级等级 {saved}→{clamped}（卡牌含抽牌行为，防止死循环）");
     }
 }

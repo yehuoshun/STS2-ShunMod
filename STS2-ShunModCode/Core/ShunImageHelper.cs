@@ -9,16 +9,22 @@ public static class ShunImageHelper
 
     // ── 卡牌 ──
 
-    public static string CardPortrait(string color, string name) =>
-        $"{Root}/packed/card_portraits/{color}/{name}.png";
+    public static string CardPortrait(string color, string name)
+    {
+        return $"{Root}/packed/card_portraits/{color}/{name}.png";
+    }
 
     // ── 遗物 ──
 
-    public static string RelicBigIcon(string iconBaseName) =>
-        $"{Root}/relics/{iconBaseName}/{iconBaseName}.png";
+    public static string RelicBigIcon(string iconBaseName)
+    {
+        return $"{Root}/relics/{iconBaseName}/{iconBaseName}.png";
+    }
 
     // ── 事件 ──
 
-    public static string EventImage(string id) =>
-        $"{Root}/events/{id}.png";
+    public static string EventImage(string id)
+    {
+        return $"{Root}/events/{id}.png";
+    }
 }

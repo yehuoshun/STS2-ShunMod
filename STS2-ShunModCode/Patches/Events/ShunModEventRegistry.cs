@@ -1,5 +1,4 @@
 using HarmonyLib;
-using MegaCrit.Sts2.Core.Events;
 using MegaCrit.Sts2.Core.Models;
 using STS2_ShunMod.Core;
 using STS2_ShunMod.Core.Registration;
@@ -31,10 +30,10 @@ public static class ShunModEventRegistry
 ///     将 ShunModEventRegistry.SharedEvents 注入 ModelDb.AllSharedEvents。
 /// </summary>
 [HarmonyPatch(typeof(ModelDb), nameof(ModelDb.AllSharedEvents), MethodType.Getter)]
-static class AllSharedEvents_InjectPatch
+internal static class AllSharedEvents_InjectPatch
 {
     [HarmonyPostfix]
-    static IEnumerable<EventModel> Postfix(IEnumerable<EventModel> __result)
+    private static IEnumerable<EventModel> Postfix(IEnumerable<EventModel> __result)
     {
         var merged = __result.Concat(ShunModEventRegistry.SharedEvents).ToList();
         ShunLogger.Info("事件注册", $"注入 {ShunModEventRegistry.SharedEvents.Count} 个自定义事件，总计 {merged.Count}");
@@ -47,10 +46,10 @@ static class AllSharedEvents_InjectPatch
 /// </summary>
 [HarmonyPatch(typeof(ModelDb), nameof(ModelDb.Init))]
 [HarmonyPriority(Priority.Last)]
-static class ModelDbInit_RegisterPatch
+internal static class ModelDbInit_RegisterPatch
 {
     [HarmonyPostfix]
-    static void Postfix()
+    private static void Postfix()
     {
         var count = 0;
         foreach (var type in ContentRegistry.EventTypes)
