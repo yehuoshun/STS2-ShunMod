@@ -34,6 +34,7 @@ public class ShunModRelicExchange : EventModel
         "RoyallyApproved",
         "SlumberingEssence",
         "Sown",
+        "Spiral",
         "Steady",
         "TezcatarasEmber",
         "Vigorous",
