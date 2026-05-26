@@ -30,6 +30,7 @@ public class ShunModRelicExchange : EventModel
     /// <summary>附魔黑名单 — 不会在交易所随机出现。</summary>
     private static readonly HashSet<string> EnchantBlacklist = new()
     {
+        "Adroit",
         "PerfectFit",
         "RoyallyApproved",
         "SlumberingEssence",
