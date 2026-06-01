@@ -10,7 +10,7 @@ public static class ShunImageHelper
     // ── 卡牌 ──
 
     public static string CardPortrait(string color, string name) =>
-        $"{Root}/packed/card_portraits/{color}/{name}.png";
+        $"{Root}/card/card_portraits/{color}/{name}.png";
 
     // ── 遗物 ──
 
