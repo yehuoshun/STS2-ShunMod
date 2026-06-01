@@ -15,10 +15,10 @@ public static class ShunImageHelper
     // ── 遗物 ──
 
     public static string RelicPackedIcon(string iconBaseName) =>
-        $"{Root}/atlases/relic_atlas.sprites/{iconBaseName}.tres";
+        $"{Root}/relics/{iconBaseName}/{iconBaseName}.png";
 
     public static string RelicOutlineIcon(string iconBaseName) =>
-        $"{Root}/atlases/relic_outline_atlas.sprites/{iconBaseName}.tres";
+        $"{Root}/relics/{iconBaseName}/{iconBaseName}_outline.png";
 
     public static string RelicBigIcon(string iconBaseName) =>
         $"{Root}/relics/{iconBaseName}/{iconBaseName}.png";
