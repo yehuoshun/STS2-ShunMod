@@ -3,7 +3,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
-using STS2_ShunMod.Core;
+using MegaCrit.Sts2.Core.Logging;
 
 namespace STS2_ShunMod.Patches;
 
@@ -32,6 +32,6 @@ public static class HardenedShellPowerPatch
     {
         var old = __result;
         __result = amount;
-        ShunLogger.Info("硬化外壳", $"修复: target={target.GetType().Name} old={old} → new={amount}");
+        Log.Info($"[硬化外壳] 修复: target={target.GetType().Name} old={old} → new={amount}");
     }
 }

@@ -2,7 +2,7 @@ using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Models;
-using STS2_ShunMod.Core;
+using MegaCrit.Sts2.Core.Logging;
 
 namespace STS2_ShunMod.Patches;
 
@@ -30,11 +30,11 @@ public static class ShowTotalDamage_Description
             [typeof(PileType), typeof(Creature)]);
         if (method == null)
         {
-            ShunLogger.Error("总伤害", "❌ 未找到 CardModel.GetDescriptionForPile(PileType, Creature)，补丁跳过！游戏 API 可能已变更。");
+            Log.Error($"[总伤害] ❌ 未找到 CardModel.GetDescriptionForPile(PileType, Creature)，补丁跳过！游戏 API 可能已变更。");
             return false;
         }
 
-        ShunLogger.Info("总伤害", "✅ 已绑定 GetDescriptionForPile");
+        Log.Info("[总伤害] ✅ 已绑定 GetDescriptionForPile");
         return true;
     }
 
@@ -58,13 +58,13 @@ public static class ShowTotalDamage_Description
             // 中英双语：total damage / 总伤害
             __result += $"\n[color=#ffcc00]({perHit} × {totalHits} = {total} total damage / 总伤害)[/color]";
 
-            ShunLogger.Debug("总伤害", $"{__instance.GetType().Name}: {perHit}×{totalHits}={total}");
+            Log.Info($"[总伤害] {__instance.GetType().Name}: {perHit}×{totalHits}={total}");
         }
         catch (Exception ex)
         {
-            ShunLogger.Error("总伤害", $"❌ Postfix 异常: {ex.GetType().Name}: {ex.Message}");
+            Log.Error($"[总伤害] ❌ Postfix 异常: {ex.GetType().Name}: {ex.Message}");
             if (ex.StackTrace != null)
-                ShunLogger.Error("总伤害", ex.StackTrace);
+                Log.Error($"[总伤害] {ex.StackTrace}");
         }
     }
 

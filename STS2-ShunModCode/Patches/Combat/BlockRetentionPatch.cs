@@ -1,6 +1,6 @@
 using System.Reflection;
 using HarmonyLib;
-using STS2_ShunMod.Core;
+using MegaCrit.Sts2.Core.Logging;
 
 namespace STS2_ShunMod.Patches;
 
@@ -62,11 +62,11 @@ public static class BlockRetentionPrepareForNextTurnPatch
                 return;
 
             CreatureReflection.SetBlock(__instance, __state);
-            ShunLogger.Info("格挡保留/回合结束", $"恢复格挡: {__state}");
+            Log.Info($"[格挡保留/回合结束] 恢复格挡: {__state}");
         }
         catch (Exception ex)
         {
-            ShunLogger.Error("格挡保留/回合结束", ex);
+            Log.Error($"[格挡保留/回合结束] {ex.GetType().Name}: {ex.Message}");
         }
     }
 }

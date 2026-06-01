@@ -4,7 +4,7 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Models.Cards;
-using STS2_ShunMod.Core;
+using MegaCrit.Sts2.Core.Logging;
 
 namespace STS2_ShunMod.Patches;
 
@@ -43,11 +43,11 @@ public static class ForgePullBladesToHandPatch
             foreach (var blade in blades) await CardPileCmd.Add(blade, PileType.Hand);
 
             if (blades.Count > 0)
-                ShunLogger.Debug("锻造拉回", $"回收 {blades.Count} 张 SovereignBlade 到手牌");
+                Log.Info($"[锻造拉回] 回收 {blades.Count} 张 SovereignBlade 到手牌");
         }
         catch (Exception ex)
         {
-            ShunLogger.Error("锻造拉回", ex);
+            Log.Error($"[锻造拉回] {ex.GetType().Name}: {ex.Message}");
         }
     }
 }

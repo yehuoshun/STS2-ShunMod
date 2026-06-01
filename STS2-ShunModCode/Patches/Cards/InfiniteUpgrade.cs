@@ -2,7 +2,7 @@ using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Saves.Runs;
-using STS2_ShunMod.Core;
+using MegaCrit.Sts2.Core.Logging;
 
 namespace STS2_ShunMod.Patches;
 
@@ -232,6 +232,6 @@ internal static class InfiniteUpgrade_Safety
             if (!ClampedWarnings.Add(key)) return;
         }
 
-        ShunLogger.Warn("无限升级", $"读档钳制 {card.Id} 升级等级 {saved}→{clamped}（卡牌含抽牌行为，防止死循环）");
+        Log.Warning($"[无限升级] 读档钳制 {card.Id} 升级等级 {saved}→{clamped}（卡牌含抽牌行为，防止死循环）");
     }
 }
