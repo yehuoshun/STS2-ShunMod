@@ -1,21 +1,20 @@
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
-using MegaCrit.Sts2.Core.Helpers;
+using MegaCrit.Sts2.Core.Factories;
+using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.RelicPools;
-using MegaCrit.Sts2.Core.Rewards;
-using MegaCrit.Sts2.Core.Rooms;
 using STS2_ShunMod.Core;
 using STS2_ShunMod.Core.Registration;
 
-namespace STS2_ShunMod.Relics;
+namespace STS2_ShunMod.Relics.ShunRelics;
 
 /// <summary>
-///     首领奖杯 — 击杀 Boss 后最大生命值 +25%。
+///     丰饶叶 — 每个回合开始时，用随机药水填满所有空药水栏位。
 /// </summary>
 [Pool(typeof(SharedRelicPool))]
-public sealed class ShunModBossTrophy : RelicModel
+public sealed class ShunModBountifulFrond : RelicModel
 {
     public override RelicRarity Rarity => RelicRarity.Rare;
 
@@ -28,17 +27,16 @@ public sealed class ShunModBossTrophy : RelicModel
     protected override string BigIconPath =>
         ShunImageHelper.RelicBigIcon(IconBaseName);
 
-    public override bool TryModifyRewards(Player player, List<Reward> rewards, AbstractRoom? room)
+    public override async Task AfterPlayerTurnStart(PlayerChoiceContext choiceContext, Player player)
     {
-        if (player != Owner || room == null || room.RoomType != RoomType.Boss)
-            return false;
-
         Flash();
-
-        var gain = (int)(Owner!.Creature.MaxHp * 0.25m);
-        if (gain > 0)
-            TaskHelper.RunSafely(CreatureCmd.GainMaxHp(Owner.Creature, gain));
-
-        return false;
+        while (player.HasOpenPotionSlots)
+        {
+            var potion = PotionFactory
+                .CreateRandomPotionOutOfCombat(player, player.RunState.Rng.CombatPotionGeneration)
+                .ToMutable();
+            if (!(await PotionCmd.TryToProcure(potion, player)).success)
+                break;
+        }
     }
 }

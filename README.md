@@ -63,8 +63,9 @@ STS2-ShunMod/
 │   │   └── ShunCard/
 │   │       └── ShunModSuperApotheosis.cs  # 超级神化卡牌
 │   ├── Relics/
-│   │   └── ShunModBossTrophy.cs    # 首领奖杯遗物
-│   │   └── ShunModBountifulFrond.cs # 丰饶叶遗物
+│   │   └── ShunRelics/
+│   │       ├── ShunModBossTrophy.cs    # 首领奖杯遗物
+│   │       └── ShunModBountifulFrond.cs # 丰饶叶遗物
 │   ├── Events/
 │   │   └── ShunEvents/
 │   │       └── ShunModRelicExchange.cs   # 遗物交易所
