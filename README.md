@@ -66,10 +66,10 @@ STS2-ShunMod/
 │   │   └── ShunModBossTrophy.cs    # 首领奖杯遗物
 │   │   └── ShunModBountifulFrond.cs # 丰饶叶遗物
 │   ├── Events/
-│   │   └── ShunModRelicExchange.cs   # 遗物交易所
+│   │   └── ShunEvents/
+│   │       └── ShunModRelicExchange.cs   # 遗物交易所
 │   ├── Core/
 │   │   ├── ShunCard.cs             # 卡牌基类（链式配置）
-│   │   ├── ShunLogger.cs           # 日志写入游戏目录 logs/shunmod-YYYY-MM-DD.log
 │   │   ├── CreatureReflection.cs   # Creature 反射工具
 │   │   ├── RelicHelper.cs          # 遗物反射工具
 │   │   └── Registration/           # 自动注册系统
