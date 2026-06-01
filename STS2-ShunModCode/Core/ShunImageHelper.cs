@@ -15,13 +15,13 @@ public static class ShunImageHelper
     // ── 遗物 ──
 
     public static string RelicPackedIcon(string iconBaseName) =>
-        $"{Root}/relics/{iconBaseName}/{iconBaseName}.png";
+        $"{Root}/relics/shunRelics/{iconBaseName}/{iconBaseName}.png";
 
     public static string RelicOutlineIcon(string iconBaseName) =>
-        $"{Root}/relics/{iconBaseName}/{iconBaseName}_outline.png";
+        $"{Root}/relics/shunRelics/{iconBaseName}/{iconBaseName}_outline.png";
 
     public static string RelicBigIcon(string iconBaseName) =>
-        $"{Root}/relics/{iconBaseName}/{iconBaseName}.png";
+        $"{Root}/relics/shunRelics/{iconBaseName}/{iconBaseName}.png";
 
     // ── 事件 ──
 
