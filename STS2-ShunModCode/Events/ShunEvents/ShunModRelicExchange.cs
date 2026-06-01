@@ -15,7 +15,7 @@ using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Runs;
 using STS2_ShunMod.Core;
 
-namespace STS2_ShunMod.Events;
+namespace STS2_ShunMod.Events.ShunEvents;
 
 /// <summary>
 ///     遗物交易所 — 随机遗物换遗物/附魔，可反复交易直到退出。
