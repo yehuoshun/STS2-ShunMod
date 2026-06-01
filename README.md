@@ -36,7 +36,6 @@
 | 💥 显示总伤害 | 多段卡/X卡在卡牌描述末尾显示总伤害（单段伤害 × 段数）。 |
 | ⚔️ 锻造拉回 | 所有 Forge 行为自动将非手牌的 SovereignBlade 拉回手牌。 |
 | 🌀 螺旋解锁 | Spiral 附魔取消仅限基础打击/防御的限制，任意卡牌可附魔。 |
-| ✨ 奖励附魔 | 战斗奖励卡牌和商店卡牌概率获得随机附魔（每幕 12.5% × 幕数，附魔数量 = 幕数 + 1）。 |
 
 ---
 
@@ -79,9 +78,8 @@ STS2-ShunMod/
 │   └── Patches/
 │       ├── Cards/
 │       │   ├── InfiniteUpgrade.cs      # 无限升级
-│       │   ├── InfiniteUpgrade.cs        # 无限升级
-│       │   ├── RewardEnchantPatch.cs      # 奖励附魔
-│       │   └── SpiralCanEnchantPatch.cs   # 螺旋附魔解锁
+│       │   ├── InfiniteUpgrade.cs      # 无限升级
+│       │   └── SpiralCanEnchantPatch.cs  # 螺旋附魔解锁
 │       ├── Combat/
 │       │   ├── BlockRetentionPatch.cs  # 格挡保留
 │       │   ├── HardenedShellPatch.cs   # 硬化外壳修复
