@@ -26,5 +26,5 @@ public static class ShunImageHelper
     // ── 事件 ──
 
     public static string EventImage(string id) =>
-        $"{Root}/events/{id}.png";
+        $"{Root}/events/shunEvents/{id}.png";
 }
