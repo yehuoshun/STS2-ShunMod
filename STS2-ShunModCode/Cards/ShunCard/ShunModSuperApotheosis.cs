@@ -6,7 +6,7 @@ using MegaCrit.Sts2.Core.Nodes.CommonUi;
 using STS2_ShunMod.Core;
 using STS2_ShunMod.Core.Registration;
 
-namespace STS2_ShunMod.ShunCard;
+namespace STS2_ShunMod.Cards.ShunCard;
 
 /// <summary>
 ///     超级神化 — 升级战斗中所有卡牌，同时升级牌组中所有可升级卡牌。

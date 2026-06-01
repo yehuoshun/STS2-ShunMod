@@ -59,8 +59,9 @@
 STS2-ShunMod/
 ├── STS2-ShunModCode/               # C# 源码
 │   ├── MainFile.cs                 # Mod 入口（Harmony + 自动注册）
-│   ├── ShunCard/
-│   │   └── ShunModSuperApotheosis.cs  # 超级神化卡牌
+│   ├── Cards/
+│   │   └── ShunCard/
+│   │       └── ShunModSuperApotheosis.cs  # 超级神化卡牌
 │   ├── Relics/
 │   │   └── ShunModBossTrophy.cs    # 首领奖杯遗物
 │   │   └── ShunModBountifulFrond.cs # 丰饶叶遗物
