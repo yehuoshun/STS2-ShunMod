@@ -159,40 +159,6 @@ dotnet build
 
 ---
 
-## 调试
-
-模组日志写入游戏统一目录 `{游戏存档}/logs/shunmod-YYYY-MM-DD.log`（Windows: `%AppData%/SlayTheSpire2/logs/`），与游戏本体日志合并，方便查找。
-
-### 日志级别
-
-在 `STS2-ShunMod.json` 中加 `"logLevel"` 字段控制输出量：
-
-```json
-{
-  "id": "STS2-ShunMod",
-  "logLevel": "Minimal"
-}
-```
-
-| `logLevel` | 输出内容 | 适用场景 |
-|---|---|---|
-| `Minimal` | 只输出 ERROR | 正常玩游戏，零打扰 |
-| `Normal` | ERROR + WARN + INFO（**默认**） | 日常开发，看补丁触发情况 |
-| `Verbose` | 全部（含 DEBUG 状态快照 + TRACE 堆栈） | 追 bug |
-
-不设此字段 = 默认 Normal。修改后**重启游戏**生效。
-
-### 日志样例
-
-```
-[10:30:01.234] [INFO] [STS2-ShunMod] ══════════ 日志已启动 (级别: Normal) ══════════
-[10:30:01.456] [INFO] [无限升级/TargetMethods] 扫描到 28 个 MaxUpgradeLevel getter
-[10:35:22.790] [ERROR] [无限升级/反序列化] NullReferenceException: ...
-[10:35:22.791] [TRACE] [无限升级/反序列化]    at STS2_ShunMod.Patches.InfiniteUpgrade_Deserialize.Finalizer(...)
-```
-
----
-
 ## 技术栈
 
 - **游戏引擎** Godot 4.5 (.NET)
