@@ -276,22 +276,22 @@ public class ShunModRelicExchange : EventModel
                 if (!deck.Any(c => ench.CanEnchant(c)))
                     continue;
 
-                var e = ench;
+                var mutableEnch = (EnchantmentModel)ench.MutableClone();
+                mutableEnch.Amount = 5;
                 var tips = new List<IHoverTip>();
                 tips.AddRange(lose.HoverTips);
-                tips.AddRange(e.HoverTips);
+                tips.AddRange(mutableEnch.HoverTips);
                 list.Add(Opt(async () =>
                 {
                     var picked = await CardSelectCmd.FromDeckGeneric(player!,
                         new CardSelectorPrefs(CardSelectorPrefs.EnchantSelectionPrompt, 1, 1),
-                        c => e.CanEnchant(c));
+                        c => mutableEnch.CanEnchant(c));
                     if (!picked.Any())
                     {
                         Refresh();
                         return;
                     }
 
-                    var mutableEnch = (EnchantmentModel)e.MutableClone();
                     var card = picked.First();
                     CardCmd.Enchant(mutableEnch, card, 5);
                     await RelicCmd.Remove(lose);
