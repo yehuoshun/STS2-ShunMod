@@ -25,7 +25,7 @@ public class ShunModRelicExchange : EventModel
     private static readonly Random Rnd = new();
 
     private static readonly HashSet<RelicRarity> TradeableRarities =
-        [RelicRarity.Common, RelicRarity.Uncommon, RelicRarity.Rare, RelicRarity.Shop];
+        [RelicRarity.Common, RelicRarity.Uncommon, RelicRarity.Rare, RelicRarity.Shop, RelicRarity.None];
 
     /// <summary>附魔黑名单 — 不会在交易所随机出现。</summary>
     private static readonly HashSet<string> EnchantBlacklist = new()
