@@ -18,7 +18,6 @@ public static class MainFile
         try
         {
             _harmony.PatchAll();
-            Log.Info($"[{ModId}] Harmony PatchAll 完成，共 {_harmony.GetPatchedMethods().Count()} 个方法已注入");
         }
         catch (Exception e)
         {
@@ -31,13 +30,10 @@ public static class MainFile
         try
         {
             ContentRegistry.RegisterAll(Assembly.GetExecutingAssembly());
-            Log.Info($"[{ModId}] 内容注册完成");
         }
         catch (Exception e)
         {
             Log.Error($"[{ModId}] 内容注册失败: {e.Message}");
         }
-
-        Log.Info($"{ModId} - 加载完成! ({_harmony.GetPatchedMethods().Count()} patches)");
     }
 }

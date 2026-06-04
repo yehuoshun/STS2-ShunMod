@@ -34,7 +34,6 @@ public static class ShowTotalDamage_Description
             return false;
         }
 
-        Log.Info("[总伤害] ✅ 已绑定 GetDescriptionForPile");
         return true;
     }
 
@@ -57,8 +56,6 @@ public static class ShowTotalDamage_Description
 
             // 中英双语：total damage / 总伤害
             __result += $"\n[color=#ffcc00]({perHit} × {totalHits} = {total} total damage / 总伤害)[/color]";
-
-            Log.Info($"[总伤害] {__instance.GetType().Name}: {perHit}×{totalHits}={total}");
         }
         catch (Exception ex)
         {

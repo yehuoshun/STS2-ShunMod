@@ -30,8 +30,6 @@ public static class HardenedShellPowerPatch
     private static void Postfix(HardenedShellPower __instance, Creature target, decimal amount,
         ValueProp props, Creature? dealer, CardModel? cardSource, ref decimal __result)
     {
-        var old = __result;
         __result = amount;
-        Log.Info($"[硬化外壳] 修复: target={target.GetType().Name} old={old} → new={amount}");
     }
 }

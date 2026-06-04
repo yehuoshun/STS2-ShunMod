@@ -41,9 +41,6 @@ public static class ForgePullBladesToHandPatch
                 .ToList();
 
             foreach (var blade in blades) await CardPileCmd.Add(blade, PileType.Hand);
-
-            if (blades.Count > 0)
-                Log.Info($"[锻造拉回] 回收 {blades.Count} 张 SovereignBlade 到手牌");
         }
         catch (Exception ex)
         {

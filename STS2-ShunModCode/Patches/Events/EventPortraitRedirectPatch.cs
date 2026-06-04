@@ -25,7 +25,6 @@ public static class EventPortraitRedirectPatch
             return true; // 不是我们的 mod 事件，走原逻辑
 
         __result = ResourceLoader.Load<Texture2D>(modPath);
-        Log.Info($"[事件立绘] 劫持 {modId} → {modPath}");
         return false; // 跳过原方法（以及其他 mod 的补丁）
     }
 }

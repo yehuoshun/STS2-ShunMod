@@ -36,7 +36,6 @@ internal static class AllSharedEvents_InjectPatch
     private static IEnumerable<EventModel> Postfix(IEnumerable<EventModel> __result)
     {
         var merged = __result.Concat(ShunModEventRegistry.SharedEvents).ToList();
-        Log.Info($"[事件注册] 注入 {ShunModEventRegistry.SharedEvents.Count} 个自定义事件，总计 {merged.Count}");
         return merged;
     }
 }
@@ -62,7 +61,5 @@ internal static class ModelDbInit_RegisterPatch
                 count++;
             }
         }
-
-        Log.Info($"[事件注册] ModelDb.Init 后注册 {count} 个事件");
     }
 }

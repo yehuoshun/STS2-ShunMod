@@ -2,7 +2,6 @@ using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Saves.Runs;
-using MegaCrit.Sts2.Core.Logging;
 
 namespace STS2_ShunMod.Patches;
 
@@ -138,7 +137,6 @@ internal static class InfiniteUpgrade_Safety
 
     private static readonly object SyncRoot = new();
     private static readonly Dictionary<Type, bool> DrawSensitiveCache = new();
-    private static readonly HashSet<string> ClampedWarnings = new(StringComparer.Ordinal);
 
     // ═══ 公开 API ═══
 
@@ -180,7 +178,6 @@ internal static class InfiniteUpgrade_Safety
         if (CanUseUnlimitedGrowth(card, originalMax)) return level;
 
         save.CurrentUpgradeLevel = originalMax;
-        LogClamped(card, level, originalMax);
         return originalMax;
     }
 
@@ -222,16 +219,5 @@ internal static class InfiniteUpgrade_Safety
         }
 
         return sensitive;
-    }
-
-    private static void LogClamped(CardModel card, int saved, int clamped)
-    {
-        var key = $"{card.Id}:{saved}→{clamped}";
-        lock (SyncRoot)
-        {
-            if (!ClampedWarnings.Add(key)) return;
-        }
-
-        Log.Info($"[无限升级] [WARN] 读档钳制 {card.Id} 升级等级 {saved}→{clamped}（卡牌含抽牌行为，防止死循环）");
     }
 }

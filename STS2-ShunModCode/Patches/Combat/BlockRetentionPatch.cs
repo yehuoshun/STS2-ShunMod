@@ -63,7 +63,6 @@ public static class BlockRetentionPrepareForNextTurnPatch
                 return;
 
             CreatureReflection.SetBlock(__instance, __state);
-            Log.Info($"[格挡保留/回合结束] 恢复格挡: {__state}");
         }
         catch (Exception ex)
         {
