@@ -232,6 +232,6 @@ internal static class InfiniteUpgrade_Safety
             if (!ClampedWarnings.Add(key)) return;
         }
 
-        Log.Warning($"[无限升级] 读档钳制 {card.Id} 升级等级 {saved}→{clamped}（卡牌含抽牌行为，防止死循环）");
+        Log.Info($"[无限升级] [WARN] 读档钳制 {card.Id} 升级等级 {saved}→{clamped}（卡牌含抽牌行为，防止死循环）");
     }
 }
