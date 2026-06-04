@@ -21,7 +21,7 @@ namespace STS2_ShunMod.Cards.ShunCard;
 ///     </list>
 /// </remarks>
 [Pool(typeof(ColorlessCardPool))]
-public class ShunModSuperApotheosis : ShunCard
+public class ShunModSuperApotheosis : Core.ShunCard
 {
     /// <summary>
     ///     配置卡牌基础属性与关键词。
