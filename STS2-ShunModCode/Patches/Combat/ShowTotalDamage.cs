@@ -4,6 +4,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Logging;
+using MegaCrit.Sts2.Core.Saves;
 
 namespace STS2_ShunMod.Patches;
 
@@ -11,6 +12,8 @@ namespace STS2_ShunMod.Patches;
 // 显示总伤害
 // 多段卡 / X 卡在描述末尾追加总伤害 = 单段伤害 × 段数
 // 中英双语显示
+//
+// 语言自适应：中文(zhs)显示中文，其他语言显示英文
 //
 // 段数来源（三者乘积）：
 //   1) 原生 HitCount（DynamicVars.Repeat / CalculatedHits）
@@ -64,8 +67,12 @@ public static class ShowTotalDamageDescription
 
             var total = perHit * totalHits;
 
-            // 中英双语：total damage / 总伤害
-            __result += $"\n[color=#ffcc00]({perHit} × {totalHits} = {total} total damage / 总伤害)[/color]";
+            // 根据语言显示：中文用中文，其他用英文
+            var lang = SaveManager.Instance.SettingsSave.Language;
+            var label = lang == "zhs"
+                ? $"({perHit} × {totalHits} = {total} 总伤害)"
+                : $"({perHit} × {totalHits} = {total} total damage)";
+            __result += $"\n[color=#ffcc00]{label}[/color]";
         }
         catch (Exception ex)
         {
