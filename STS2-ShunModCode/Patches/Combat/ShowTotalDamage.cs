@@ -22,7 +22,7 @@ namespace STS2_ShunMod.Patches;
 // ════════════════════════════════════════════════════════
 
 [HarmonyPatch]
-public static class ShowTotalDamage_Description
+public static class ShowTotalDamageDescription
 {
     /// <summary>
     ///     找到私有方法 CardModel.GetDescriptionForPile(PileType, DescriptionPreviewType, Creature?)
