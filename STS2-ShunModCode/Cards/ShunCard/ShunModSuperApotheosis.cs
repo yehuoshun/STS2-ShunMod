@@ -17,7 +17,6 @@ namespace STS2_ShunMod.Cards.ShunCard;
 ///         <item>费用：2（升级后 1）</item>
 ///         <item>类型：技能 / 自身目标</item>
 ///         <item>稀有度：稀有 / 无色</item>
-///         <item>关键词：消耗</item>
 ///     </list>
 /// </remarks>
 [Pool(typeof(ColorlessCardPool))]
