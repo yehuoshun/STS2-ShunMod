@@ -9,14 +9,14 @@ using MegaCrit.Sts2.Core.Logging;
 namespace STS2_ShunMod.Patches;
 
 /// <summary>
-///     锻造后自动将所有非手牌的 SovereignBlade 拉回手牌。
-///     原先"征召上前"独占此能力，现在所有 Forge 行为统一拥有。
+///     所有 锻造 行为自动将非手牌的 君王之剑 拉回手牌。
+///     原先"征召上前"独占此能力，现在所有 锻造 行为统一拥有。
 /// </summary>
 [HarmonyPatch(typeof(ForgeCmd), nameof(ForgeCmd.Forge))]
 public static class ForgePullBladesToHandPatch
 {
     /// <summary>
-    ///     异步后置拦截 — 等待原 Forge 完成后，回收 SovereignBlade 到手牌。
+    ///     异步后置拦截 — 等待原 锻造 完成后，回收 君王之剑 到手牌。
     /// </summary>
     [HarmonyPostfix]
     private static async void Postfix(Task<IEnumerable<SovereignBlade>> __result, Player player)
