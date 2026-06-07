@@ -29,8 +29,6 @@ public class ShunModSuperApotheosis : Core.ShunCard
     public ShunModSuperApotheosis()
         : base(2, CardType.Skill, CardRarity.Rare, TargetType.Self)
     {
-        WithKeywords(CardKeyword.Exhaust);
-        WithTip(CardKeyword.Exhaust);
         WithCostUpgradeBy(-1);
     }
 
