@@ -27,7 +27,7 @@ public static class ShowTotalDamage_Description
     /// <summary>
     ///     找到私有方法 CardModel.GetDescriptionForPile(PileType, DescriptionPreviewType, Creature?)
     /// </summary>
-    private static MethodBase TargetMethod()
+    private static MethodBase? TargetMethod()
     {
         return typeof(CardModel).GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
             .FirstOrDefault(m => m.Name == "GetDescriptionForPile" && m.GetParameters().Length == 3);
