@@ -29,15 +29,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p deps
-          gh release download 0.99 \
+          gh release download deps \
             --dir deps \
             --pattern "*.dll" \
             --repo "${{ github.repository }}" \
             --clobber 2>/dev/null || {
             echo ""
             echo "=============================================="
-            echo "  缺少 CI 构建依赖！请上传游戏 DLL 到 0.99 release："
-            echo "    gh release create 0.99 --title 0.99 sts2.dll 0Harmony.dll"
+            echo "  缺少 CI 构建依赖！请上传游戏 DLL 到 deps release："
+            echo "    gh release create deps --title deps sts2.dll 0Harmony.dll"
             echo "=============================================="
             exit 1
           }
