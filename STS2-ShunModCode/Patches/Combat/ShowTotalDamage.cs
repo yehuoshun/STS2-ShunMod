@@ -1,3 +1,4 @@
+using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -15,22 +16,31 @@ namespace STS2_ShunMod.Patches;
 //   1) 原生 HitCount（DynamicVars.Repeat / CalculatedHits）
 //   2) 重放次数（GetEnchantedReplayCount + 1）
 // 当总段数 > 1 时才追加显示。
+//
+// 注：补丁挂在私有方法 GetDescriptionForPile(PileType, DescriptionPreviewType, Creature?)
+// 而非公开方法，因为公开方法只有一行委托调用，极易被 JIT 内联导致 Postfix 不触发。
 // ════════════════════════════════════════════════════════
 
-[HarmonyPatch(typeof(CardModel), "GetDescriptionForPile",
-    typeof(PileType), typeof(Creature))]
+[HarmonyPatch]
 public static class ShowTotalDamage_Description
 {
+    /// <summary>
+    ///     找到私有方法 CardModel.GetDescriptionForPile(PileType, DescriptionPreviewType, Creature?)
+    /// </summary>
+    private static MethodBase TargetMethod()
+    {
+        return typeof(CardModel).GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
+            .FirstOrDefault(m => m.Name == "GetDescriptionForPile" && m.GetParameters().Length == 3);
+    }
+
     /// <summary>
     ///     Patch 前验证目标方法是否存在。不存在则写日志，避免静默跳过。
     /// </summary>
     private static bool Prepare()
     {
-        var method = AccessTools.Method(typeof(CardModel), "GetDescriptionForPile",
-            [typeof(PileType), typeof(Creature)]);
-        if (method == null)
+        if (TargetMethod() == null)
         {
-            Log.Error($"[总伤害] ❌ 未找到 CardModel.GetDescriptionForPile(PileType, Creature)，补丁跳过！游戏 API 可能已变更。");
+            Log.Error("[总伤害] ❌ 未找到 CardModel.GetDescriptionForPile 私有方法(PileType, DescriptionPreviewType, Creature?)，补丁跳过！游戏 API 可能已变更。");
             return false;
         }
 
