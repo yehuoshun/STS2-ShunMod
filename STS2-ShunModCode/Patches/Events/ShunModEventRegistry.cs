@@ -41,7 +41,26 @@ internal static class AllSharedEvents_InjectPatch
 }
 
 /// <summary>
-///     ModelDb.Init 后 — 从 ModelDb 取正规实例注册到 ShunModEventRegistry。
+///     ModelDb.Init Prefix — 提前用 ModelDb.Inject 注入我们的类型，
+///     避免原版 Init 遍历 AllAbstractModelSubtypes 时重复构造导致 DuplicateModelException。
+///     不跳过原版 Init，确保 ModelIdSerializationCache.Init / InitIds 正常执行。
+/// </summary>
+[HarmonyPatch(typeof(ModelDb), nameof(ModelDb.Init))]
+[HarmonyPriority(Priority.First)]
+internal static class ModelDbInit_InjectPatch
+{
+    [HarmonyPrefix]
+    private static void Prefix()
+    {
+        foreach (var type in ContentRegistry.EventTypes)
+        {
+            ModelDb.Inject(type);
+        }
+    }
+}
+
+/// <summary>
+///     ModelDb.Init Postfix — 从 ModelDb 取正规实例注册到 ShunModEventRegistry。
 /// </summary>
 [HarmonyPatch(typeof(ModelDb), nameof(ModelDb.Init))]
 [HarmonyPriority(Priority.Last)]
@@ -50,7 +69,6 @@ internal static class ModelDbInit_RegisterPatch
     [HarmonyPostfix]
     private static void Postfix()
     {
-        var count = 0;
         foreach (var type in ContentRegistry.EventTypes)
         {
             var id = ModelDb.GetId(type);
@@ -58,7 +76,6 @@ internal static class ModelDbInit_RegisterPatch
                 && !ShunModEventRegistry.SharedEvents.Contains(em))
             {
                 ShunModEventRegistry.Register(em);
-                count++;
             }
         }
     }
