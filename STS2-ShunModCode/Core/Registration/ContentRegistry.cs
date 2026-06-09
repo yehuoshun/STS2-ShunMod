@@ -35,10 +35,10 @@ public static class ContentRegistry
                 poolCount++;
             }
 
-            // 自动检测 EventModel 子类 → 注入 ModelDb + 收集类型
+            // 自动检测 EventModel 子类 → 收集类型
+            // 实例创建交给 ModelDbInit_SafePatch 处理，避免与 ModelDb.Init 冲突导致 DuplicateModelException
             if (typeof(EventModel).IsAssignableFrom(type))
             {
-                ModelDb.Inject(type);
                 EventTypes.Add(type);
                 eventCount++;
             }
