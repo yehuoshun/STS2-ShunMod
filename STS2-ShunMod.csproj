@@ -49,14 +49,14 @@
         <EmbeddedResource Remove="materials/**" />
         <EmbeddedResource Remove="shaders/**" />
         <EmbeddedResource Remove="images/**" />
-        <Compile Remove="STS2-ShunModCode\patch\**" />
-        <EmbeddedResource Remove="STS2-ShunModCode\patch\**" />
-        <Compile Remove="STS2-ShunModCode\Abilities\**" />
-        <EmbeddedResource Remove="STS2-ShunModCode\Abilities\**" />
+        <Compile Remove="STS2_ShunModCode\patch\**" />
+        <EmbeddedResource Remove="STS2_ShunModCode\patch\**" />
+        <Compile Remove="STS2_ShunModCode\Abilities\**" />
+        <EmbeddedResource Remove="STS2_ShunModCode\Abilities\**" />
         <!-- Godot UI 类型在本地编译需要 sts2.dll 引用（已通过 Sts2DataDir 提供），不需要 Megadot -->
-        <Compile Remove="STS2-ShunModCode\Ui\CompactPotionDrawer.cs" Condition="'$(Sts2DataDir)' == '' or !Exists('$(Sts2DataDir)/sts2.dll')" />
-        <Compile Remove="STS2-ShunModCode\Patches\CompactPotionDrawerAttachPatch.cs" Condition="'$(Sts2DataDir)' == '' or !Exists('$(Sts2DataDir)/sts2.dll')" />
-        <Compile Remove="STS2-ShunModCode\Patches\CompactPotionDrawerBindPatch.cs" Condition="'$(Sts2DataDir)' == '' or !Exists('$(Sts2DataDir)/sts2.dll')" />
+        <Compile Remove="STS2_ShunModCode\Ui\CompactPotionDrawer.cs" Condition="'$(Sts2DataDir)' == '' or !Exists('$(Sts2DataDir)/sts2.dll')" />
+        <Compile Remove="STS2_ShunModCode\Patches\CompactPotionDrawerAttachPatch.cs" Condition="'$(Sts2DataDir)' == '' or !Exists('$(Sts2DataDir)/sts2.dll')" />
+        <Compile Remove="STS2_ShunModCode\Patches\CompactPotionDrawerBindPatch.cs" Condition="'$(Sts2DataDir)' == '' or !Exists('$(Sts2DataDir)/sts2.dll')" />
     </ItemGroup>
 
     <ItemGroup>
