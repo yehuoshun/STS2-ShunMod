@@ -16,7 +16,7 @@ public static class ModEntry
     private static bool _initialized;
     private static Harmony? _harmony;
 
-    /// <summary>从 assets/STS2-ShunMod.json 读取模组 ID，缓存</summary>
+    /// <summary>从 assets/STS2_ShunMod.json 读取模组 ID，缓存</summary>
     private static string? _modId;
     private static string ModId => _modId ??= ReadModId();
 
@@ -24,7 +24,7 @@ public static class ModEntry
     {
         try
         {
-            var jsonRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "STS2-ShunMod.json");
+            var jsonRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "STS2_ShunMod.json");
             // Godot 导出后资源在 res:// 下，PCK 内路径不同；JSON 由 ModHelper 解析
             // 回退到硬编码，保证总是有值
             if (!File.Exists(jsonRoot)) return "STS2-ShunMod";

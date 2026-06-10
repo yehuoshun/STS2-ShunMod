@@ -21,17 +21,17 @@ jobs:
 
       - name: Bump version
         run: |
-          CUR=$(python3 -c "import json; d=json.load(open('STS2-ShunMod.json')); print(d['version'])")
+          CUR=$(python3 -c "import json; d=json.load(open('STS2_ShunMod.json')); print(d['version'])")
           MAJOR=$(echo "${CUR#v}" | cut -d. -f1)
           MINOR=$(echo "${CUR#v}" | cut -d. -f2)
           PATCH=$(echo "${CUR#v}" | cut -d. -f3)
           NEW=$((PATCH + 1))
           V="v${MAJOR}.${MINOR}.${NEW}"
           echo "${CUR} → ${V}"
-          python3 -c "import json; d=json.load(open('STS2-ShunMod.json')); d['version']='${V}'; json.dump(d, open('STS2-ShunMod.json','w'), indent=2, ensure_ascii=False)"
+          python3 -c "import json; d=json.load(open('STS2_ShunMod.json')); d['version']='${V}'; json.dump(d, open('STS2_ShunMod.json','w'), indent=2, ensure_ascii=False)"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add STS2-ShunMod.json
+          git add STS2_ShunMod.json
           git commit -m "chore: bump to ${V}"
           git push origin HEAD:main
 
@@ -61,7 +61,7 @@ jobs:
 
       - name: Build & Export .pck
         run: |
-          dotnet build STS2-ShunMod.csproj -c Release -p:Sts2DataDir="$(realpath deps)"
+          dotnet build STS2_ShunMod.csproj -c Release -p:Sts2DataDir="$(realpath deps)"
           echo "=== 下载 Godot 4.5.1 Mono ==="
           GODOT_URL="https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_mono_linux_x86_64.zip"
           curl -sL "$GODOT_URL" -o godot.zip || { echo "❌ 下载失败，回退到资源目录"; exit 0; }
@@ -78,7 +78,7 @@ jobs:
           BUILD_DIR=.godot/mono/temp/bin/Release
           mkdir -p publish
           cp "$BUILD_DIR/STS2-ShunMod.dll" publish/
-          cp STS2-ShunMod.json publish/
+          cp STS2_ShunMod.json publish/
           PCK=$(find . -maxdepth 1 -name "STS2-ShunMod.pck" -type f 2>/dev/null | head -1)
           if [ -n "$PCK" ]; then
             cp "$PCK" publish/
@@ -91,7 +91,7 @@ jobs:
       - name: Get version
         id: ver
         run: |
-          V=$(python3 -c "import json; d=json.load(open('STS2-ShunMod.json')); print(d['version'])")
+          V=$(python3 -c "import json; d=json.load(open('STS2_ShunMod.json')); print(d['version'])")
           echo "version: $V"
           echo "TAG=$V" >> $GITHUB_OUTPUT
 
@@ -128,7 +128,7 @@ jobs:
             echo ""
             echo "---"
             echo ""
-            V=$(python3 -c "import json; d=json.load(open('STS2-ShunMod.json')); print(d['version'])")
+            V=$(python3 -c "import json; d=json.load(open('STS2_ShunMod.json')); print(d['version'])")
             echo "## ⚠️ 已知问题"
             echo ""
             echo "- 无"

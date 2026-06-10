@@ -43,10 +43,10 @@ jobs:
           fi
 
       - name: Restore
-        run: dotnet restore STS2-ShunMod.csproj
+        run: dotnet restore STS2_ShunMod.csproj
 
       - name: Build DLL
-        run: dotnet build STS2-ShunMod.csproj -c Release -p:Sts2DataDir="$(realpath deps)" --no-restore
+        run: dotnet build STS2_ShunMod.csproj -c Release -p:Sts2DataDir="$(realpath deps)" --no-restore
 
       - name: Export .pck
         run: |
@@ -74,7 +74,7 @@ jobs:
           echo "DLL: $DLL"
           mkdir -p publish
           cp "$DLL" publish/
-          cp STS2-ShunMod.json publish/
+          cp STS2_ShunMod.json publish/
           PCK=$(find . -maxdepth 1 -name "STS2-ShunMod.pck" -type f 2>/dev/null | head -1)
           if [ -n "$PCK" ]; then
             cp "$PCK" publish/

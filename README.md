@@ -5,7 +5,7 @@
 
 [![Version](https://img.shields.io/badge/version-v0.0.0-blue)](https://github.com/yehuoshun/STS2-ShunMod)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Framework](https://img.shields.io/badge/framework-.NET%209.0-purple)](STS2-ShunMod.csproj)
+[![Framework](https://img.shields.io/badge/framework-.NET%209.0-purple)](STS2_ShunMod.csproj)
 
 ---
 
@@ -95,7 +95,7 @@ STS2-ShunMod/
 │   ├── cards/                      # 卡牌美术
 │   └── localization/               # 本地化（中/英）
 ├── project.godot                   # Godot 4.5 项目
-└── STS2-ShunMod.csproj             # .NET 9.0
+└── STS2_ShunMod.csproj             # .NET 9.0
 ```
 
 ---
