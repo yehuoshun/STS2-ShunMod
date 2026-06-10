@@ -16,15 +16,11 @@ namespace STS2ShunMod.STS2_ShunModCode.Relics.Shun;
 [RelicPool(typeof(SharedRelicPool))]
 public sealed class ShunModBossTrophy : RelicModel
 {
-    private const string IconBaseName = "boss_trophy";
-    private const string IconPath = "res://STS2_ShunMod/images/relics/shunRelics/boss_trophy/boss_trophy.png";
-    private const string IconOutlinePath = "res://STS2_ShunMod/images/relics/shunRelics/boss_trophy/boss_trophy_outline.png";
-
     public override RelicRarity Rarity => RelicRarity.Rare;
 
-    public override string PackedIconPath => IconPath;
-    protected override string PackedIconOutlinePath => IconOutlinePath;
-    protected override string BigIconPath => IconPath;
+    public override string PackedIconPath => ShunModHelper.RelicIconPath(GetType());
+    protected override string PackedIconOutlinePath => ShunModHelper.RelicOutlinePath(GetType());
+    protected override string BigIconPath => ShunModHelper.RelicIconPath(GetType());
 
     public override bool TryModifyRewards(Player player, List<Reward> rewards, AbstractRoom? room)
     {

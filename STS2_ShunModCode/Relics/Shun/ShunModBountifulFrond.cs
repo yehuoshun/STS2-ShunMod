@@ -15,15 +15,11 @@ namespace STS2ShunMod.STS2_ShunModCode.Relics.Shun;
 [RelicPool(typeof(SharedRelicPool))]
 public sealed class ShunModBountifulFrond : RelicModel
 {
-    private const string IconBaseName = "bountiful_frond";
-    private const string IconPath = "res://STS2_ShunMod/images/relics/shunRelics/bountiful_frond/bountiful_frond.png";
-    private const string IconOutlinePath = "res://STS2_ShunMod/images/relics/shunRelics/bountiful_frond/bountiful_frond_outline.png";
-
     public override RelicRarity Rarity => RelicRarity.Rare;
 
-    public override string PackedIconPath => IconPath;
-    protected override string PackedIconOutlinePath => IconOutlinePath;
-    protected override string BigIconPath => IconPath;
+    public override string PackedIconPath => ShunModHelper.RelicIconPath(GetType());
+    protected override string PackedIconOutlinePath => ShunModHelper.RelicOutlinePath(GetType());
+    protected override string BigIconPath => ShunModHelper.RelicIconPath(GetType());
 
     public override async Task AfterPlayerTurnStart(PlayerChoiceContext choiceContext, Player player)
     {
