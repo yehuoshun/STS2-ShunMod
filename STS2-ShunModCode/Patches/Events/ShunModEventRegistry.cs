@@ -8,7 +8,7 @@ namespace STS2ShunMod.Patches.Events;
 
 /// <summary>
 ///     自定义事件注册 — 从 ModelDb 取正规实例注入 AllSharedEvents。
-///     事件类型由 Core/ContentRegistry 扫描 [ShunEvent] 属性收集。
+///     事件类型由 Core/ContentRegistry 扫描 [EventPool] 属性收集。
 /// </summary>
 public static class ShunModEventRegistry
 {

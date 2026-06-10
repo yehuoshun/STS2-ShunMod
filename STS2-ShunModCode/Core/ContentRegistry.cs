@@ -5,7 +5,7 @@ using MegaCrit.Sts2.Core.Modding;
 namespace STS2ShunMod.Core;
 
 /// <summary>
-///     内容自动注册器 — 扫描 [CardPool] / [RelicPool] / [ShunEvent] 属性并注册。
+///     内容自动注册器 — 扫描 [CardPool] / [RelicPool] / [EventPool] 属性并注册。
 /// </summary>
 public static class ContentRegistry
 {
@@ -41,7 +41,7 @@ public static class ContentRegistry
             }
 
             // 事件（收集类型，由 ShunModEventRegistry 在 ModelDb.Init 时实例化）
-            if (type.GetCustomAttribute<ShunEventAttribute>() != null)
+            if (type.GetCustomAttribute<EventPoolAttribute>() != null)
             {
                 ShunModEventRegistry.EventTypes.Add(type);
                 eventCount++;

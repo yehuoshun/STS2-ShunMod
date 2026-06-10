@@ -32,6 +32,6 @@ public class RelicPoolAttribute : Attribute
 ///     标记自定义事件。ContentRegistry 扫描后收集类型，由 ShunModEventRegistry 注册。
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-public class ShunEventAttribute : Attribute
+public class EventPoolAttribute : Attribute
 {
 }

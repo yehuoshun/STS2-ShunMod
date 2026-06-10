@@ -19,7 +19,7 @@ namespace STS2ShunMod.Events;
 ///     遗物交易所 — 随机遗物换遗物/附魔，可反复交易直到退出。
 ///     ①随机遗物换随机遗物 ②随机遗物换卡牌附魔 ③扣5HP刷新 ④退出
 /// </summary>
-[ShunEvent]
+[EventPool]
 public class ShunModRelicExchange : EventModel
 {
     private static readonly Random Rnd = new();

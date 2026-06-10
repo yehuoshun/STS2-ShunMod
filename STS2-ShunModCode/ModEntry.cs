@@ -64,7 +64,7 @@ public static class ModEntry
                 Log.Error($"[{id}]   → inner: {e.InnerException.GetType().Name}: {e.InnerException.Message}");
         }
 
-        // Phase 2: Content registration (auto-scan [CardPool] / [RelicPool] / [ShunEvent])
+        // Phase 2: Content registration (auto-scan [CardPool] / [RelicPool] / [EventPool])
         ContentRegistry.RegisterAll(Assembly.GetExecutingAssembly());
 
         Log.Info($"[{id}] Initialization complete");
