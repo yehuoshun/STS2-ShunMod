@@ -4,28 +4,23 @@ using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Factories;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.Models.RelicPools;
-using STS2_ShunMod.Core;
-using STS2_ShunMod.Core.Registration;
 
-namespace STS2_ShunMod.Relics.ShunRelics;
+namespace STS2ShunMod.Relics;
 
 /// <summary>
 ///     丰饶叶 — 每个回合开始时，用随机药水填满所有空药水栏位。
 /// </summary>
-[Pool(typeof(SharedRelicPool))]
 public sealed class ShunModBountifulFrond : RelicModel
 {
+    private const string IconBaseName = "bountiful_frond";
+    private const string IconPath = "res://STS2-ShunMod/images/relics/shunRelics/bountiful_frond/bountiful_frond.png";
+    private const string IconOutlinePath = "res://STS2-ShunMod/images/relics/shunRelics/bountiful_frond/bountiful_frond_outline.png";
+
     public override RelicRarity Rarity => RelicRarity.Rare;
 
-    public override string PackedIconPath =>
-        ShunImageHelper.RelicPackedIcon(IconBaseName);
-
-    protected override string PackedIconOutlinePath =>
-        ShunImageHelper.RelicOutlineIcon(IconBaseName);
-
-    protected override string BigIconPath =>
-        ShunImageHelper.RelicBigIcon(IconBaseName);
+    public override string PackedIconPath => IconPath;
+    protected override string PackedIconOutlinePath => IconOutlinePath;
+    protected override string BigIconPath => IconPath;
 
     public override async Task AfterPlayerTurnStart(PlayerChoiceContext choiceContext, Player player)
     {

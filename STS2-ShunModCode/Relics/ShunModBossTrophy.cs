@@ -3,30 +3,25 @@ using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.Models.RelicPools;
 using MegaCrit.Sts2.Core.Rewards;
 using MegaCrit.Sts2.Core.Rooms;
-using STS2_ShunMod.Core;
-using STS2_ShunMod.Core.Registration;
 
-namespace STS2_ShunMod.Relics.ShunRelics;
+namespace STS2ShunMod.Relics;
 
 /// <summary>
 ///     首领奖杯 — 击杀 Boss 后最大生命值 +25%。
 /// </summary>
-[Pool(typeof(SharedRelicPool))]
 public sealed class ShunModBossTrophy : RelicModel
 {
+    private const string IconBaseName = "boss_trophy";
+    private const string IconPath = "res://STS2-ShunMod/images/relics/shunRelics/boss_trophy/boss_trophy.png";
+    private const string IconOutlinePath = "res://STS2-ShunMod/images/relics/shunRelics/boss_trophy/boss_trophy_outline.png";
+
     public override RelicRarity Rarity => RelicRarity.Rare;
 
-    public override string PackedIconPath =>
-        ShunImageHelper.RelicPackedIcon(IconBaseName);
-
-    protected override string PackedIconOutlinePath =>
-        ShunImageHelper.RelicOutlineIcon(IconBaseName);
-
-    protected override string BigIconPath =>
-        ShunImageHelper.RelicBigIcon(IconBaseName);
+    public override string PackedIconPath => IconPath;
+    protected override string PackedIconOutlinePath => IconOutlinePath;
+    protected override string BigIconPath => IconPath;
 
     public override bool TryModifyRewards(Player player, List<Reward> rewards, AbstractRoom? room)
     {

@@ -2,6 +2,8 @@
     <Import Project=".\Sts2PathDiscovery.props"/>
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
+        <RootNamespace>STS2ShunMod</RootNamespace>
+        <AssemblyName>STS2ShunMod</AssemblyName>
         <ImplicitUsings>true</ImplicitUsings>
         <Nullable>enable</Nullable> <!--Makes code analysis regarding null values stricter.-->
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -89,9 +91,6 @@
         <GodotResourceFiles Include="STS2-ShunMod/**"/>
     </ItemGroup>
     
-    <ItemGroup>
-      <Folder Include="STS2-ShunModCode\Core\Registration\" />
-    </ItemGroup>
     
     <Target Name="GodotPublish" AfterTargets="Publish" Condition="'$(GodotPath)' != '' and Exists('$(GodotPath)') and '$(IsInnerGodotExport)' != 'true'" Inputs="@(GodotResourceFiles)" Outputs="$(ModsPath)$(MSBuildProjectName)/$(MSBuildProjectName).pck">
         <Message Text="Exporting Godot .pck to mods folder" Importance="high"/>

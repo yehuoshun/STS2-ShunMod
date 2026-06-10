@@ -1,24 +1,21 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Events;
-using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Runs;
-using STS2_ShunMod.Core;
+using Godot;
 
-namespace STS2_ShunMod.Events.ShunEvents;
+namespace STS2ShunMod.Events;
 
 /// <summary>
 ///     遗物交易所 — 随机遗物换遗物/附魔，可反复交易直到退出。
+///     ①随机遗物换随机遗物 ②随机遗物换卡牌附魔 ③扣5HP刷新 ④退出
 /// </summary>
 public class ShunModRelicExchange : EventModel
 {
@@ -30,56 +27,43 @@ public class ShunModRelicExchange : EventModel
     /// <summary>附魔黑名单 — 不会在交易所随机出现。</summary>
     private static readonly HashSet<string> EnchantBlacklist = new()
     {
-        "Adroit",
-        "PerfectFit",
-        "RoyallyApproved",
-        "SlumberingEssence",
-        "Sown",
-        "Spiral",
-        "Steady",
-        "TezcatarasEmber",
-        "Vigorous",
-        "Swift",
-        "Glam",
-        "Clone",
-        "Goopy",
-        "Momentum",
-        "Inky",
+        "Adroit", "PerfectFit", "RoyallyApproved", "SlumberingEssence",
+        "Sown", "Spiral", "Steady", "TezcatarasEmber", "Vigorous",
+        "Swift", "Glam", "Clone", "Goopy", "Momentum", "Inky",
     };
 
-    private EnchantmentModel? _enchantA;
-    private EnchantmentModel? _enchantB;
-    private RelicModel? _gainRelic;
+    private const string EventImagePath = "res://STS2-ShunMod/images/events/shunEvents/shunmod_relicexchange.png";
 
-    // ════════════════════════════════════ 状态 ════════════════════════════════════
-
+    // ── 状态 ──
     private RelicModel? _loseRelic1;
     private RelicModel? _loseRelic2;
+    private RelicModel? _gainRelic;
+    private EnchantmentModel? _enchantA;
+    private EnchantmentModel? _enchantB;
 
     // ════════════════════════════════════ DynamicVars ════════════════════════════════════
 
-    protected override IEnumerable<DynamicVar> CanonicalVars =>
-    [
+    protected override IEnumerable<DynamicVar> CanonicalVars => [
         new StringVar("LOSE_RELIC_1"),
         new StringVar("GAIN_RELIC"),
         new StringVar("LOSE_RELIC_2"),
         new StringVar("ENCHANT_NAME_A"),
-        new StringVar("ENCHANT_NAME_B")
+        new StringVar("ENCHANT_NAME_B"),
     ];
-
 
     // ════════════════════════════════════ 背景图 ════════════════════════════════════
 
     public override IEnumerable<string> GetAssetPaths(IRunState runState)
     {
         var paths = base.GetAssetPaths(runState).ToList();
-        var modPath = ShunImageHelper.EventImage(Id.Entry.ToLowerInvariant());
         var defaultPath = ImageHelper.GetImagePath($"events/{Id.Entry.ToLowerInvariant()}.png");
         var i = paths.IndexOf(defaultPath);
-        if (i >= 0) paths[i] = modPath;
-        else paths.Add(modPath);
+        if (i >= 0) paths[i] = EventImagePath;
+        else paths.Add(EventImagePath);
         return paths;
     }
+
+    // ════════════════════════════════════ CalculateVars ════════════════════════════════════
 
     public override void CalculateVars()
     {
@@ -87,6 +71,15 @@ public class ShunModRelicExchange : EventModel
         Roll();
         SyncVars();
     }
+
+    // ════════════════════════════════════ GenerateInitialOptions ════════════════════════════════════
+
+    protected override IReadOnlyList<EventOption> GenerateInitialOptions()
+    {
+        return BuildOptions();
+    }
+
+    // ════════════════════════════════════ 内部实现 ════════════════════════════════════
 
     private void SyncVars()
     {
@@ -97,27 +90,11 @@ public class ShunModRelicExchange : EventModel
         SetStr("ENCHANT_NAME_B", Resolve(_enchantB?.Title));
     }
 
-    // ════════════════════════════════════ LocString 解析 ════════════════════════════════════
-
     private static string Resolve(LocString? loc)
     {
         if (loc == null) return "?";
-        try
-        {
-            return loc.GetRawText();
-        }
-        catch (LocException)
-        {
-        }
-
-        try
-        {
-            return loc.GetFormattedText();
-        }
-        catch (LocException)
-        {
-        }
-
+        try { return loc.GetRawText(); } catch (LocException) { }
+        try { return loc.GetFormattedText(); } catch (LocException) { }
         return "?";
     }
 
@@ -136,8 +113,6 @@ public class ShunModRelicExchange : EventModel
         }
     }
 
-    // ════════════════════════════════════ 随机 ════════════════════════════════════
-
     private void Roll()
     {
         _loseRelic1 = _loseRelic2 = _gainRelic = null;
@@ -147,7 +122,6 @@ public class ShunModRelicExchange : EventModel
         var available = player.Relics.Where(IsTradeable).ToList();
         if (available.Count == 0) return;
 
-        // 优先头环作为付出的遗物
         _loseRelic1 = PreferCirclet(available);
         _gainRelic = RollRandomRelic();
 
@@ -158,7 +132,6 @@ public class ShunModRelicExchange : EventModel
             _loseRelic2 = PreferCirclet(remaining);
         }
 
-        // 滚动 3 种不同附魔
         RollThreeEnchants();
     }
 
@@ -172,7 +145,6 @@ public class ShunModRelicExchange : EventModel
         {
             var e = pool[Rnd.Next(pool.Count)];
             var key = e.GetType().FullName!;
-            // 不重复
             var tries = 0;
             while (rolled.Contains(key) && tries < 10)
             {
@@ -180,7 +152,6 @@ public class ShunModRelicExchange : EventModel
                 key = e.GetType().FullName!;
                 tries++;
             }
-
             rolled.Add(key);
             switch (i)
             {
@@ -205,10 +176,7 @@ public class ShunModRelicExchange : EventModel
     private static RelicModel? RollRandomRelic()
     {
         IEnumerable<RelicModel> all;
-        try
-        {
-            all = ModelDb.AllRelics;
-        }
+        try { all = ModelDb.AllRelics; }
         catch
         {
             all = typeof(RelicModel).Assembly.GetTypes()
@@ -216,30 +184,16 @@ public class ShunModRelicExchange : EventModel
                 .Select(t => ModelDb.GetByIdOrNull<RelicModel>(ModelDb.GetId(t)))
                 .OfType<RelicModel>();
         }
-
         var pool = all.Where(IsTradeable).ToList();
         return pool.Count > 0 ? pool[Rnd.Next(pool.Count)] : null;
     }
 
-    private static bool IsTradeable(RelicModel r)
-    {
-        return TradeableRarities.Contains(r.Rarity);
-    }
+    private static bool IsTradeable(RelicModel r) => TradeableRarities.Contains(r.Rarity);
 
-    /// <summary>
-    ///     有头环时百分百选头环，否则随机。
-    /// </summary>
     private static RelicModel PreferCirclet(List<RelicModel> available)
     {
         var circlet = available.FirstOrDefault(r => r.GetType().Name == "Circlet");
         return circlet ?? available[Rnd.Next(available.Count)];
-    }
-
-    // ════════════════════════════════════ 选项 ════════════════════════════════════
-
-    protected override IReadOnlyList<EventOption> GenerateInitialOptions()
-    {
-        return BuildOptions();
     }
 
     private IReadOnlyList<EventOption> BuildOptions()
@@ -263,7 +217,7 @@ public class ShunModRelicExchange : EventModel
             }, "OPT_1", tips));
         }
 
-        // OPT_2A/2B/2C: 遗物 → 附魔（三选一）
+        // OPT_2A/2B: 遗物 → 附魔
         if (_loseRelic2 != null)
         {
             var lose = _loseRelic2;
@@ -271,10 +225,8 @@ public class ShunModRelicExchange : EventModel
             foreach (var (ench, key) in new[]
                          { (_enchantA, "OPT_2A"), (_enchantB, "OPT_2B") })
             {
-                if (ench == null)
-                    continue;
-                if (!deck.Any(c => ench.CanEnchant(c)))
-                    continue;
+                if (ench == null) continue;
+                if (!deck.Any(c => ench.CanEnchant(c))) continue;
 
                 var mutableEnch = (EnchantmentModel)ench.MutableClone();
                 mutableEnch.Amount = 5;
@@ -286,12 +238,7 @@ public class ShunModRelicExchange : EventModel
                     var picked = await CardSelectCmd.FromDeckGeneric(player!,
                         new CardSelectorPrefs(CardSelectorPrefs.EnchantSelectionPrompt, 1, 1),
                         c => mutableEnch.CanEnchant(c));
-                    if (!picked.Any())
-                    {
-                        Refresh();
-                        return;
-                    }
-
+                    if (!picked.Any()) { Refresh(); return; }
                     var card = picked.First();
                     CardCmd.Enchant(mutableEnch, card, 5);
                     await RelicCmd.Remove(lose);
@@ -322,11 +269,24 @@ public class ShunModRelicExchange : EventModel
             hoverTips ?? Array.Empty<IHoverTip>());
     }
 
-    /// <summary>交易/刷新后：重新 Roll → 写 DynamicVars → SetEventState</summary>
     private void Refresh()
     {
         Roll();
         SyncVars();
         SetEventState(L10NLookup("pages.INITIAL.description"), BuildOptions());
+    }
+
+    // ════════════════════════════════════ RelicHelper 内联（反射移除遗物） ════════════════════════════════════
+
+    private static readonly FieldInfo? RelicsField =
+        typeof(Player).GetField("_relics", BindingFlags.NonPublic | BindingFlags.Instance);
+
+    // Not used in current code since we use RelicCmd.Remove now, but kept for potential internal use
+    public static bool RemoveRelic(Player player, RelicModel relic)
+    {
+        if (RelicsField?.GetValue(player) is not List<RelicModel> list)
+            return false;
+        if (!list.Remove(relic)) return false;
+        return true;
     }
 }
