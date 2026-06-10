@@ -1,29 +1,53 @@
 using System.Reflection;
+using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
 
 namespace STS2ShunMod.Core;
 
 /// <summary>
-///     内容自动注册器 — 扫描 [Pool] 类型并注册到对应池。
+///     内容自动注册器 — 扫描 [CardPool] / [RelicPool] / [ShunEvent] 属性并注册。
 /// </summary>
 public static class ContentRegistry
 {
     /// <summary>
-    ///     扫描程序集中所有非抽象类，注册 [Pool] 类型。
+    ///     扫描程序集中所有非抽象类，按属性类型分别注册。
     /// </summary>
-    public static int RegisterAll(Assembly assembly)
+    public static void RegisterAll(Assembly assembly)
     {
-        var count = 0;
+        var cardCount = 0;
+        var relicCount = 0;
+        var eventCount = 0;
+
         foreach (var type in assembly.GetTypes())
         {
             if (type.IsAbstract) continue;
 
-            var poolAttr = type.GetCustomAttribute<PoolAttribute>();
-            if (poolAttr == null) continue;
+            // 卡牌
+            var cardAttr = type.GetCustomAttribute<CardPoolAttribute>();
+            if (cardAttr != null)
+            {
+                ModHelper.AddModelToPool(cardAttr.PoolType, type);
+                cardCount++;
+                continue;
+            }
 
-            ModHelper.AddModelToPool(poolAttr.PoolType, type);
-            count++;
+            // 遗物
+            var relicAttr = type.GetCustomAttribute<RelicPoolAttribute>();
+            if (relicAttr != null)
+            {
+                ModHelper.AddModelToPool(relicAttr.PoolType, type);
+                relicCount++;
+                continue;
+            }
+
+            // 事件（收集类型，由 ShunModEventRegistry 在 ModelDb.Init 时实例化）
+            if (type.GetCustomAttribute<ShunEventAttribute>() != null)
+            {
+                ShunModEventRegistry.EventTypes.Add(type);
+                eventCount++;
+            }
         }
-        return count;
+
+        Log.Info($"[STS2-ShunMod] ContentRegistry: {cardCount} cards, {relicCount} relics, {eventCount} events");
     }
 }

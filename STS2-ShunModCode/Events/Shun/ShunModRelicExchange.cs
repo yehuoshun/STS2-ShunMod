@@ -11,6 +11,7 @@ using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Runs;
 using MegaCrit.Sts2.Core.Helpers;
 using Godot;
+using STS2ShunMod.Core;
 
 namespace STS2ShunMod.Events;
 
@@ -18,6 +19,7 @@ namespace STS2ShunMod.Events;
 ///     遗物交易所 — 随机遗物换遗物/附魔，可反复交易直到退出。
 ///     ①随机遗物换随机遗物 ②随机遗物换卡牌附魔 ③扣5HP刷新 ④退出
 /// </summary>
+[ShunEvent]
 public class ShunModRelicExchange : EventModel
 {
     private static readonly Random Rnd = new();

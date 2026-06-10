@@ -12,7 +12,7 @@ namespace STS2ShunMod.Cards;
 ///     超级神化 — 升级战斗中所有卡牌，同时升级牌组中所有可升级卡牌。
 ///     2费→1费（升级后），技能，稀有，无色。
 /// </summary>
-[Pool(typeof(ColorlessCardPool))]
+[CardPool(typeof(ColorlessCardPool))]
 public class ShunModSuperApotheosis : CardModel
 {
     private const string Portrait = "res://STS2-ShunMod/images/cards/shunCards/colorless/superapotheosis.png";

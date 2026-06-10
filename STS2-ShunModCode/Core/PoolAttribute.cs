@@ -1,16 +1,37 @@
 namespace STS2ShunMod.Core;
 
 /// <summary>
-///     标记类所属的游戏内容池（卡池/遗物池）。
-///     ContentRegistry.RegisterAll 扫描到此属性后自动注册。
+///     标记卡牌所属的卡池。ContentRegistry 扫描后自动注册。
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-public class PoolAttribute : Attribute
+public class CardPoolAttribute : Attribute
 {
     public Type PoolType { get; }
 
-    public PoolAttribute(Type poolType)
+    public CardPoolAttribute(Type poolType)
     {
         PoolType = poolType;
     }
+}
+
+/// <summary>
+///     标记遗物所属的遗物池。ContentRegistry 扫描后自动注册。
+/// </summary>
+[AttributeUsage(AttributeTargets.Class, Inherited = false)]
+public class RelicPoolAttribute : Attribute
+{
+    public Type PoolType { get; }
+
+    public RelicPoolAttribute(Type poolType)
+    {
+        PoolType = poolType;
+    }
+}
+
+/// <summary>
+///     标记自定义事件。ContentRegistry 扫描后收集类型，由 ShunModEventRegistry 注册。
+/// </summary>
+[AttributeUsage(AttributeTargets.Class, Inherited = false)]
+public class ShunEventAttribute : Attribute
+{
 }

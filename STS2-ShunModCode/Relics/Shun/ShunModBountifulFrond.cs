@@ -12,7 +12,7 @@ namespace STS2ShunMod.Relics;
 /// <summary>
 ///     丰饶叶 — 每个回合开始时，用随机药水填满所有空药水栏位。
 /// </summary>
-[Pool(typeof(SharedRelicPool))]
+[RelicPool(typeof(SharedRelicPool))]
 public sealed class ShunModBountifulFrond : RelicModel
 {
     private const string IconBaseName = "bountiful_frond";

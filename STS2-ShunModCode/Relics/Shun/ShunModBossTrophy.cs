@@ -13,7 +13,7 @@ namespace STS2ShunMod.Relics;
 /// <summary>
 ///     首领奖杯 — 击杀 Boss 后最大生命值 +25%。
 /// </summary>
-[Pool(typeof(SharedRelicPool))]
+[RelicPool(typeof(SharedRelicPool))]
 public sealed class ShunModBossTrophy : RelicModel
 {
     private const string IconBaseName = "boss_trophy";

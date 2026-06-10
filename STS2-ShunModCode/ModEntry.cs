@@ -64,17 +64,8 @@ public static class ModEntry
                 Log.Error($"[{id}]   → inner: {e.InnerException.GetType().Name}: {e.InnerException.Message}");
         }
 
-        // Phase 2: Content registration (auto-scan [Pool] attribute)
-        var registered = ContentRegistry.RegisterAll(Assembly.GetExecutingAssembly());
-        Log.Info($"[{id}] ContentRegistry: {registered} types registered");
-
-        // Events — registered via ShunModEventRegistry + ModelDbInit_SafePatch
-        try
-        {
-            ShunModEventRegistry.RegisterEventTypes(Assembly.GetExecutingAssembly());
-            Log.Info($"[{id}] Event types registered for SafeInit");
-        }
-        catch (Exception e) { Log.Error($"[{id}] Event registration failed: {e.Message}"); }
+        // Phase 2: Content registration (auto-scan [CardPool] / [RelicPool] / [ShunEvent])
+        ContentRegistry.RegisterAll(Assembly.GetExecutingAssembly());
 
         Log.Info($"[{id}] Initialization complete");
         Log.Info($"[{id}] ============================================================");

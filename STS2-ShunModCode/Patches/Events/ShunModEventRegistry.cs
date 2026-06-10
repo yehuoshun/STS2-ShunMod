@@ -8,26 +8,15 @@ namespace STS2ShunMod.Patches.Events;
 
 /// <summary>
 ///     自定义事件注册 — 从 ModelDb 取正规实例注入 AllSharedEvents。
-///     参照 YuWanCard CustomEventRegistry + AllSharedEventsPatch。
+///     事件类型由 Core/ContentRegistry 扫描 [ShunEvent] 属性收集。
 /// </summary>
 public static class ShunModEventRegistry
 {
-    /// <summary>EventModel 子类类型集合，由 ModelDbInit_SafePatch 消费。</summary>
+    /// <summary>EventModel 子类类型集合，由 ContentRegistry 和 ModelDbInit_SafePatch 消费。</summary>
     public static readonly HashSet<Type> EventTypes = [];
 
     /// <summary>共享事件列表（非 act 限定），由 AllSharedEventsPatch 注入。</summary>
     public static readonly List<EventModel> SharedEvents = [];
-
-    /// <summary>扫描程序集收集 EventModel 子类类型。</summary>
-    public static void RegisterEventTypes(Assembly assembly)
-    {
-        foreach (var type in assembly.GetTypes())
-        {
-            if (type.IsAbstract) continue;
-            if (typeof(EventModel).IsAssignableFrom(type))
-                EventTypes.Add(type);
-        }
-    }
 
     /// <summary>注册事件实例。若非 act 限定事件，加入 SharedEvents。</summary>
     public static void Register(EventModel eventModel)
