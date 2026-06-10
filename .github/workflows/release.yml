@@ -41,22 +41,11 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Download game references
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p deps
-          gh release download deps \
-            --dir deps \
-            --pattern "*.dll" \
-            --repo "${{ github.repository }}" \
-            --clobber 2>/dev/null || {
-            echo ""
-            echo "=============================================="
-            echo "  缺少 CI 构建依赖！请上传游戏 DLL 到 deps release："
-            echo "    gh release create deps --title deps sts2.dll 0Harmony.dll"
-            echo "=============================================="
-            exit 1
-          }
+          DEPS_URL="https://github.com/${{ github.repository }}/releases/download/deps"
+          curl -sL "${DEPS_URL}/sts2.dll" -o deps/sts2.dll
+          curl -sL "${DEPS_URL}/0Harmony.dll" -o deps/0Harmony.dll
           ls -la deps/
 
       - name: Build & Export .pck

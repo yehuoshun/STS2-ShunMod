@@ -20,15 +20,13 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Download game references
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p deps
-          gh release download deps \
-            --dir deps \
-            --pattern "*.dll" \
-            --repo "${{ github.repository }}" \
-            --clobber 2>/dev/null
+          # 直接用 curl 从 deps release 下载，避免 gh CLI 权限问题
+          DEPS_URL="https://github.com/${{ github.repository }}/releases/download/deps"
+          curl -sL "${DEPS_URL}/sts2.dll" -o deps/sts2.dll
+          curl -sL "${DEPS_URL}/0Harmony.dll" -o deps/0Harmony.dll
+          ls -la deps/
 
       - name: Check deps
         run: |
