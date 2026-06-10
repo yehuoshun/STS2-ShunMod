@@ -170,6 +170,7 @@ jobs:
           api_key: ${{ secrets.NEXUSMODS_API_KEY }}
           file_group_id: ${{ secrets.NEXUSMODS_FILE_GROUP_ID }}
           filename: STS2_ShunMod.zip
+          changelog_file: release_notes.md
           version: ${{ steps.ver.outputs.TAG }}
           file_category: main
 
