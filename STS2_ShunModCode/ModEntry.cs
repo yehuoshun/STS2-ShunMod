@@ -27,14 +27,14 @@ public static class ModEntry
             var jsonRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "STS2_ShunMod.json");
             // Godot 导出后资源在 res:// 下，PCK 内路径不同；JSON 由 ModHelper 解析
             // 回退到硬编码，保证总是有值
-            if (!File.Exists(jsonRoot)) return "STS2-ShunMod";
+            if (!File.Exists(jsonRoot)) return "STS2_ShunMod";
             var json = File.ReadAllText(jsonRoot);
             using var doc = JsonDocument.Parse(json);
-            return doc.RootElement.TryGetProperty("id", out var id) ? id.GetString() ?? "STS2-ShunMod" : "STS2-ShunMod";
+            return doc.RootElement.TryGetProperty("id", out var id) ? id.GetString() ?? "STS2_ShunMod" : "STS2_ShunMod";
         }
         catch
         {
-            return "STS2-ShunMod";
+            return "STS2_ShunMod";
         }
     }
 

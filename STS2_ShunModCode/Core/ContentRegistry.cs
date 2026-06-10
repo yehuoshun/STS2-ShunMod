@@ -49,6 +49,6 @@ public static class ContentRegistry
             }
         }
 
-        Log.Info($"[STS2-ShunMod] ContentRegistry: {cardCount} cards, {relicCount} relics, {eventCount} events");
+        Log.Info($"[STS2_ShunMod] ContentRegistry: {cardCount} cards, {relicCount} relics, {eventCount} events");
     }
 }

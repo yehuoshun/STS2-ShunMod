@@ -70,23 +70,23 @@ jobs:
           [ -z "$GODOT" ] && { echo "❌ 未找到 Godot 可执行文件"; exit 0; }
           chmod +x "$GODOT"
           echo "=== 导出 .pck ==="
-          "$GODOT" --headless --export-pack "BasicExport" STS2-ShunMod.pck
-          ls -la STS2-ShunMod.pck 2>/dev/null || echo "⚠️ 导出失败"
+          "$GODOT" --headless --export-pack "BasicExport" STS2_ShunMod.pck
+          ls -la STS2_ShunMod.pck 2>/dev/null || echo "⚠️ 导出失败"
 
       - name: Package
         run: |
           BUILD_DIR=.godot/mono/temp/bin/Release
           mkdir -p publish
-          cp "$BUILD_DIR/STS2-ShunMod.dll" publish/
+          cp "$BUILD_DIR/STS2_ShunMod.dll" publish/
           cp STS2_ShunMod.json publish/
-          PCK=$(find . -maxdepth 1 -name "STS2-ShunMod.pck" -type f 2>/dev/null | head -1)
+          PCK=$(find . -maxdepth 1 -name "STS2_ShunMod.pck" -type f 2>/dev/null | head -1)
           if [ -n "$PCK" ]; then
             cp "$PCK" publish/
           else
             echo "⚠️ 无 .pck"
           fi
           ls -la publish/
-          cd publish && zip -r ../STS2-ShunMod.zip .
+          cd publish && zip -r ../STS2_ShunMod.zip .
 
       - name: Get version
         id: ver
@@ -124,7 +124,7 @@ jobs:
           {
             echo "## 🚀 安装"
             echo ""
-            echo "下载 \`STS2-ShunMod.zip\`，解压到 \`Mods/STS2_ShunMod/\`，启动游戏。"
+            echo "下载 \`STS2_ShunMod.zip\`，解压到 \`Mods/STS2_ShunMod/\`，启动游戏。"
             echo ""
             echo "---"
             echo ""
@@ -180,7 +180,7 @@ jobs:
         with:
           api_key: ${{ secrets.NEXUSMODS_API_KEY }}
           file_group_id: ${{ secrets.NEXUSMODS_FILE_GROUP_ID }}
-          filename: STS2-ShunMod.zip
+          filename: STS2_ShunMod.zip
           version: ${{ steps.ver.outputs.TAG }}
           file_category: main
 
@@ -188,6 +188,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.ver.outputs.TAG }}
-          files: STS2-ShunMod.zip
+          files: STS2_ShunMod.zip
           body_path: release_notes.md
           prerelease: ${{ github.event.inputs.prerelease || false }}

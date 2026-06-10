@@ -57,7 +57,7 @@ internal static class ModelDbInit_SafePatch
     {
         if (ContentByIdField?.GetValue(null) is not IDictionary<ModelId, AbstractModel> contentById)
         {
-            Log.Warn("[STS2-ShunMod] _contentById 字段不可用，回退到原版 Init");
+            Log.Warn("[STS2_ShunMod] _contentById 字段不可用，回退到原版 Init");
             return true;
         }
 
@@ -74,7 +74,7 @@ internal static class ModelDbInit_SafePatch
             created++;
         }
 
-        Log.Info($"[STS2-ShunMod] SafeInit: {allTypes.Length} 类型, {created} 新建, {contentById.Count - created} 已存在, {ShunModEventRegistry.EventTypes.Count} 事件类型");
+        Log.Info($"[STS2_ShunMod] SafeInit: {allTypes.Length} 类型, {created} 新建, {contentById.Count - created} 已存在, {ShunModEventRegistry.EventTypes.Count} 事件类型");
 
         // 注册 ShunMod 事件
         foreach (var type in ShunModEventRegistry.EventTypes)

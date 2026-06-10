@@ -50,7 +50,7 @@
 
 ## 安装
 
-下载 Release 中的 `STS2-ShunMod.zip`，解压到 Slay the Spire 2 的 `Mods/STS2-ShunMod/` 目录，启动游戏自动加载。
+下载 Release 中的 `STS2_ShunMod.zip`，解压到 Slay the Spire 2 的 `Mods/STS2_ShunMod/` 目录，启动游戏自动加载。
 
 ---
 
@@ -58,7 +58,7 @@
 
 ```
 STS2-ShunMod/
-├── STS2-ShunModCode/               # C# 源码
+├── STS2_ShunModCode/               # C# 源码
 │   ├── MainFile.cs                 # Mod 入口（Harmony + 自动注册）
 │   ├── Cards/
 │   │   └── ShunCard/
@@ -91,7 +91,7 @@ STS2-ShunMod/
 │       ├── Events/
 │       │   ├── ShunModEventRegistry.cs  # 事件注册
 │       │   └── EventPortraitRedirectPatch.cs  # 事件肖像重定向
-├── STS2-ShunMod/                   # Godot 资源
+├── STS2_ShunMod/                   # Godot 资源
 │   ├── cards/                      # 卡牌美术
 │   └── localization/               # 本地化（中/英）
 ├── project.godot                   # Godot 4.5 项目

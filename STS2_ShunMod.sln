@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STS2-ShunMod", "STS2_ShunMod.csproj", "{51BDED72-BD4E-4ACF-A80B-14A31DA9CB11}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "STS2_ShunMod", "STS2_ShunMod.csproj", "{51BDED72-BD4E-4ACF-A80B-14A31DA9CB11}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

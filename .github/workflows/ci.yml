@@ -58,8 +58,8 @@ jobs:
           [ -z "$GODOT" ] && { echo "❌ 未找到 Godot"; exit 0; }
           chmod +x "$GODOT"
           echo "=== 导出 .pck ==="
-          "$GODOT" --headless --export-pack "BasicExport" STS2-ShunMod.pck
-          ls -la STS2-ShunMod.pck 2>/dev/null || echo "⚠️ 导出失败"
+          "$GODOT" --headless --export-pack "BasicExport" STS2_ShunMod.pck
+          ls -la STS2_ShunMod.pck 2>/dev/null || echo "⚠️ 导出失败"
 
       - name: Package
         run: |
@@ -75,13 +75,13 @@ jobs:
           mkdir -p publish
           cp "$DLL" publish/
           cp STS2_ShunMod.json publish/
-          PCK=$(find . -maxdepth 1 -name "STS2-ShunMod.pck" -type f 2>/dev/null | head -1)
+          PCK=$(find . -maxdepth 1 -name "STS2_ShunMod.pck" -type f 2>/dev/null | head -1)
           if [ -n "$PCK" ]; then
             cp "$PCK" publish/
           else
             echo "⚠️ 无 .pck"
           fi
           ls -la publish/
-          cd publish && zip -r ../STS2-ShunMod.zip .
-          echo "✅ 打包完成: $(ls -lh ../STS2-ShunMod.zip | awk '{print $5}')"
+          cd publish && zip -r ../STS2_ShunMod.zip .
+          echo "✅ 打包完成: $(ls -lh ../STS2_ShunMod.zip | awk '{print $5}')"
 
