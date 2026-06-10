@@ -1,4 +1,4 @@
-namespace STS2ShunMod.Core;
+namespace STS2ShunMod.STS2_ShunModCode.Core;
 
 /// <summary>
 ///     标记卡牌所属的卡池。ContentRegistry 扫描后自动注册。

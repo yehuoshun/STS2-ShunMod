@@ -6,7 +6,7 @@ using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Saves;
 
-namespace STS2ShunMod.Patches.Combat;
+namespace STS2ShunMod.STS2_ShunModCode.Patches.Combat;
 
 /// <summary>
 ///     显示总伤害 — 多段卡/X卡在卡牌描述末尾追加总伤害 = 单段伤害 × 段数。

@@ -4,7 +4,7 @@ using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using Godot;
 
-namespace STS2ShunMod.Patches.Events;
+namespace STS2ShunMod.STS2_ShunModCode.Patches.Events;
 
 /// <summary>
 ///     自定义事件注册 — 从 ModelDb 取正规实例注入 AllSharedEvents。

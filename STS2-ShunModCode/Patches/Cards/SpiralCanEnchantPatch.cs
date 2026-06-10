@@ -3,7 +3,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Enchantments;
 
-namespace STS2ShunMod.Patches.Cards;
+namespace STS2ShunMod.STS2_ShunModCode.Patches.Cards;
 
 /// <summary>
 ///     取消 Spiral 附魔的「仅限基础打击/防御」限制，改为任意卡牌皆可附魔。

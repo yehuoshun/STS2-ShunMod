@@ -4,7 +4,7 @@ using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
 
-namespace STS2ShunMod.Patches.Combat;
+namespace STS2ShunMod.STS2_ShunModCode.Patches.Combat;
 
 /// <summary>
 ///     修复硬化外壳能力 — 使 ModifyHpLostBeforeOstyLate 返回原始伤害值，取消减伤效果。

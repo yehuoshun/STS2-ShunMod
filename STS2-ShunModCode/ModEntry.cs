@@ -3,10 +3,10 @@ using System.Text.Json;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
-using STS2ShunMod.Core;
-using STS2ShunMod.Patches.Events;
+using STS2ShunMod.STS2_ShunModCode.Core;
+using STS2ShunMod.STS2_ShunModCode.Patches.Events;
 
-namespace STS2ShunMod;
+namespace STS2ShunMod.STS2_ShunModCode;
 
 [ModInitializer(nameof(Initialize))]
 public static class ModEntry

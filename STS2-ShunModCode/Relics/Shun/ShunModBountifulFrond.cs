@@ -5,9 +5,9 @@ using MegaCrit.Sts2.Core.Factories;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.RelicPools;
-using STS2ShunMod.Core;
+using STS2ShunMod.STS2_ShunModCode.Core;
 
-namespace STS2ShunMod.Relics.Shun;
+namespace STS2ShunMod.STS2_ShunModCode.Relics.Shun;
 
 /// <summary>
 ///     丰饶叶 — 每个回合开始时，用随机药水填满所有空药水栏位。

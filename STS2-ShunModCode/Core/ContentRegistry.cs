@@ -1,9 +1,9 @@
 using System.Reflection;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
-using STS2ShunMod.Patches.Events;
+using STS2ShunMod.STS2_ShunModCode.Patches.Events;
 
-namespace STS2ShunMod.Core;
+namespace STS2ShunMod.STS2_ShunModCode.Core;
 
 /// <summary>
 ///     内容自动注册器 — 扫描 [CardPool] / [RelicPool] / [EventPool] 属性并注册。

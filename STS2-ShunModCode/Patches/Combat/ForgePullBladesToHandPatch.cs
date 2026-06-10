@@ -6,7 +6,7 @@ using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Models.Cards;
 using MegaCrit.Sts2.Core.Logging;
 
-namespace STS2ShunMod.Patches.Combat;
+namespace STS2ShunMod.STS2_ShunModCode.Patches.Combat;
 
 /// <summary>
 ///     所有 Forge 行为自动将非手牌的君王之剑拉回手牌。

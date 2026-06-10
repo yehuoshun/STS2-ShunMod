@@ -2,7 +2,7 @@ using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 
-namespace STS2ShunMod.Patches.Combat;
+namespace STS2ShunMod.STS2_ShunModCode.Patches.Combat;
 
 // ════════════════════════════════════════════════════════
 // 格挡保留系统

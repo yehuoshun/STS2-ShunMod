@@ -1,7 +1,7 @@
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Hooks;
 
-namespace STS2ShunMod.Patches.Combat;
+namespace STS2ShunMod.STS2_ShunModCode.Patches.Combat;
 
 /// <summary>
 ///     能量保留（冰激凌逻辑）

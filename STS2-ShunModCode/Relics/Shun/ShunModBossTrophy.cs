@@ -6,9 +6,9 @@ using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.RelicPools;
 using MegaCrit.Sts2.Core.Rewards;
 using MegaCrit.Sts2.Core.Rooms;
-using STS2ShunMod.Core;
+using STS2ShunMod.STS2_ShunModCode.Core;
 
-namespace STS2ShunMod.Relics.Shun;
+namespace STS2ShunMod.STS2_ShunModCode.Relics.Shun;
 
 /// <summary>
 ///     首领奖杯 — 击杀 Boss 后最大生命值 +25%。
