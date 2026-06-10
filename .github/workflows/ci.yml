@@ -65,10 +65,10 @@ jobs:
         run: |
           # Godot 导出会 rebuild DLL，输出到 .godot/mono/temp/bin/ 下
           # 优先找 Release，找不到搜 ExportRelease/ExportDebug
-          DLL=$(find .godot/mono/temp/bin -name "STS2-ShunMod.dll" -type f 2>/dev/null | head -1)
+          DLL=$(find .godot/mono/temp/bin -name "STS2ShunMod.dll" -type f 2>/dev/null | head -1)
           if [ -z "$DLL" ]; then
             echo "❌ 找不到 DLL"
-            find . -name "STS2-ShunMod.dll" -type f 2>/dev/null || true
+            find . -name "*.dll" -type f 2>/dev/null || true
             exit 1
           fi
           echo "DLL: $DLL"
