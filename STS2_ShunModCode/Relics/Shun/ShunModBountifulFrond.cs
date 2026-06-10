@@ -16,8 +16,8 @@ namespace STS2ShunMod.STS2_ShunModCode.Relics.Shun;
 public sealed class ShunModBountifulFrond : RelicModel
 {
     private const string IconBaseName = "bountiful_frond";
-    private const string IconPath = "res://STS2-ShunMod/images/relics/shunRelics/bountiful_frond/bountiful_frond.png";
-    private const string IconOutlinePath = "res://STS2-ShunMod/images/relics/shunRelics/bountiful_frond/bountiful_frond_outline.png";
+    private const string IconPath = "res://STS2_ShunMod/images/relics/shunRelics/bountiful_frond/bountiful_frond.png";
+    private const string IconOutlinePath = "res://STS2_ShunMod/images/relics/shunRelics/bountiful_frond/bountiful_frond_outline.png";
 
     public override RelicRarity Rarity => RelicRarity.Rare;
 

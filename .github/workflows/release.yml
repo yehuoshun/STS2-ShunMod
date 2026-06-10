@@ -124,7 +124,7 @@ jobs:
           {
             echo "## 🚀 安装"
             echo ""
-            echo "下载 \`STS2-ShunMod.zip\`，解压到 \`Mods/STS2-ShunMod/\`，启动游戏。"
+            echo "下载 \`STS2-ShunMod.zip\`，解压到 \`Mods/STS2_ShunMod/\`，启动游戏。"
             echo ""
             echo "---"
             echo ""

@@ -35,7 +35,7 @@ public class ShunModRelicExchange : EventModel
         "Swift", "Glam", "Clone", "Goopy", "Momentum", "Inky",
     };
 
-    private const string EventImagePath = "res://STS2-ShunMod/images/events/shunEvents/shunmod_relicexchange.png";
+    private const string EventImagePath = "res://STS2_ShunMod/images/events/shunEvents/shunmod_relicexchange.png";
 
     // ── 状态 ──
     private RelicModel? _loseRelic1;

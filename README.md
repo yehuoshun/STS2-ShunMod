@@ -118,7 +118,7 @@ public class MyCard : ShunCard
         WithCostUpgradeBy(-1);
     }
 
-    public override string PortraitPath => "res://STS2-ShunMod/cards/my_card.png";
+    public override string PortraitPath => "res://STS2_ShunMod/cards/my_card.png";
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {

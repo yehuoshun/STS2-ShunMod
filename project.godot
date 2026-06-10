@@ -12,7 +12,7 @@ config_version=5
 
 config/name="STS2-ShunMod"
 config/features=PackedStringArray("4.5", "C#", "Mobile")
-config/icon="res://STS2-ShunMod/mod_image.png"
+config/icon="res://STS2_ShunMod/mod_image.png"
 
 [display]
 

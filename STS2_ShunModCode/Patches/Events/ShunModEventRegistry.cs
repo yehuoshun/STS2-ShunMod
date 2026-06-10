@@ -98,7 +98,7 @@ internal static class ModelDbInit_SafePatch
 [HarmonyPriority(Priority.First)]
 public static class EventPortraitRedirectPatch
 {
-    private const string EventImageRoot = "res://STS2-ShunMod/images/events/shunEvents";
+    private const string EventImageRoot = "res://STS2_ShunMod/images/events/shunEvents";
 
     [HarmonyPrefix]
     private static bool Prefix(EventModel __instance, ref Texture2D? __result)

@@ -17,8 +17,8 @@ namespace STS2ShunMod.STS2_ShunModCode.Relics.Shun;
 public sealed class ShunModBossTrophy : RelicModel
 {
     private const string IconBaseName = "boss_trophy";
-    private const string IconPath = "res://STS2-ShunMod/images/relics/shunRelics/boss_trophy/boss_trophy.png";
-    private const string IconOutlinePath = "res://STS2-ShunMod/images/relics/shunRelics/boss_trophy/boss_trophy_outline.png";
+    private const string IconPath = "res://STS2_ShunMod/images/relics/shunRelics/boss_trophy/boss_trophy.png";
+    private const string IconOutlinePath = "res://STS2_ShunMod/images/relics/shunRelics/boss_trophy/boss_trophy_outline.png";
 
     public override RelicRarity Rarity => RelicRarity.Rare;
 
