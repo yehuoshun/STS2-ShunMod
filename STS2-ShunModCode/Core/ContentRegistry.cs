@@ -1,6 +1,7 @@
 using System.Reflection;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
+using STS2ShunMod.Patches.Events;
 
 namespace STS2ShunMod.Core;
 
