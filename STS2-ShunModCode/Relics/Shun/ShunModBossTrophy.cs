@@ -3,14 +3,17 @@ using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.RelicPools;
 using MegaCrit.Sts2.Core.Rewards;
 using MegaCrit.Sts2.Core.Rooms;
+using STS2ShunMod.Core;
 
 namespace STS2ShunMod.Relics;
 
 /// <summary>
 ///     首领奖杯 — 击杀 Boss 后最大生命值 +25%。
 /// </summary>
+[Pool(typeof(SharedRelicPool))]
 public sealed class ShunModBossTrophy : RelicModel
 {
     private const string IconBaseName = "boss_trophy";

@@ -1,14 +1,9 @@
 using System.Reflection;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
-using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.Models.CardPools;
-using MegaCrit.Sts2.Core.Models.RelicPools;
-using STS2ShunMod.Cards;
-using STS2ShunMod.Relics;
+using STS2ShunMod.Core;
 using STS2ShunMod.Patches.Events;
 
 namespace STS2ShunMod;
@@ -69,39 +64,9 @@ public static class ModEntry
                 Log.Error($"[{id}]   → inner: {e.InnerException.GetType().Name}: {e.InnerException.Message}");
         }
 
-        // Phase 2: Content registration
-        RegisterContent();
-
-        Log.Info($"[{id}] Initialization complete");
-        Log.Info($"[{id}] ============================================================");
-    }
-
-    private static void RegisterContent()
-    {
-        var id = ModId;
-
-        // Cards
-        try
-        {
-            ModHelper.AddModelToPool(typeof(ColorlessCardPool), typeof(ShunModSuperApotheosis));
-            Log.Info($"[{id}] Registered card: ShunModSuperApotheosis → ColorlessCardPool");
-        }
-        catch (Exception e) { Log.Error($"[{id}] Card registration failed: {e.Message}"); }
-
-        // Relics
-        try
-        {
-            ModHelper.AddModelToPool(typeof(SharedRelicPool), typeof(ShunModBossTrophy));
-            Log.Info($"[{id}] Registered relic: ShunModBossTrophy → SharedRelicPool");
-        }
-        catch (Exception e) { Log.Error($"[{id}] Relic registration failed (BossTrophy): {e.Message}"); }
-
-        try
-        {
-            ModHelper.AddModelToPool(typeof(SharedRelicPool), typeof(ShunModBountifulFrond));
-            Log.Info($"[{id}] Registered relic: ShunModBountifulFrond → SharedRelicPool");
-        }
-        catch (Exception e) { Log.Error($"[{id}] Relic registration failed (BountifulFrond): {e.Message}"); }
+        // Phase 2: Content registration (auto-scan [Pool] attribute)
+        var registered = ContentRegistry.RegisterAll(Assembly.GetExecutingAssembly());
+        Log.Info($"[{id}] ContentRegistry: {registered} types registered");
 
         // Events — registered via ShunModEventRegistry + ModelDbInit_SafePatch
         try
@@ -110,5 +75,8 @@ public static class ModEntry
             Log.Info($"[{id}] Event types registered for SafeInit");
         }
         catch (Exception e) { Log.Error($"[{id}] Event registration failed: {e.Message}"); }
+
+        Log.Info($"[{id}] Initialization complete");
+        Log.Info($"[{id}] ============================================================");
     }
 }

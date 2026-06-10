@@ -4,12 +4,15 @@ using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Factories;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.RelicPools;
+using STS2ShunMod.Core;
 
 namespace STS2ShunMod.Relics;
 
 /// <summary>
 ///     丰饶叶 — 每个回合开始时，用随机药水填满所有空药水栏位。
 /// </summary>
+[Pool(typeof(SharedRelicPool))]
 public sealed class ShunModBountifulFrond : RelicModel
 {
     private const string IconBaseName = "bountiful_frond";
