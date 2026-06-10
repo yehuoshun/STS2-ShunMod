@@ -83,3 +83,10 @@ jobs:
           cd publish && zip -r ../STS2_ShunMod.zip .
           echo "✅ 打包完成: $(ls -lh ../STS2_ShunMod.zip | awk '{print $5}')"
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: STS2_ShunMod
+          path: STS2_ShunMod.zip
+          if-no-files-found: error
+
