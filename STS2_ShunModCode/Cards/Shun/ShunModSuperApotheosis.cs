@@ -15,7 +15,7 @@ namespace STS2ShunMod.STS2_ShunModCode.Cards.Shun;
 [CardPool(typeof(ColorlessCardPool))]
 public class ShunModSuperApotheosis : CardModel
 {
-    private const string Portrait = "res://STS2_ShunMod/images/cards/shunCards/colorless/superapotheosis.png";
+    private const string Portrait = "res://STS2_ShunMod/images/cards/shunCards/colorless/shun_mod_super_apotheosis.png";
 
     public ShunModSuperApotheosis() : base(2, CardType.Skill, CardRarity.Rare, TargetType.Self) { }
 
