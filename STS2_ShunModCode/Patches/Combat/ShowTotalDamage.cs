@@ -5,6 +5,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Saves;
+using STS2ShunMod.STS2_ShunModCode.Settings;
 
 namespace STS2ShunMod.STS2_ShunModCode.Patches.Combat;
 
@@ -34,6 +35,7 @@ public static class ShowTotalDamage
     [HarmonyPostfix]
     private static void Postfix(CardModel __instance, ref string __result)
     {
+        if (!PatchManager.IsEnabled("ShowTotalDamage")) return;
         try
         {
             var perHit = GetDamageValue(__instance);

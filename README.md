@@ -32,6 +32,8 @@
 
 ## 补丁
 
+> 所有补丁可在游戏设置 → ShunMod 面板中独立开关。
+
 | 名称 | 说明 |
 |---|---|
 | ♾️ 无限升级 | 卡牌可无限次升级。 |
@@ -82,6 +84,11 @@ STS2-ShunMod/
 │   │       ├── PoolAttribute.cs    # [Pool] 特性
 │   │       ├── AssemblyScanner.cs  # 安全类型扫描
 │   │       └── ContentRegistry.cs  # 扫描 + 注册
+│   ├── Settings/
+│   │   ├── ConfigEntry.cs          # 配置项定义
+│   │   ├── SettingsManager.cs      # 持久化（JSON + debounce）
+│   │   ├── SettingsUI.cs           # 零 Harmony UI 注入
+│   │   └── PatchManager.cs         # 补丁开关管理
 │   └── Patches/
 │       ├── Cards/
 │       │   ├── InfiniteUpgrade.cs        # 无限升级

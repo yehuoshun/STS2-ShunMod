@@ -5,6 +5,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Models.Cards;
 using MegaCrit.Sts2.Core.Logging;
+using STS2ShunMod.STS2_ShunModCode.Settings;
 
 namespace STS2ShunMod.STS2_ShunModCode.Patches.Combat;
 
@@ -17,6 +18,7 @@ public static class ForgePullBladesToHandPatch
     [HarmonyPostfix]
     private static async void Postfix(Task<IEnumerable<SovereignBlade>> __result, Player player)
     {
+        if (!PatchManager.IsEnabled("ForgePullBlades")) return;
         try
         {
             await __result;
