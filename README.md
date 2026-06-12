@@ -3,6 +3,10 @@
 > 杀戮尖塔 2 原生模组
 > Shun's Slay the Spire 2 Mod — Native
 
+## 鸣谢
+
+- [ModConfig-STS2](https://github.com/xhyrzldf/ModConfig-STS2) — 设置界面架构参考（零 Harmony 注入、双向绑定、持久化 debounce）
+
 [![Version](https://img.shields.io/badge/version-v0.0.0-blue)](https://github.com/yehuoshun/STS2-ShunMod)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Framework](https://img.shields.io/badge/framework-.NET%209.0-purple)](STS2_ShunMod.csproj)
