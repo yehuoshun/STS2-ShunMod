@@ -230,14 +230,14 @@ internal static class SettingsUI
         label.AddThemeColorOverride("font_color", TextColor);
         label.AddThemeFontSizeOverride("font_size", 20);
 
-        var tickbox = new NTickbox
+        var tickbox = new CheckBox
         {
             ButtonPressed = SettingsManager.GetValue(entry.Key, (bool)entry.DefaultValue),
             FocusMode = Control.FocusModeEnum.All,
         };
 
         var guard = new UiUpdateGuard();
-        var tickboxRef = new WeakReference<NTickbox>(tickbox);
+        var tickboxRef = new WeakReference<CheckBox>(tickbox);
 
         RegisterBinding(entry.Key, new LiveBinding(value =>
         {
@@ -274,7 +274,7 @@ internal static class SettingsUI
         label.AddThemeColorOverride("font_color", TextColor);
         label.AddThemeFontSizeOverride("font_size", 20);
 
-        var currentValue = SettingsManager.GetValue<float>(entry.Key);
+        var currentValue = SettingsManager.GetValue(entry.Key, (float)entry.DefaultValue);
         var slider = new HSlider
         {
             MinValue = entry.Min,
@@ -337,12 +337,12 @@ internal static class SettingsUI
         label.AddThemeColorOverride("font_color", TextColor);
         label.AddThemeFontSizeOverride("font_size", 20);
 
-        var dropdown = new NOptionButton { FocusMode = Control.FocusModeEnum.All };
+        var dropdown = new OptionButton { FocusMode = Control.FocusModeEnum.All };
 
         foreach (var opt in entry.Options)
             dropdown.AddItem(opt);
 
-        var current = SettingsManager.GetValue<string>(entry.Key);
+        var current = SettingsManager.GetValue(entry.Key, (string)entry.DefaultValue);
         for (int i = 0; i < entry.Options.Length; i++)
         {
             if (entry.Options[i] == current)

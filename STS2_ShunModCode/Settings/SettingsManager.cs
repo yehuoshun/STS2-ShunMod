@@ -30,7 +30,7 @@ internal static class SettingsManager
         }
 
         var path = ConfigDir + key + ".json";
-        if (!FileAccess.FileExists(path))
+        if (!Godot.FileAccess.FileExists(path))
         {
             _values[key] = fallback!;
             return fallback;
@@ -38,7 +38,7 @@ internal static class SettingsManager
 
         try
         {
-            using var file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
+            using var file = Godot.FileAccess.Open(path, Godot.FileAccess.ModeFlags.Read);
             var json = file.GetAsText();
             var value = JsonSerializer.Deserialize<T>(json);
             _values[key] = value!;
@@ -81,7 +81,7 @@ internal static class SettingsManager
             try
             {
                 var path = ConfigDir + key + ".json";
-                using var file = FileAccess.Open(path, FileAccess.ModeFlags.Write);
+                using var file = Godot.FileAccess.Open(path, Godot.FileAccess.ModeFlags.Write);
                 file.StoreString(JsonSerializer.Serialize(_values[key]));
             }
             catch { /* 写入失败不崩溃 */ }
