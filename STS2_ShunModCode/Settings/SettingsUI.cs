@@ -47,6 +47,25 @@ internal static class SettingsUI
 
         var tree = (SceneTree)Engine.GetMainLoop();
         tree.NodeAdded += OnNodeAdded;
+
+        // 扫描已有节点：NSettingsTabManager 可能在 mod 初始化前就已经在场景树里了
+        ScanExistingNodes(tree.Root);
+    }
+
+    private static void ScanExistingNodes(Node root)
+    {
+        foreach (var child in root.GetChildren())
+        {
+            if (child is NSettingsTabManager tabManager && tabManager.GetNodeOrNull("ShunMod") == null)
+            {
+                // 节点已在场景树中，ready 可能已发射，直接注入
+                if (tabManager.IsNodeReady())
+                    InjectTab(tabManager);
+                else
+                    OnNodeAdded(child);
+            }
+            ScanExistingNodes(child);
+        }
     }
 
     private static void OnNodeAdded(Node node)
