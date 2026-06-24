@@ -5,7 +5,6 @@ using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
 using STS2ShunMod.STS2_ShunModCode.Core;
 using STS2ShunMod.STS2_ShunModCode.Patches.Events;
-using STS2ShunMod.STS2_ShunModCode.Settings;
 
 namespace STS2ShunMod.STS2_ShunModCode;
 
@@ -65,13 +64,7 @@ public static class ModEntry
                 Log.Error($"[{id}]   → inner: {e.InnerException.GetType().Name}: {e.InnerException.Message}");
         }
 
-        // Phase 2: Settings (load before content registration so patches can read config)
-        SettingsManager.Initialize();
-        PatchManager.LoadFromSettings();
-        SettingsUI.Initialize(PatchManager.GetConfigEntries());
-        Log.Info($"[{id}] Settings system initialized");
-
-        // Phase 3: Content registration (auto-scan [CardPool] / [RelicPool] / [EventPool])
+        // Phase 2: Content registration (auto-scan [CardPool] / [RelicPool] / [EventPool])
         ContentRegistry.RegisterAll(Assembly.GetExecutingAssembly());
 
         Log.Info($"[{id}] Initialization complete");

@@ -5,8 +5,6 @@
 
 ## 鸣谢
 
-- [ModConfig-STS2](https://github.com/xhyrzldf/ModConfig-STS2) — 设置界面架构参考（零 Harmony 注入、双向绑定、持久化 debounce）
-
 [![Version](https://img.shields.io/badge/version-v0.0.0-blue)](https://github.com/yehuoshun/STS2-ShunMod)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Framework](https://img.shields.io/badge/framework-.NET%209.0-purple)](STS2_ShunMod.csproj)
@@ -31,8 +29,6 @@
 ---
 
 ## 补丁
-
-> 所有补丁可在游戏设置 → ShunMod 面板中独立开关。
 
 | 名称 | 说明 |
 |---|---|
@@ -84,11 +80,6 @@ STS2-ShunMod/
 │   │       ├── PoolAttribute.cs    # [Pool] 特性
 │   │       ├── AssemblyScanner.cs  # 安全类型扫描
 │   │       └── ContentRegistry.cs  # 扫描 + 注册
-│   ├── Settings/
-│   │   ├── ConfigEntry.cs          # 配置项定义
-│   │   ├── SettingsManager.cs      # 持久化（JSON + debounce）
-│   │   ├── SettingsUI.cs           # 零 Harmony UI 注入
-│   │   └── PatchManager.cs         # 补丁开关管理
 │   └── Patches/
 │       ├── Cards/
 │       │   ├── InfiniteUpgrade.cs        # 无限升级

@@ -3,8 +3,6 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
-using STS2ShunMod.STS2_ShunModCode.Settings;
-
 namespace STS2ShunMod.STS2_ShunModCode.Patches.Combat;
 
 /// <summary>
@@ -16,7 +14,6 @@ public static class HardenedShellPatch
     private static void Postfix(HardenedShellPower __instance, Creature target, decimal amount,
         ValueProp props, Creature? dealer, CardModel? cardSource, ref decimal __result)
     {
-        if (!PatchManager.IsEnabled("HardenedShell")) return;
         __result = amount;
     }
 }

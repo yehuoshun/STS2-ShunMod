@@ -1,8 +1,6 @@
 using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
-using STS2ShunMod.STS2_ShunModCode.Settings;
-
 namespace STS2ShunMod.STS2_ShunModCode.Patches.Combat;
 
 // ════════════════════════════════════════════════════════
@@ -46,7 +44,6 @@ public static class BlockRetentionClearBlockPatch
 
     private static bool Prefix(object __instance, ref Task __result)
     {
-        if (!PatchManager.IsEnabled("BlockRetention")) return true;
         if (!CreatureReflection.IsPlayer(__instance)) return true;
         __result = Task.CompletedTask;
         return false;
@@ -65,7 +62,6 @@ public static class BlockRetentionPrepareForNextTurnPatch
 
     private static void Prefix(object __instance, ref int __state)
     {
-        if (!PatchManager.IsEnabled("BlockRetention")) return;
         if (!CreatureReflection.IsPlayer(__instance)) return;
         __state = CreatureReflection.GetBlock(__instance);
     }
@@ -74,7 +70,6 @@ public static class BlockRetentionPrepareForNextTurnPatch
     {
         try
         {
-            if (!PatchManager.IsEnabled("BlockRetention")) return;
             if (__state <= 0 || !CreatureReflection.IsPlayer(__instance)) return;
             CreatureReflection.SetBlock(__instance, __state);
         }

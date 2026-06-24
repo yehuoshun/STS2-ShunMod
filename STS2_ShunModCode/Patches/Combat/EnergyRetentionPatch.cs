@@ -1,7 +1,5 @@
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Hooks;
-using STS2ShunMod.STS2_ShunModCode.Settings;
-
 namespace STS2ShunMod.STS2_ShunModCode.Patches.Combat;
 
 /// <summary>
@@ -19,7 +17,6 @@ public static class EnergyRetentionPatch
     [HarmonyPrefix]
     private static bool Prefix(ref bool __result)
     {
-        if (!PatchManager.IsEnabled("EnergyRetention")) return true;
         __result = false;
         return false;
     }

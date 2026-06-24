@@ -2,8 +2,6 @@ using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Saves.Runs;
-using STS2ShunMod.STS2_ShunModCode.Settings;
-
 namespace STS2ShunMod.STS2_ShunModCode.Patches.Cards;
 
 // ════════════════════════════════ 主 Patch：MaxUpgradeLevel getter ════════════════════════════════
@@ -29,8 +27,6 @@ public static class InfiniteUpgrade_MaxUpgrade
     [HarmonyPostfix]
     private static void Postfix(CardModel __instance, ref int __result)
     {
-        if (!PatchManager.IsEnabled("InfiniteUpgrade")) return;
-
         if (InfiniteUpgrade_Safety.CanUseUnlimitedGrowth(__instance, __result) && __result < UpgradeCap)
             __result = UpgradeCap;
 
