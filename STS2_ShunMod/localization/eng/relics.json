@@ -4,5 +4,5 @@
   "SHUN_MOD_BOUNTIFUL_FROND.title": "Bountiful Frond",
   "SHUN_MOD_BOUNTIFUL_FROND.description": "At the start of each turn, fill your empty potion slots with random potions.",
   "SHUN_MOD_INFINITE_GIRYA.title": "Infinite Girya",
-  "SHUN_MOD_INFINITE_GIRYA.description": "Whenever you rest at a Rest Site, gain 1 Strength."
+  "SHUN_MOD_INFINITE_GIRYA.description": "You may train at Rest Sites. Each training gives +1 Strength at the start of combat. No limit."
 }
