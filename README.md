@@ -37,7 +37,6 @@
 | 🛡️ 格挡保留 | 格挡永不归零。 |
 | 💥 显示总伤害 | 多段卡/X卡在卡牌描述末尾显示总伤害（单段伤害 × 段数）。 |
 | ⚔️ 锻造拉回 | 所有锻造行为自动将非手牌的君王之剑拉回手牌。 |
-| 🌀 附魔限制解锁 | 附魔取消仅限基础打击/防御的限制，任意卡牌可附魔。 |
 | ⚡ 能量保留 | 回合开始时能量不清零，剩余能量累积（冰激凌逻辑）。 |
 
 ---
@@ -82,8 +81,7 @@ STS2-ShunMod/
 │   │       └── ContentRegistry.cs  # 扫描 + 注册
 │   └── Patches/
 │       ├── Cards/
-│       │   ├── InfiniteUpgrade.cs        # 无限升级
-│       │   └── SpiralCanEnchantPatch.cs  # 附魔限制解锁
+│       │   └── InfiniteUpgrade.cs        # 无限升级
 │       ├── Combat/
 │       │   ├── BlockRetentionPatch.cs  # 格挡保留
 │       │   ├── EnergyRetentionPatch.cs  # 能量保留（冰激凌）
