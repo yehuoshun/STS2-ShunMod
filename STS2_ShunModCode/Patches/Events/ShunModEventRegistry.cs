@@ -98,13 +98,10 @@ internal static class ModelDbInit_SafePatch
 [HarmonyPriority(Priority.First)]
 public static class EventPortraitRedirectPatch
 {
-    private const string EventImageRoot = "res://STS2_ShunMod/images/events/shunEvents";
-
     [HarmonyPrefix]
     private static bool Prefix(EventModel __instance, ref Texture2D? __result)
     {
-        var modId = __instance.Id.Entry;
-        var modPath = $"{EventImageRoot}/{modId.ToLowerInvariant()}.png";
+        var modPath = ShunModHelper.EventImagePath(__instance.GetType());
 
         if (!ResourceLoader.Exists(modPath)) return true;
 

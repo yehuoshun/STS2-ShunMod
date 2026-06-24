@@ -12,7 +12,13 @@ public static class ShunModHelper
     /// <summary>类名 → snake_case（如 ShunModSuperApotheosis → shun_mod_super_apotheosis）</summary>
     public static string ClassToSnakeCase(Type type)
     {
-        return Regex.Replace(type.Name, "([a-z])([A-Z])", "$1_$2").ToLowerInvariant();
+        return ClassNameToSnakeCase(type.Name);
+    }
+
+    /// <summary>类名字符串 → snake_case</summary>
+    public static string ClassNameToSnakeCase(string className)
+    {
+        return Regex.Replace(className, "([a-z])([A-Z])", "$1_$2").ToLowerInvariant();
     }
 
     /// <summary>卡牌肖像路径：cards/shunCards/colorless/{snake}.png</summary>
@@ -33,5 +39,11 @@ public static class ShunModHelper
     {
         var name = ClassToSnakeCase(type);
         return $"{ResourceRoot}/relics/shunRelics/{name}/{name}_outline.png";
+    }
+
+    /// <summary>事件图片路径：events/shunEvents/{snake}.png</summary>
+    public static string EventImagePath(Type type)
+    {
+        return $"{ResourceRoot}/events/shunEvents/{ClassToSnakeCase(type)}.png";
     }
 }
