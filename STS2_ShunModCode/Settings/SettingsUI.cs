@@ -252,6 +252,7 @@ internal static class SettingsUI
         {
             if (guard.Suppress) return;
             SettingsManager.SetValue(entry.Key, pressed);
+            entry.OnChanged?.Invoke(pressed);
         };
 
         hbox.AddChild(label);
@@ -314,6 +315,7 @@ internal static class SettingsUI
             valueLabel.Text = v.ToString(entry.Format);
             if (guard.Suppress) return;
             SettingsManager.SetValue(entry.Key, v);
+            entry.OnChanged?.Invoke(v);
         };
 
         hbox.AddChild(label);
@@ -355,6 +357,7 @@ internal static class SettingsUI
         dropdown.ItemSelected += index =>
         {
             SettingsManager.SetValue(entry.Key, entry.Options[index]);
+            entry.OnChanged?.Invoke(entry.Options[index]);
         };
 
         hbox.AddChild(label);
