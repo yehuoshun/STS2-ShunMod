@@ -44,10 +44,12 @@ public static class ShowTotalDamage
             if (totalHits <= 1) return;
 
             var total = perHit * totalHits;
+            var perHitStr = perHit % 1 == 0 ? perHit.ToString("F0") : perHit.ToString("F1");
+            var totalStr = total % 1 == 0 ? total.ToString("F0") : total.ToString("F1");
             var lang = SaveManager.Instance.SettingsSave.Language;
             var label = lang == "zhs"
-                ? $"({perHit} × {totalHits} = {total} 总伤害)"
-                : $"({perHit} × {totalHits} = {total} total damage)";
+                ? $"({perHitStr} × {totalHits} = {totalStr} 总伤害)"
+                : $"({perHitStr} × {totalHits} = {totalStr} total damage)";
             __result += $"\n[color=#ffcc00]{label}[/color]";
         }
         catch (Exception ex)
