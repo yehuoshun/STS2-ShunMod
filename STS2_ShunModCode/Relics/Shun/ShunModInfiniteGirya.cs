@@ -1,10 +1,9 @@
 using MegaCrit.Sts2.Core.Commands;
-using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.Models.RelicPools;
-using MegaCrit.Sts2.Core.Powers;
 using STS2ShunMod.STS2_ShunModCode.Core;
 
 namespace STS2ShunMod.STS2_ShunModCode.Relics.Shun;
@@ -21,10 +20,8 @@ public sealed class ShunModInfiniteGirya : RelicModel
     protected override string PackedIconOutlinePath => ShunModHelper.RelicOutlinePath(GetType());
     protected override string BigIconPath => ShunModHelper.RelicIconPath(GetType());
 
-    public override void OnPlayerRest(Player player)
+    public override void OnRest()
     {
-        if (player != Owner) return;
-
         Flash();
         TaskHelper.RunSafely(CreatureCmd.ApplyPower(Owner!.Creature, new StrengthPower(1)));
     }
