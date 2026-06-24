@@ -25,6 +25,7 @@
 |---|---|---|
 | 🏆 首领奖杯 | 稀有 | 击杀 Boss 后最大生命值 +25%。 |
 | 🌿 丰饶叶 | 稀有 | 每个回合开始时，用随机药水填满所有空药水栏位。 |
+| 💪 无限壶铃 | 稀有 | 每次在休息处休息时，获得 1 点力量。无使用次数限制。 |
 
 ---
 
@@ -67,7 +68,9 @@ STS2-ShunMod/
 │   ├── Relics/
 │   │   └── ShunRelics/
 │   │       ├── ShunModBossTrophy.cs    # 首领奖杯遗物
-│   │       └── ShunModBountifulFrond.cs # 丰饶叶遗物
+│   │       ├── ShunModBossTrophy.cs    # 首领奖杯遗物
+│       ├── ShunModBountifulFrond.cs # 丰饶叶遗物
+│       └── ShunModInfiniteGirya.cs  # 无限壶铃遗物
 │   ├── Events/
 │   │   └── ShunEvents/
 │   │       └── ShunModRelicExchange.cs   # 遗物交易所
