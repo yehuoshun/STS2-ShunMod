@@ -59,7 +59,7 @@ public sealed class ShunModInfiniteGirya : RelicModel
         if (TimesLifted > 0 && room is CombatRoom)
         {
             Flash();
-            await PowerCmd.Apply<StrengthPower>(Owner.Creature, TimesLifted, Owner.Creature, null);
+            await PowerCmd.Apply<StrengthPower>(Owner.Creature, TimesLifted, Owner.Creature, null, false);
         }
     }
 
@@ -94,7 +94,9 @@ public class ShunModLiftRestSiteOption : RestSiteOption
 
     public override async Task<bool> OnSelect()
     {
-        Owner.GetRelic<ShunModInfiniteGirya>().TimesLifted++;
+        var relic = Owner.GetRelic<ShunModInfiniteGirya>();
+        if (relic != null)
+            relic.TimesLifted++;
         return await Task.FromResult(true);
     }
 
