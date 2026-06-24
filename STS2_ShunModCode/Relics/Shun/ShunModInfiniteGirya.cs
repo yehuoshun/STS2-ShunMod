@@ -59,7 +59,7 @@ public sealed class ShunModInfiniteGirya : RelicModel
         if (TimesLifted > 0 && room is CombatRoom)
         {
             Flash();
-            await PowerCmd.Apply<StrengthPower>(Owner.Creature, TimesLifted, Owner.Creature, null, false);
+            await PowerCmd.Apply<StrengthPower>(Owner.Creature, TimesLifted, Owner.Creature, null);
         }
     }
 
