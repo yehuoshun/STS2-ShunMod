@@ -3,6 +3,7 @@ using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using Godot;
+using STS2ShunMod.STS2_ShunModCode.Core;
 
 namespace STS2ShunMod.STS2_ShunModCode.Patches.Events;
 
