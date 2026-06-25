@@ -28,7 +28,7 @@ public class ShunModSuperApotheosis : CardModel
         // 升级战斗中所有卡牌（排除自身）
         foreach (var allCard in owner.PlayerCombatState.AllCards)
             if (allCard != this && allCard.IsUpgradable)
-                CardCmd.Upgrade(allCard);
+                CardCmd.Upgrade(allCard, CardPreviewStyle.None);
 
         // 升级牌组中所有可升级卡牌（无预览动画）
         var deckCards = PileType.Deck.GetPile(owner).Cards
