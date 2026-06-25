@@ -5,6 +5,7 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Entities.RestSite;
+using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
@@ -60,7 +61,7 @@ public sealed class ShunModInfiniteGirya : RelicModel
         {
             Flash();
             var power = ModelDb.Power<StrengthPower>().ToMutable();
-            await PowerCmd.Apply(power, Owner.Creature, TimesLifted, Owner.Creature, null);
+            await PowerCmd.Apply<StrengthPower>(new ThrowingPlayerChoiceContext(), Owner.Creature, TimesLifted, Owner.Creature, null);
         }
     }
 
