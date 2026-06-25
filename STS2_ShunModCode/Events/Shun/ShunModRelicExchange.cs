@@ -210,8 +210,8 @@ public class ShunModRelicExchange : EventModel
             var lose = _loseRelic1;
             var gain = _gainRelic;
             var tips = new List<IHoverTip>();
-            tips.AddRange(lose.HoverTips);
-            tips.AddRange(gain.HoverTips);
+            tips.AddRange(SafeHoverTips(lose));
+            tips.AddRange(SafeHoverTips(gain));
             list.Add(Opt(async () =>
             {
                 await RelicCmd.Remove(lose);
@@ -234,7 +234,7 @@ public class ShunModRelicExchange : EventModel
                 var mutableEnch = (EnchantmentModel)ench.MutableClone();
                 mutableEnch.Amount = 5;
                 var tips = new List<IHoverTip>();
-                tips.AddRange(lose.HoverTips);
+                tips.AddRange(SafeHoverTips(lose));
                 tips.AddRange(mutableEnch.HoverTips);
                 list.Add(Opt(async () =>
                 {
@@ -285,6 +285,20 @@ public class ShunModRelicExchange : EventModel
         typeof(Player).GetField("_relics", BindingFlags.NonPublic | BindingFlags.Instance);
 
     // Not used in current code since we use RelicCmd.Remove now, but kept for potential internal use
+    /// <summary>安全获取遗物 HoverTips，捕获 Pool 缺失导致的异常。</summary>
+    private static List<IHoverTip> SafeHoverTips(RelicModel relic)
+    {
+        try
+        {
+            return relic.HoverTips.ToList();
+        }
+        catch (InvalidOperationException)
+        {
+            // 某些 Mod 遗物没有归属 Pool，EnergyIconHelper.GetPool 会抛 NoMatchException
+            return new List<IHoverTip>();
+        }
+    }
+
     public static bool RemoveRelic(Player player, RelicModel relic)
     {
         if (RelicsField?.GetValue(player) is not List<RelicModel> list)
