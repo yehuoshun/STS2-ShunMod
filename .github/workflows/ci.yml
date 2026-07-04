@@ -22,8 +22,7 @@ jobs:
       - name: Download game references
         run: |
           mkdir -p deps
-          # 直接用 curl 从 deps release 下载，避免 gh CLI 权限问题
-          DEPS_URL="https://github.com/${{ github.repository }}/releases/download/deps"
+          DEPS_URL="https://github.com/${{ github.repository }}/releases/download/0.107.1"
           curl -sL "${DEPS_URL}/sts2.dll" -o deps/sts2.dll
           curl -sL "${DEPS_URL}/0Harmony.dll" -o deps/0Harmony.dll
           ls -la deps/
@@ -33,9 +32,8 @@ jobs:
           if [ ! -f deps/sts2.dll ]; then
             echo ""
             echo "=============================================="
-            echo "  deps release 不存在或缺少 sts2.dll！"
-            echo "  请上传游戏 DLL 到 deps release："
-            echo "    gh release create deps --title deps sts2.dll 0Harmony.dll"
+            echo "  sts2.dll not found in 0.107.1 release!"
+            echo "  Upload with: gh release upload 0.107.1 sts2.dll 0Harmony.dll"
             echo "=============================================="
             exit 1
           fi
@@ -48,24 +46,22 @@ jobs:
 
       - name: Export .pck
         run: |
-          echo "=== 下载 Godot 4.5.1 Mono ==="
+          echo "=== Downloading Godot 4.5.1 Mono ==="
           GODOT_URL="https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_mono_linux_x86_64.zip"
-          curl -sL "$GODOT_URL" -o godot.zip || { echo "❌ 下载失败"; exit 0; }
+          curl -sL "$GODOT_URL" -o godot.zip || { echo "Download failed"; exit 0; }
           unzip -q godot.zip -d godot 2>/dev/null
           GODOT=$(find godot -name "Godot*" -type f -executable | head -1)
-          [ -z "$GODOT" ] && { echo "❌ 未找到 Godot"; exit 0; }
+          [ -z "$GODOT" ] && { echo "Godot not found"; exit 0; }
           chmod +x "$GODOT"
-          echo "=== 导出 .pck ==="
+          echo "=== Exporting .pck ==="
           "$GODOT" --headless --export-pack "BasicExport" STS2_ShunMod.pck
-          ls -la STS2_ShunMod.pck 2>/dev/null || echo "⚠️ 导出失败"
+          ls -la STS2_ShunMod.pck 2>/dev/null || echo "Export failed"
 
       - name: Package
         run: |
-          # Godot 导出会 rebuild DLL，输出到 .godot/mono/temp/bin/ 下
-          # 优先找 Release，找不到搜 ExportRelease/ExportDebug
           DLL=$(find .godot/mono/temp/bin -name "STS2_ShunMod.dll" -type f 2>/dev/null | head -1)
           if [ -z "$DLL" ]; then
-            echo "❌ 找不到 DLL"
+            echo "DLL not found"
             find . -name "*.dll" -type f 2>/dev/null || true
             exit 1
           fi
@@ -77,11 +73,11 @@ jobs:
           if [ -n "$PCK" ]; then
             cp "$PCK" publish/
           else
-            echo "⚠️ 无 .pck"
+            echo "No .pck"
           fi
           ls -la publish/
           cd publish && zip -r ../STS2_ShunMod.zip .
-          echo "✅ 打包完成: $(ls -lh ../STS2_ShunMod.zip | awk '{print $5}')"
+          echo "Packaged: $(ls -lh ../STS2_ShunMod.zip | awk '{print $5}')"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -89,4 +85,3 @@ jobs:
           name: STS2_ShunMod
           path: STS2_ShunMod.zip
           if-no-files-found: error
-
