@@ -14,5 +14,6 @@ internal static class CompatibilityPatches
     {
         ShadowverseEvolutionPointPatch.Apply(harmony);
         ShadowverseSkinLimitPatch.Apply(harmony);
+        ShadowverseBgLimitPatch.Apply(harmony);
     }
 }
