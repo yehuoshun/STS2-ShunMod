@@ -7,7 +7,7 @@ namespace STS2ShunMod.STS2_ShunModCode.Patches.Cards;
 // ════════════════════════════════ 主 Patch：MaxUpgradeLevel getter ════════════════════════════════
 
 [HarmonyPatch]
-public static class InfiniteUpgrade_MaxUpgrade
+public static class InfiniteUpgradeMaxUpgrade
 {
     private const int UpgradeCap = 99;
 
