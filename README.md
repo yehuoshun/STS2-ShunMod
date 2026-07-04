@@ -43,6 +43,7 @@
 | 名称 | 说明 |
 |---|---|
 | 🔮 影之诗进化点解除 | 影之诗模组进化点从 2→99，取消 AddEvolvePoints 硬上限。纯反射，无依赖。 |
+| 🎨 影之诗皮肤限制解除 | 影之诗模组皮肤启用数从 14→无限，Patch SkinPackManager.SetEnabled。纯反射，无依赖。 |
 
 ---
 
@@ -88,7 +89,8 @@ STS2-ShunMod/
 │   │       └── ContentRegistry.cs  # 扫描 + 注册
 │   └── Patches/
 │       ├── Compatibility/
-│       │   └── ShadowverseEvolutionPointPatch.cs  # 影之诗进化点解除
+│       │   ├── ShadowverseEvolutionPointPatch.cs  # 影之诗进化点解除
+│       │   └── ShadowverseSkinLimitPatch.cs       # 影之诗皮肤限制解除
 │       ├── Cards/
 │       │   └── InfiniteUpgrade.cs        # 无限升级
 │       ├── Combat/
