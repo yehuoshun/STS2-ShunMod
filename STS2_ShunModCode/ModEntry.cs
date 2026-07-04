@@ -4,6 +4,7 @@ using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
 using STS2ShunMod.STS2_ShunModCode.Core;
+using STS2ShunMod.STS2_ShunModCode.Patches.Compatibility;
 using STS2ShunMod.STS2_ShunModCode.Patches.Events;
 
 namespace STS2ShunMod.STS2_ShunModCode;
@@ -65,8 +66,7 @@ public static class ModEntry
         }
 
         // Phase 2: Compatibility patches (reflection-based, no hard dependency)
-        Patches.Compatibility.ShadowverseEvolutionPointPatch.Apply(_harmony);
-        Patches.Compatibility.ShadowverseSkinLimitPatch.Apply(_harmony);
+        CompatibilityPatches.ApplyAll(_harmony);
 
         // Phase 3: Content registration (auto-scan [CardPool] / [RelicPool] / [EventPool])
         ContentRegistry.RegisterAll(Assembly.GetExecutingAssembly());
