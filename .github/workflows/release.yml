@@ -43,7 +43,7 @@ jobs:
       - name: Download game references
         run: |
           mkdir -p deps
-          DEPS_URL="https://github.com/${{ github.repository }}/releases/download/deps"
+          DEPS_URL="https://github.com/${{ github.repository }}/releases/download/0.107.1"
           curl -sL "${DEPS_URL}/sts2.dll" -o deps/sts2.dll
           curl -sL "${DEPS_URL}/0Harmony.dll" -o deps/0Harmony.dll
           ls -la deps/
