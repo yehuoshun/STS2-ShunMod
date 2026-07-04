@@ -64,7 +64,10 @@ public static class ModEntry
                 Log.Error($"[{id}]   → inner: {e.InnerException.GetType().Name}: {e.InnerException.Message}");
         }
 
-        // Phase 2: Content registration (auto-scan [CardPool] / [RelicPool] / [EventPool])
+        // Phase 2: Compatibility patches (reflection-based, no hard dependency)
+        Patches.Compatibility.ShadowverseEvolutionPointPatch.Apply(_harmony);
+
+        // Phase 3: Content registration (auto-scan [CardPool] / [RelicPool] / [EventPool])
         ContentRegistry.RegisterAll(Assembly.GetExecutingAssembly());
 
         Log.Info($"[{id}] Initialization complete");

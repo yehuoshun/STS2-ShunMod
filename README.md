@@ -38,6 +38,12 @@
 | ⚔️ 锻造拉回 | 所有锻造行为自动将非手牌的君王之剑拉回手牌。 |
 | ⚡ 能量保留 | 回合开始时能量不清零，剩余能量累积（冰激凌逻辑）。 |
 
+## 兼容性补丁
+
+| 名称 | 说明 |
+|---|---|
+| 🔮 影之诗进化点解除 | 影之诗模组进化点从 2→99，取消 AddEvolvePoints 硬上限。纯反射，无依赖。 |
+
 ---
 
 ## 事件
@@ -81,6 +87,8 @@ STS2-ShunMod/
 │   │       ├── AssemblyScanner.cs  # 安全类型扫描
 │   │       └── ContentRegistry.cs  # 扫描 + 注册
 │   └── Patches/
+│       ├── Compatibility/
+│       │   └── ShadowverseEvolutionPointPatch.cs  # 影之诗进化点解除
 │       ├── Cards/
 │       │   └── InfiniteUpgrade.cs        # 无限升级
 │       ├── Combat/
