@@ -43,9 +43,10 @@ public static class ShowTotalDamage
             var totalHits = nativeHits * (replays + 1);
             if (totalHits <= 1) return;
 
-            var total = perHit * totalHits;
-            var perHitStr = ((int)perHit).ToString();
-            var totalStr = ((int)total).ToString();
+            var perHitTruncated = (int)perHit;
+            var total = perHitTruncated * totalHits;
+            var perHitStr = perHitTruncated.ToString();
+            var totalStr = total.ToString();
             var lang = SaveManager.Instance.SettingsSave.Language;
             var label = lang == "zhs"
                 ? $"({perHitStr} × {totalHits} = {totalStr} 总伤害)"
