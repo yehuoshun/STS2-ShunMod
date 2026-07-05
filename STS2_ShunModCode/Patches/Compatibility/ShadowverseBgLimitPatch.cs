@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
@@ -12,12 +11,11 @@ namespace STS2ShunMod.STS2_ShunModCode.Patches.Compatibility;
 /// 反编译确认限制在两处：
 ///   1. ScanInstalledPacks（启动加载）：
 ///        bool flag6 = flag5 &amp;&amp; num &gt;= 7;   // 第 8 个起强制禁用
-///   2. SetEnabled（运行时手动开关）：
-///        bool flag3 = BgPackManager.GetEnabledCount() &gt;= 7;
+///   2. SetEnabled（运行时 UI 开关）：
+///        bool flag3 = GetEnabledCount() &gt;= 7;
 ///
-/// 方案：
-///   - ScanInstalledPacks: Transpiler 将 ldc.i4.s 7 替换为 ldc.i4 int.MaxValue
-///   - SetEnabled: Prefix 跳过原方法直接写入 _preferences
+/// 方案：两个方法都上 Transpiler，将 7 替换为 int.MaxValue。
+/// 同时匹配 ldc.i4.s（短格式）和 ldc.i4（长格式），兼容不同 Roslyn 版本。
 /// 纯反射，不引用 shadowverse.dll。
 /// </summary>
 public static class ShadowverseBgLimitPatch
@@ -47,28 +45,29 @@ public static class ShadowverseBgLimitPatch
             Log.Info($"[{ModId}] Shadowverse BgLimit: ScanInstalledPacks cap removed (7→unlimited)");
         }
 
-        // ── Patch 2: SetEnabled Prefix — 运行时手动开关冗余保护 ──
+        // ── Patch 2: SetEnabled Transpiler — GetEnabledCount() >= 7 ──
         var setEnabledMethod = AccessTools.Method(_bgMgrType, "SetEnabled",
             [typeof(string), typeof(bool)]);
         if (setEnabledMethod != null)
         {
             harmony.Patch(setEnabledMethod,
-                prefix: new HarmonyMethod(typeof(ShadowverseBgLimitPatch),
-                    nameof(SetEnabled_Prefix)));
-            Log.Info($"[{ModId}] Shadowverse BgLimit: SetEnabled cap bypass patched");
+                transpiler: new HarmonyMethod(typeof(ShadowverseBgLimitPatch),
+                    nameof(SetEnabled_Transpiler)));
+            Log.Info($"[{ModId}] Shadowverse BgLimit: SetEnabled cap removed (7→unlimited)");
         }
     }
 
     /// <summary>
-    /// Transpiler: 将 ScanInstalledPacks IL 中的 ldc.i4.s 7 替换为 ldc.i4 int.MaxValue。
-    /// ldc.i4.s 7 仅用于 num &gt;= 7 比较，不会误伤其他常量。
+    /// Transpiler: 将 ScanInstalledPacks IL 中的 7 常量替换为 int.MaxValue。
+    /// 同时匹配 ldc.i4.s 7（短格式）和 ldc.i4 7（长格式），
+    /// 因为不同 C# 编译器版本可能生成不同的 IL 指令。
     /// </summary>
     private static IEnumerable<CodeInstruction> ScanInstalledPacks_Transpiler(
         IEnumerable<CodeInstruction> instructions)
     {
         foreach (var inst in instructions)
         {
-            if (inst.opcode == OpCodes.Ldc_I4_S && inst.operand is sbyte sb && sb == 7)
+            if (IsConstant7(inst))
             {
                 inst.opcode = OpCodes.Ldc_I4;
                 inst.operand = int.MaxValue;
@@ -78,21 +77,28 @@ public static class ShadowverseBgLimitPatch
     }
 
     /// <summary>
-    /// SetEnabled Prefix: 启用时跳过原方法直接写入 _preferences。
-    /// 禁用操作仍走原方法（不受限）。
+    /// SetEnabled Transpiler: 运行时 GetEnabledCount() &gt;= 7 也补上。
+    /// UI 开关背景包会走 SetEnabled，双重保障。
     /// </summary>
-    private static bool SetEnabled_Prefix(string packId, bool enabled, ref bool __result)
+    private static IEnumerable<CodeInstruction> SetEnabled_Transpiler(
+        IEnumerable<CodeInstruction> instructions)
     {
-        if (!enabled) return true; // 禁用走原方法
+        foreach (var inst in instructions)
+        {
+            if (IsConstant7(inst))
+            {
+                inst.opcode = OpCodes.Ldc_I4;
+                inst.operand = int.MaxValue;
+            }
+            yield return inst;
+        }
+    }
 
-        var prefsField = _bgMgrType!.GetField("_preferences",
-            BindingFlags.NonPublic | BindingFlags.Static);
-        if (prefsField == null) return true;
-
-        var prefs = (Dictionary<string, bool>)prefsField.GetValue(null)!;
-        prefs[packId] = true;
-        __result = true;
-        return false; // 跳过原方法
+    /// <summary>判断 IL 指令是否为常量 7（短格式或长格式）</summary>
+    private static bool IsConstant7(CodeInstruction inst)
+    {
+        return (inst.opcode == OpCodes.Ldc_I4_S && inst.operand is sbyte sb && sb == 7)
+            || (inst.opcode == OpCodes.Ldc_I4 && inst.operand is int i && i == 7);
     }
 
     private static Type? FindType()

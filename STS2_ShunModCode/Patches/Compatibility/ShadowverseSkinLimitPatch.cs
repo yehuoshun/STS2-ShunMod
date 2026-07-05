@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
@@ -9,13 +8,14 @@ namespace STS2ShunMod.STS2_ShunModCode.Patches.Compatibility;
 /// <summary>
 /// 影之诗模组兼容 — 解除皮肤启用数量限制（14→无限）。
 ///
-/// 反编译分析确认限制在 ScanInstalledPacks（启动时扫描），而非 SetEnabled：
-///   bool flag2 = preferences[packId].Enabled;
-///   bool flag3 = flag2 && num >= 14;   // ← 超过第 14 个直接强制禁用
-///   if (flag3) { flag2 = false; ... }
+/// 反编译确认限制在两处：
+///   1. ScanInstalledPacks（启动时扫描）：
+///        bool flag3 = flag2 &amp;&amp; num &gt;= 14;   // 超过第 14 个直接强制禁用
+///   2. SetEnabled（运行时 UI 开关）：
+///        bool flag3 = GetEnabledCount() &gt;= 14;
 ///
-/// 方案：Transpiler 将 ldc.i4.s 14 替换为 ldc.i4 int.MaxValue。
-/// 保留 SetEnabled prefix 作为运行时手动开关的冗余保护。
+/// 方案：两个方法都上 Transpiler，将 14 替换为 int.MaxValue。
+/// 同时匹配 ldc.i4.s（短格式）和 ldc.i4（长格式），兼容不同 Roslyn 版本。
 /// 纯反射，不引用 shadowverse.dll。
 /// </summary>
 public static class ShadowverseSkinLimitPatch
@@ -45,27 +45,30 @@ public static class ShadowverseSkinLimitPatch
             Log.Info($"[{ModId}] Shadowverse SkinLimit: ScanInstalledPacks cap removed (14→unlimited)");
         }
 
-        // ── Patch 2: SetEnabled Prefix — 运行时冗余保护 ──
-        var setEnabledMethod = AccessTools.Method(_skinMgrType, "SetEnabled");
+        // ── Patch 2: SetEnabled Transpiler — 运行时 GetEnabledCount() >= 14 ──
+        var setEnabledMethod = AccessTools.Method(_skinMgrType, "SetEnabled",
+            [typeof(string), typeof(bool)]);
         if (setEnabledMethod != null)
         {
             harmony.Patch(setEnabledMethod,
-                prefix: new HarmonyMethod(typeof(ShadowverseSkinLimitPatch),
-                    nameof(SetEnabled_Prefix)));
-            Log.Info($"[{ModId}] Shadowverse SkinLimit: SetEnabled cap bypass patched");
+                transpiler: new HarmonyMethod(typeof(ShadowverseSkinLimitPatch),
+                    nameof(SetEnabled_Transpiler)));
+            Log.Info($"[{ModId}] Shadowverse SkinLimit: SetEnabled cap removed (14→unlimited)");
         }
     }
 
     /// <summary>
-    /// Transpiler: 将 ScanInstalledPacks IL 中的 ldc.i4.s 14 替换为 ldc.i4 int.MaxValue。
-    /// ldc.i4.s 14 仅用于 num &gt;= 14 比较（字符串插值的 14 会 box 为 ldc.i4 14），不会误伤。
+    /// Transpiler: 将 ScanInstalledPacks IL 中的 14 常量替换为 int.MaxValue。
+    /// 同时匹配 ldc.i4.s 14（短格式）和 ldc.i4 14（长格式），
+    /// 因为不同 C# 编译器版本可能生成不同的 IL 指令。
+    /// 仅用于 num &gt;= 14 的比较，字符串插值的 14 会经过 box 不会误伤。
     /// </summary>
     private static IEnumerable<CodeInstruction> ScanInstalledPacks_Transpiler(
         IEnumerable<CodeInstruction> instructions)
     {
         foreach (var inst in instructions)
         {
-            if (inst.opcode == OpCodes.Ldc_I4_S && inst.operand is sbyte sb && sb == 14)
+            if (IsConstant14(inst))
             {
                 inst.opcode = OpCodes.Ldc_I4;
                 inst.operand = int.MaxValue;
@@ -75,21 +78,30 @@ public static class ShadowverseSkinLimitPatch
     }
 
     /// <summary>
-    /// SetEnabled Prefix: 启用时跳过原方法直接写入 _preferences。
-    /// 禁用操作仍走原方法。
+    /// Transpiler: 将 SetEnabled IL 中的 GetEnabledCount() &gt;= 14 替换为 int.MaxValue。
+    /// 双重保障：即使 ScanInstalledPacks 的 transpiler 生效后，
+    /// 运行时通过 UI 开关皮肤也会走 SetEnabled 的 GetEnabledCount() &gt;= 14 检查。
+    /// 冗余保护，避免极端情况漏掉。
     /// </summary>
-    private static bool SetEnabled_Prefix(string packId, bool enabled, ref bool __result)
+    private static IEnumerable<CodeInstruction> SetEnabled_Transpiler(
+        IEnumerable<CodeInstruction> instructions)
     {
-        if (!enabled) return true; // 禁用走原方法
+        foreach (var inst in instructions)
+        {
+            if (IsConstant14(inst))
+            {
+                inst.opcode = OpCodes.Ldc_I4;
+                inst.operand = int.MaxValue;
+            }
+            yield return inst;
+        }
+    }
 
-        var prefsField = _skinMgrType!.GetField("_preferences",
-            BindingFlags.NonPublic | BindingFlags.Static);
-        if (prefsField == null) return true;
-
-        var prefs = (Dictionary<string, bool>)prefsField.GetValue(null)!;
-        prefs[packId] = true;
-        __result = true;
-        return false; // 跳过原方法
+    /// <summary>判断 IL 指令是否为常量 14（短格式或长格式）</summary>
+    private static bool IsConstant14(CodeInstruction inst)
+    {
+        return (inst.opcode == OpCodes.Ldc_I4_S && inst.operand is sbyte sb && sb == 14)
+            || (inst.opcode == OpCodes.Ldc_I4 && inst.operand is int i && i == 14);
     }
 
     private static Type? FindType()
