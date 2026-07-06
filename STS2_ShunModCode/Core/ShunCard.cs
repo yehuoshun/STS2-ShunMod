@@ -1,19 +1,12 @@
-using MegaCrit.Sts2.Core.Models;
-
 namespace STS2ShunMod.STS2_ShunModCode.Core;
 
 /// <summary>
-///     ShunMod 卡牌基类 — 自动提供 PortraitPath。
-///     子类只需加 [CardPool] 特性，实现 OnPlay 和升级逻辑。
-///     非无色卡牌可覆写 CardColor 属性。
+///     ShunMod 卡牌路径工具 — 自动生成 PortraitPath。
+///     子类在对应属性中调用即可消除重复样板。
+///     非无色卡牌可传 color 参数。
 /// </summary>
-public abstract class ShunCard : CardModel
+public static class ShunCard
 {
-    protected ShunCard(int baseCost, CardType type, CardRarity rarity, TargetType target)
-        : base(baseCost, type, rarity, target) { }
-
-    /// <summary>卡牌颜色，用于资源路径。默认 colorless。</summary>
-    protected virtual string CardColor => "colorless";
-
-    public override string PortraitPath => ShunModHelper.CardPortraitPath(GetType(), CardColor);
+    public static string PortraitPath<T>(string color = "colorless") where T : class
+        => ShunModHelper.CardPortraitPath(typeof(T), color);
 }

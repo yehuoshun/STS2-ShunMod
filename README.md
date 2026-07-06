@@ -83,8 +83,8 @@ STS2-ShunMod/
 │   │   ├── ContentRegistry.cs          # 扫描 + 注册
 │   │   ├── PoolAttribute.cs            # [CardPool]/[RelicPool]/[EventPool] 特性
 │   │   ├── ShunModHelper.cs            # 资源路径工具
-│   │   ├── ShunRelic.cs                # 遗物基类（自动路径）
-│   │   ├── ShunCard.cs                 # 卡牌基类（自动肖像路径）
+│   │   ├── ShunRelic.cs                # 遗物路径工具（静态泛型 helper）
+│   │   ├── ShunCard.cs                 # 卡牌肖像工具（静态泛型 helper）
 │   │   ├── CompatibilityPatchUtil.cs   # 兼容补丁共享工具（类型查找/单例发现）
 │   │   └── CreatureReflection.cs        # Creature 反射工具（Block/IsPlayer）
 │   └── Patches/

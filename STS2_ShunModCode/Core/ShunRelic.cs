@@ -1,14 +1,12 @@
-using MegaCrit.Sts2.Core.Entities.Relics;
-
 namespace STS2ShunMod.STS2_ShunModCode.Core;
 
 /// <summary>
-///     ShunMod 遗物基类 — 自动提供 PackedIconPath / PackedIconOutlinePath / BigIconPath。
-///     子类只需加 [RelicPool] 特性、覆写 Rarity 和实现效果方法。
+///     ShunMod 遗物路径工具 — 自动生成 PackedIconPath / PackedIconOutlinePath / BigIconPath。
+///     子类在对应属性中调用即可消除重复样板。
 /// </summary>
-public abstract class ShunRelic : RelicModel
+public static class ShunRelic
 {
-    public override string PackedIconPath => ShunModHelper.RelicIconPath(GetType());
-    protected override string PackedIconOutlinePath => ShunModHelper.RelicOutlinePath(GetType());
-    protected override string BigIconPath => ShunModHelper.RelicIconPath(GetType());
+    public static string PackedIconPath<T>() where T : class => ShunModHelper.RelicIconPath(typeof(T));
+    public static string PackedIconOutlinePath<T>() where T : class => ShunModHelper.RelicOutlinePath(typeof(T));
+    public static string BigIconPath<T>() where T : class => ShunModHelper.RelicIconPath(typeof(T));
 }
