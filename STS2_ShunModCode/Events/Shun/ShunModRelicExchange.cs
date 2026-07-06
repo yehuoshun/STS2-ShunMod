@@ -279,12 +279,6 @@ public class ShunModRelicExchange : EventModel
         SetEventState(L10NLookup("pages.INITIAL.description"), BuildOptions());
     }
 
-    // ════════════════════════════════════ RelicHelper 内联（反射移除遗物） ════════════════════════════════════
-
-    private static readonly FieldInfo? RelicsField =
-        typeof(Player).GetField("_relics", BindingFlags.NonPublic | BindingFlags.Instance);
-
-    // Not used in current code since we use RelicCmd.Remove now, but kept for potential internal use
     /// <summary>安全获取遗物 HoverTips，捕获 Pool 缺失导致的异常。</summary>
     private static List<IHoverTip> SafeHoverTips(RelicModel relic)
     {
@@ -298,12 +292,3 @@ public class ShunModRelicExchange : EventModel
             return new List<IHoverTip>();
         }
     }
-
-    public static bool RemoveRelic(Player player, RelicModel relic)
-    {
-        if (RelicsField?.GetValue(player) is not List<RelicModel> list)
-            return false;
-        if (!list.Remove(relic)) return false;
-        return true;
-    }
-}

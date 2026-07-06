@@ -67,45 +67,42 @@
 ```
 STS2-ShunMod/
 ├── STS2_ShunModCode/               # C# 源码
-│   ├── MainFile.cs                 # Mod 入口（Harmony + 自动注册）
+│   ├── ModEntry.cs                 # Mod 入口（Harmony + 自动注册）
 │   ├── Cards/
-│   │   └── ShunCard/
+│   │   └── Shun/
 │   │       └── ShunModSuperApotheosis.cs  # 超级神化卡牌
 │   ├── Relics/
-│   │   └── ShunRelics/
-│   │       ├── ShunModBossTrophy.cs    # 首领奖杯遗物
-│   │       ├── ShunModBossTrophy.cs    # 首领奖杯遗物
-│       ├── ShunModBountifulFrond.cs # 丰饶叶遗物
-│       └── ShunModInfiniteGirya.cs  # 无限壶铃遗物
+│   │   └── Shun/
+│   │       ├── ShunModBossTrophy.cs      # 首领奖杯遗物
+│   │       ├── ShunModBountifulFrond.cs  # 丰饶叶遗物
+│   │       └── ShunModInfiniteGirya.cs   # 无限壶铃遗物
 │   ├── Events/
-│   │   └── ShunEvents/
+│   │   └── Shun/
 │   │       └── ShunModRelicExchange.cs   # 遗物交易所
 │   ├── Core/
-│   │   ├── ShunCard.cs             # 卡牌基类（链式配置）
-│   │   ├── CreatureReflection.cs   # Creature 反射工具
-│   │   ├── RelicHelper.cs          # 遗物反射工具
-│   │   └── Registration/           # 自动注册系统
-│   │       ├── PoolAttribute.cs    # [Pool] 特性
-│   │       ├── AssemblyScanner.cs  # 安全类型扫描
-│   │       └── ContentRegistry.cs  # 扫描 + 注册
+│   │   ├── ContentRegistry.cs      # 扫描 + 注册
+│   │   ├── PoolAttribute.cs        # [CardPool]/[RelicPool]/[EventPool] 特性
+│   │   └── ShunModHelper.cs        # 资源路径工具
 │   └── Patches/
 │       ├── Compatibility/
-│       │   ├── ShadowverseEvolutionPointPatch.cs  # 影之诗进化点解除
-│       │   └── ShadowverseSkinLimitPatch.cs       # 影之诗皮肤限制解除
+│       │   ├── CompatibilityPatches.cs              # 统一入口
+│       │   ├── ShadowverseEvolutionPointPatch.cs   # 影之诗进化点解除
+│       │   ├── ShadowverseSkinLimitPatch.cs        # 影之诗皮肤限制解除
+│       │   └── ShadowverseBgLimitPatch.cs          # 影之诗背景包限制解除
 │       ├── Cards/
 │       │   └── InfiniteUpgrade.cs        # 无限升级
 │       ├── Combat/
-│       │   ├── BlockRetentionPatch.cs  # 格挡保留
-│       │   ├── EnergyRetentionPatch.cs  # 能量保留（冰激凌）
-│       │   ├── HardenedShellPatch.cs   # 硬化外壳修复
-│       │   ├── ShowTotalDamage.cs      # 显示总伤害
+│       │   ├── BlockRetentionPatch.cs    # 格挡保留
+│       │   ├── EnergyRetentionPatch.cs   # 能量保留（冰激凌）
+│       │   ├── HardenedShellPatch.cs     # 硬化外壳修复
+│       │   ├── ShowTotalDamage.cs        # 显示总伤害
 │       │   └── ForgePullBladesToHandPatch.cs  # 锻造拉回君王之剑
 │       ├── Events/
-│       │   ├── ShunModEventRegistry.cs  # 事件注册
-│       │   └── EventPortraitRedirectPatch.cs  # 事件肖像重定向
+│       │   └── ShunModEventRegistry.cs   # 事件注册 + 注入补丁
 ├── STS2_ShunMod/                   # Godot 资源
 │   ├── cards/                      # 卡牌美术
 │   └── localization/               # 本地化（中/英）
+├── STS2_ShunMod.json               # 模组清单
 ├── project.godot                   # Godot 4.5 项目
 └── STS2_ShunMod.csproj             # .NET 9.0
 ```
