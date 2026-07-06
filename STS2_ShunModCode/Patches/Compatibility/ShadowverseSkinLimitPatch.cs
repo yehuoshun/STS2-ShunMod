@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
@@ -8,21 +7,19 @@ using STS2ShunMod.STS2_ShunModCode.Core;
 namespace STS2ShunMod.STS2_ShunModCode.Patches.Compatibility;
 
 /// <summary>
-/// 影之诗模组兼容 — 解除皮肤启用数量限制（旧版 14 / 新版 140 → 无限）。
+/// 影之诗模组兼容 — 解除皮肤启用数量限制（14 → 无限）。
 ///
 /// 反编译确认限制在两处：
-///   1. ScanInstalledPacks（启动时扫描）：num &gt;= 140 时强制禁用后续皮肤
-///   2. SetEnabled（运行时 UI 开关）：GetEnabledCount() &gt;= 140 时拒绝启用
+///   1. ScanInstalledPacks（启动时扫描）：num &gt;= 14 时强制禁用后续皮肤
+///   2. SetEnabled（运行时 UI 开关）：GetEnabledCount() &gt;= 14 时拒绝启用
 ///
-/// 方案：
-///   ScanInstalledPacks → Transpiler: 将常量 14 和 140 都替换为 int.MaxValue
-///     （新版已改为 140，旧版为 14，两条都要匹配）
-///   SetEnabled → Prefix: 跳过原方法，始终允许启用/禁用，__result=true
-///     （Prefix 比 Transpiler 更可靠，不依赖 IL 布局）
+/// 方案：两个方法都用 Transpiler，替换 IL 中所有常量 14 为 int.MaxValue。
+///   覆盖：比较操作（num &gt;= 14 / GetEnabledCount() &gt;= 14）+
+///         AppendFormatted&lt;int&gt;(14) 日志字符串。
+///   日志文字变成 "超出上限 2147483647"，不影响功能。
 ///
-/// 纯反射，不引用 shadowverse.dll。
-/// 修复：SetEnabled 改用 Prefix 避免 Transpiler 对 GetEnabledCount() >= 14 匹配失败的风险。
-/// 2026-07-06: IsConstant14(14) → IsSkinLimitConstant(14||140)，新版已升级到 140 上限。
+/// 纯 IL 操作，不需要反射访问 _preferences 字段，不依赖任何字段类型兼容性。
+/// v2.0: SetEnabled 从 Prefix 改为 Transpiler，消除反射静默失败的隐患。
 /// </summary>
 public static class ShadowverseSkinLimitPatch
 {
@@ -30,44 +27,36 @@ public static class ShadowverseSkinLimitPatch
     private const string TargetNs = "shadowverse.Scripts";
     private const string TargetType = "SkinPackManager";
 
-    private const string PrefsFieldName = "_preferences";
-
-    private static Type? _skinMgrType;
-    private static FieldInfo? _prefsField;
-
     public static void Apply(Harmony harmony)
     {
-        _skinMgrType = FindType();
-        if (_skinMgrType == null)
+        var skinMgrType = FindType();
+        if (skinMgrType == null)
         {
             Log.Info($"[{ModId}] Shadowverse SkinPackManager not detected, skipping skin limit patch");
             return;
         }
 
-        // 发现 _preferences 字段（用于 Prefix 修改）
-        _prefsField = _skinMgrType.GetField(PrefsFieldName,
-            BindingFlags.NonPublic | BindingFlags.Static);
-
-        // ── Patch 1: ScanInstalledPacks Transpiler — 14/140 → int.MaxValue ──
-        var scanMethod = AccessTools.Method(_skinMgrType, "ScanInstalledPacks");
+        // ── Patch 1: ScanInstalledPacks Transpiler — 14 → int.MaxValue ──
+        var scanMethod = AccessTools.Method(skinMgrType, "ScanInstalledPacks");
         if (scanMethod != null)
         {
             harmony.Patch(scanMethod,
                 transpiler: new HarmonyMethod(typeof(ShadowverseSkinLimitPatch),
                     nameof(ScanInstalledPacks_Transpiler)));
-            Log.Info($"[{ModId}] Shadowverse SkinLimit: ScanInstalledPacks cap removed (14/140→unlimited)");
+            Log.Info($"[{ModId}] Shadowverse SkinLimit: ScanInstalledPacks cap removed (Transpiler, unlimited)");
         }
 
-        // ── Patch 2: SetEnabled Prefix — 跳过原方法 — 直接返回 true ──
-        // Prefix 比 Transpiler 更可靠：不依赖 GetEnabledCount() >= 14 的 IL 布局
-        var setEnabledMethod = AccessTools.Method(_skinMgrType, "SetEnabled",
+        // ── Patch 2: SetEnabled Transpiler — 14 → int.MaxValue ──
+        // Transpiler 比 Prefix 更可靠：不需要反射 _preferences 字段，
+        // 直接把 >= 14 改成 >= int.MaxValue，原方法流程不变。
+        var setEnabledMethod = AccessTools.Method(skinMgrType, "SetEnabled",
             [typeof(string), typeof(bool)]);
         if (setEnabledMethod != null)
         {
             harmony.Patch(setEnabledMethod,
-                prefix: new HarmonyMethod(typeof(ShadowverseSkinLimitPatch),
-                    nameof(SetEnabled_Prefix)));
-            Log.Info($"[{ModId}] Shadowverse SkinLimit: SetEnabled cap removed (Prefix, unlimited)");
+                transpiler: new HarmonyMethod(typeof(ShadowverseSkinLimitPatch),
+                    nameof(SetEnabled_Transpiler)));
+            Log.Info($"[{ModId}] Shadowverse SkinLimit: SetEnabled cap removed (Transpiler, unlimited)");
         }
     }
 
@@ -76,18 +65,43 @@ public static class ShadowverseSkinLimitPatch
     // ═══════════════════════════════════════════════
 
     /// <summary>
-    /// Transpiler: 将 ScanInstalledPacks IL 中的皮肤上限常量（14 或 140）替换为 int.MaxValue。
-    /// 覆盖：num &gt;= 14/140 的比较 + AppendFormatted&lt;int&gt;(14/140) 的日志字符串。
-    /// 日志中的常量被替换后仅影响显示文字（"超出上限 2147483647"），不影响功能。
-    /// 同时匹配 ldc.i4.s（短格式 ≤127）和 ldc.i4（长格式）。
-    /// 新版已从 14 升到 140，两条都要处理。
+    /// 替换 ScanInstalledPacks IL 中所有常量 14 为 int.MaxValue。
+    /// 覆盖：num &gt;= 14 的比较 + AppendFormatted&lt;int&gt;(14) 的日志字符串。
     /// </summary>
     private static IEnumerable<CodeInstruction> ScanInstalledPacks_Transpiler(
         IEnumerable<CodeInstruction> instructions)
     {
+        return ReplaceLimitConstant(instructions);
+    }
+
+    // ═══════════════════════════════════════════════
+    //  SetEnabled — Transpiler
+    // ═══════════════════════════════════════════════
+
+    /// <summary>
+    /// 替换 SetEnabled IL 中所有常量 14 为 int.MaxValue。
+    /// 覆盖：GetEnabledCount() &gt;= 14 的比较 + AppendFormatted&lt;int&gt;(14) 的日志字符串。
+    /// </summary>
+    private static IEnumerable<CodeInstruction> SetEnabled_Transpiler(
+        IEnumerable<CodeInstruction> instructions)
+    {
+        return ReplaceLimitConstant(instructions);
+    }
+
+    // ═══════════════════════════════════════════════
+    //  核心替换逻辑
+    // ═══════════════════════════════════════════════
+
+    /// <summary>
+    /// 遍历 IL 指令，将所有值为 14 的常量压入指令替换为 int.MaxValue。
+    /// 匹配 ldc.i4.s 14（短格式，≤127 的常量）和 ldc.i4 14（长格式）。
+    /// </summary>
+    private static IEnumerable<CodeInstruction> ReplaceLimitConstant(
+        IEnumerable<CodeInstruction> instructions)
+    {
         foreach (var inst in instructions)
         {
-            if (IsSkinLimitConstant(inst))
+            if (IsConstant14(inst))
             {
                 inst.opcode = OpCodes.Ldc_I4;
                 inst.operand = int.MaxValue;
@@ -96,53 +110,13 @@ public static class ShadowverseSkinLimitPatch
         }
     }
 
-    // ═══════════════════════════════════════════════
-    //  SetEnabled — Prefix（跳过原方法）
-    // ═══════════════════════════════════════════════
-
     /// <summary>
-    /// Prefix: 跳过 SkinPackManager.SetEnabled 原方法。
-    /// 原方法会检查 GetEnabledCount() &gt;= 14 并拒绝启用。
-    /// 我们直接修改 _preferences 字典并返回 true。
+    /// 判断 IL 指令是否为常量 14（ldc.i4.s 14 或 ldc.i4 14）。
     /// </summary>
-    private static bool SetEnabled_Prefix(string packId, bool enabled, ref bool __result)
-    {
-        try
-        {
-            if (_prefsField != null)
-            {
-                var prefs = _prefsField.GetValue(null) as IDictionary<string, bool>;
-                if (prefs != null)
-                {
-                    prefs[packId] = enabled;
-                    __result = true;
-                    return false; // 跳过原方法
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Log.Warn($"[{ModId}] SetEnabled Prefix failed, falling through to original: {ex.Message}");
-        }
-
-        // 如果反射失败，走原方法（带限制）
-        // __result 未设置，由原方法决定
-        return true;
-    }
-
-    // ═══════════════════════════════════════════════
-    //  辅助
-    // ═══════════════════════════════════════════════
-
-    /// <summary>
-    /// 判断 IL 指令是否为皮肤上限常量（14 或 140）。
-    /// 同时处理短格式 ldc.i4.s（14, ≤127）和长格式 ldc.i4（140, &gt;127）。
-    /// 双常量匹配：旧版 14 + 新版 140，确保不同版本都生效。
-    /// </summary>
-    private static bool IsSkinLimitConstant(CodeInstruction inst)
+    private static bool IsConstant14(CodeInstruction inst)
     {
         return (inst.opcode == OpCodes.Ldc_I4_S && inst.operand is sbyte sb && sb == 14)
-            || (inst.opcode == OpCodes.Ldc_I4 && inst.operand is int i && (i == 14 || i == 140));
+            || (inst.opcode == OpCodes.Ldc_I4 && inst.operand is int i && i == 14);
     }
 
     private static Type? FindType() => CompatibilityPatchUtil.FindType(TargetNs, TargetType);
