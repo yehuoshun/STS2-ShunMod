@@ -111,12 +111,14 @@ public static class ShadowverseSkinLimitPatch
     }
 
     /// <summary>
-    /// 判断 IL 指令是否为常量 14（ldc.i4.s 14 或 ldc.i4 14）。
+    /// 判断 IL 指令是否为皮肤上限常量（14 或 140）。
+    /// 影之诗模组旧版为 14，新版可能已改为 140（用户实测），两条都匹配。
+    /// ldc.i4.s 短格式（≤127）→ 14；ldc.i4 长格式（&gt;127）→ 140。
     /// </summary>
     private static bool IsConstant14(CodeInstruction inst)
     {
         return (inst.opcode == OpCodes.Ldc_I4_S && inst.operand is sbyte sb && sb == 14)
-            || (inst.opcode == OpCodes.Ldc_I4 && inst.operand is int i && i == 14);
+            || (inst.opcode == OpCodes.Ldc_I4 && inst.operand is int i && (i == 14 || i == 140));
     }
 
     private static Type? FindType() => CompatibilityPatchUtil.FindType(TargetNs, TargetType);
