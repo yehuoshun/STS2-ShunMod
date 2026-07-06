@@ -101,19 +101,18 @@ public class ShunModRelicExchange : EventModel
         return "?";
     }
 
+    /// <summary>
+    ///     给 StringVar 的字符串属性赋值。
+    ///     不猜属性名：直接反射查出 StringVar 上唯一可写的 string 属性，
+    ///     避免游戏 API 改名后静默失败。
+    /// </summary>
     private void SetStr(string key, string val)
     {
         if (!DynamicVars.TryGetValue(key, out var dv) || dv is not StringVar sv) return;
-        foreach (var name in new[] { "String", "StringValue", "BaseValue", "Value" })
-        {
-            var prop = sv.GetType().GetProperty(name,
-                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            if (prop?.CanWrite == true && prop.PropertyType == typeof(string))
-            {
-                prop.SetValue(sv, val);
-                return;
-            }
-        }
+        var prop = sv.GetType()
+            .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+            .FirstOrDefault(p => p.CanWrite && p.PropertyType == typeof(string));
+        prop?.SetValue(sv, val);
     }
 
     private void Roll()
