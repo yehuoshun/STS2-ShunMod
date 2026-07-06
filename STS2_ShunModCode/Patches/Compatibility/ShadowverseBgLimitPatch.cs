@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
@@ -10,13 +11,15 @@ namespace STS2ShunMod.STS2_ShunModCode.Patches.Compatibility;
 /// 影之诗模组兼容 — 解除背景包启用数量限制（7→无限）。
 ///
 /// 反编译确认限制在两处：
-///   1. ScanInstalledPacks（启动加载）：
-///        bool flag6 = flag5 &amp;&amp; num &gt;= 7;   // 第 8 个起强制禁用
-///   2. SetEnabled（运行时 UI 开关）：
-///        bool flag3 = GetEnabledCount() &gt;= 7;
+///   1. ScanInstalledPacks（启动加载）：num &gt;= 7 时强制禁用后续背景包
+///   2. SetEnabled（运行时 UI 开关）：GetEnabledCount() &gt;= 7 时拒绝启用
 ///
-/// 方案：两个方法都上 Transpiler，将 7 替换为 int.MaxValue。
-/// 同时匹配 ldc.i4.s（短格式）和 ldc.i4（长格式），兼容不同 Roslyn 版本。
+/// 方案：
+///   ScanInstalledPacks → Transpiler: 7 替换为 int.MaxValue
+///     （覆盖 num &gt;= 7 的比较 + 日志中的 AppendFormatted&lt;int&gt;(7)）
+///   SetEnabled → Prefix: 跳过原方法，始终允许启用/禁用，__result=true
+///     （Prefix 更可靠，不依赖 IL 布局）
+///
 /// 纯反射，不引用 shadowverse.dll。
 /// </summary>
 public static class ShadowverseBgLimitPatch
@@ -25,7 +28,10 @@ public static class ShadowverseBgLimitPatch
     private const string TargetNs = "shadowverse.Scripts.UI";
     private const string TargetType = "BgPackManager";
 
+    private const string PrefsFieldName = "_preferences";
+
     private static Type? _bgMgrType;
+    private static FieldInfo? _prefsField;
 
     public static void Apply(Harmony harmony)
     {
@@ -35,6 +41,10 @@ public static class ShadowverseBgLimitPatch
             Log.Info($"[{ModId}] Shadowverse BgPackManager not detected, skipping background limit patch");
             return;
         }
+
+        // 发现 _preferences 字段
+        _prefsField = _bgMgrType.GetField(PrefsFieldName,
+            BindingFlags.NonPublic | BindingFlags.Static);
 
         // ── Patch 1: ScanInstalledPacks Transpiler — 7 → int.MaxValue ──
         var scanMethod = AccessTools.Method(_bgMgrType, "ScanInstalledPacks");
@@ -46,22 +56,25 @@ public static class ShadowverseBgLimitPatch
             Log.Info($"[{ModId}] Shadowverse BgLimit: ScanInstalledPacks cap removed (7→unlimited)");
         }
 
-        // ── Patch 2: SetEnabled Transpiler — GetEnabledCount() >= 7 ──
+        // ── Patch 2: SetEnabled Prefix — 跳过原方法 ──
         var setEnabledMethod = AccessTools.Method(_bgMgrType, "SetEnabled",
             [typeof(string), typeof(bool)]);
         if (setEnabledMethod != null)
         {
             harmony.Patch(setEnabledMethod,
-                transpiler: new HarmonyMethod(typeof(ShadowverseBgLimitPatch),
-                    nameof(SetEnabled_Transpiler)));
-            Log.Info($"[{ModId}] Shadowverse BgLimit: SetEnabled cap removed (7→unlimited)");
+                prefix: new HarmonyMethod(typeof(ShadowverseBgLimitPatch),
+                    nameof(SetEnabled_Prefix)));
+            Log.Info($"[{ModId}] Shadowverse BgLimit: SetEnabled cap removed (Prefix, unlimited)");
         }
     }
 
+    // ═══════════════════════════════════════════════
+    //  ScanInstalledPacks — Transpiler
+    // ═══════════════════════════════════════════════
+
     /// <summary>
     /// Transpiler: 将 ScanInstalledPacks IL 中的 7 常量替换为 int.MaxValue。
-    /// 同时匹配 ldc.i4.s 7（短格式）和 ldc.i4 7（长格式），
-    /// 因为不同 C# 编译器版本可能生成不同的 IL 指令。
+    /// 同时匹配 ldc.i4.s 7（短格式）和 ldc.i4 7（长格式）。
     /// </summary>
     private static IEnumerable<CodeInstruction> ScanInstalledPacks_Transpiler(
         IEnumerable<CodeInstruction> instructions)
@@ -77,23 +90,40 @@ public static class ShadowverseBgLimitPatch
         }
     }
 
+    // ═══════════════════════════════════════════════
+    //  SetEnabled — Prefix（跳过原方法）
+    // ═══════════════════════════════════════════════
+
     /// <summary>
-    /// SetEnabled Transpiler: 运行时 GetEnabledCount() &gt;= 7 也补上。
-    /// UI 开关背景包会走 SetEnabled，双重保障。
+    /// Prefix: 跳过 BgPackManager.SetEnabled 原方法。
+    /// 直接修改 _preferences 字典并返回 true。
     /// </summary>
-    private static IEnumerable<CodeInstruction> SetEnabled_Transpiler(
-        IEnumerable<CodeInstruction> instructions)
+    private static bool SetEnabled_Prefix(string packId, bool enabled, ref bool __result)
     {
-        foreach (var inst in instructions)
+        try
         {
-            if (IsConstant7(inst))
+            if (_prefsField != null)
             {
-                inst.opcode = OpCodes.Ldc_I4;
-                inst.operand = int.MaxValue;
+                var prefs = _prefsField.GetValue(null) as IDictionary<string, bool>;
+                if (prefs != null)
+                {
+                    prefs[packId] = enabled;
+                    __result = true;
+                    return false; // 跳过原方法
+                }
             }
-            yield return inst;
         }
+        catch (Exception ex)
+        {
+            Log.Warn($"[{ModId}] BgLimit SetEnabled Prefix failed, falling through to original: {ex.Message}");
+        }
+
+        return true; // 走原方法（带限制）
     }
+
+    // ═══════════════════════════════════════════════
+    //  辅助
+    // ═══════════════════════════════════════════════
 
     /// <summary>判断 IL 指令是否为常量 7（短格式或长格式）</summary>
     private static bool IsConstant7(CodeInstruction inst)
