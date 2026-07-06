@@ -4,6 +4,7 @@ using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Logging;
+using STS2ShunMod.STS2_ShunModCode.Core;
 
 namespace STS2ShunMod.STS2_ShunModCode.Patches.Compatibility;
 
@@ -273,7 +274,7 @@ public static class ShadowverseEvolutionPointPatch
 
         try
         {
-            var target = _pointsField.IsStatic ? null : FindManagerInstance();
+            var target = _pointsField.IsStatic ? null : CompatibilityPatchUtil.FindManagerInstance(_evoMgrType!);
             if (target == null && !_pointsField.IsStatic) return;
 
             var points = _pointsField.GetValue(target);
@@ -316,14 +317,14 @@ public static class ShadowverseEvolutionPointPatch
                     BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
                 if (backingField != null)
                 {
-                    var target = backingField.IsStatic ? null : FindManagerInstance();
+                    var target = backingField.IsStatic ? null : CompatibilityPatchUtil.FindManagerInstance(_evoMgrType!);
                     var del = backingField.GetValue(target) as Delegate;
                     del?.DynamicInvoke();
                 }
             }
             else if (_pointsChangedEvent is FieldInfo fld)
             {
-                var target = fld.IsStatic ? null : FindManagerInstance();
+                var target = fld.IsStatic ? null : CompatibilityPatchUtil.FindManagerInstance(_evoMgrType!);
                 var del = fld.GetValue(target) as Delegate;
                 del?.DynamicInvoke();
             }
@@ -334,38 +335,5 @@ public static class ShadowverseEvolutionPointPatch
         }
     }
 
-    /// <summary>
-    /// 如果 _points 是 instance 字段，尝试获取 EvolutionPointManager 的单例。
-    /// 常见模式：static Instance 属性或私有静态 _instance 字段。
-    /// </summary>
-    private static object? FindManagerInstance()
-    {
-        if (_evoMgrType == null) return null;
-
-        // 尝试 Instance 属性
-        var prop = _evoMgrType.GetProperty("Instance",
-            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-        if (prop != null)
-            return prop.GetValue(null);
-
-        // 尝试 _instance 字段
-        var fld = _evoMgrType.GetField("_instance",
-            BindingFlags.NonPublic | BindingFlags.Static)
-            ?? _evoMgrType.GetField("instance",
-                BindingFlags.NonPublic | BindingFlags.Static);
-        if (fld != null)
-            return fld.GetValue(null);
-
-        return null;
-    }
-
-    private static Type? FindType()
-    {
-        foreach (var asm in System.AppDomain.CurrentDomain.GetAssemblies())
-        {
-            var t = asm.GetType($"{TargetNs}.{TargetType}");
-            if (t != null) return t;
-        }
-        return null;
-    }
+    private static Type? FindType() => CompatibilityPatchUtil.FindType(TargetNs, TargetType);
 }

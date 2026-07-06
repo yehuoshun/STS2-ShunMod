@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Reflection.Emit;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
+using STS2ShunMod.STS2_ShunModCode.Core;
 
 namespace STS2ShunMod.STS2_ShunModCode.Patches.Compatibility;
 
@@ -104,13 +105,5 @@ public static class ShadowverseSkinLimitPatch
             || (inst.opcode == OpCodes.Ldc_I4 && inst.operand is int i && i == 14);
     }
 
-    private static Type? FindType()
-    {
-        foreach (var asm in System.AppDomain.CurrentDomain.GetAssemblies())
-        {
-            var t = asm.GetType($"{TargetNs}.{TargetType}");
-            if (t != null) return t;
-        }
-        return null;
-    }
+    private static Type? FindType() => CompatibilityPatchUtil.FindType(TargetNs, TargetType);
 }

@@ -80,9 +80,12 @@ STS2-ShunMod/
 │   │   └── Shun/
 │   │       └── ShunModRelicExchange.cs   # 遗物交易所
 │   ├── Core/
-│   │   ├── ContentRegistry.cs      # 扫描 + 注册
-│   │   ├── PoolAttribute.cs        # [CardPool]/[RelicPool]/[EventPool] 特性
-│   │   └── ShunModHelper.cs        # 资源路径工具
+│   │   ├── ContentRegistry.cs          # 扫描 + 注册
+│   │   ├── PoolAttribute.cs            # [CardPool]/[RelicPool]/[EventPool] 特性
+│   │   ├── ShunModHelper.cs            # 资源路径工具
+│   │   ├── ShunRelic.cs                # 遗物基类（自动路径）
+│   │   ├── ShunCard.cs                 # 卡牌基类（自动肖像路径）
+│   │   └── CompatibilityPatchUtil.cs   # 兼容补丁共享工具（类型查找/单例发现）
 │   └── Patches/
 │       ├── Compatibility/
 │       │   ├── CompatibilityPatches.cs              # 统一入口

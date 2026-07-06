@@ -13,11 +13,9 @@ namespace STS2ShunMod.STS2_ShunModCode.Cards.Shun;
 ///     2费→1费（升级后），技能，稀有，无色。
 /// </summary>
 [CardPool(typeof(ColorlessCardPool))]
-public class ShunModSuperApotheosis : CardModel
+public class ShunModSuperApotheosis : ShunCard
 {
     public ShunModSuperApotheosis() : base(2, CardType.Skill, CardRarity.Rare, TargetType.Self) { }
-
-    public override string PortraitPath => ShunModHelper.CardPortraitPath(GetType());
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {

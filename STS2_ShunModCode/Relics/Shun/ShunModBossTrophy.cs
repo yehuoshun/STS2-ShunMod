@@ -14,13 +14,9 @@ namespace STS2ShunMod.STS2_ShunModCode.Relics.Shun;
 ///     首领奖杯 — 击杀 Boss 后最大生命值 +25%。
 /// </summary>
 [RelicPool(typeof(SharedRelicPool))]
-public sealed class ShunModBossTrophy : RelicModel
+public sealed class ShunModBossTrophy : ShunRelic
 {
     public override RelicRarity Rarity => RelicRarity.Rare;
-
-    public override string PackedIconPath => ShunModHelper.RelicIconPath(GetType());
-    protected override string PackedIconOutlinePath => ShunModHelper.RelicOutlinePath(GetType());
-    protected override string BigIconPath => ShunModHelper.RelicIconPath(GetType());
 
     public override bool TryModifyRewards(Player player, List<Reward> rewards, AbstractRoom? room)
     {
