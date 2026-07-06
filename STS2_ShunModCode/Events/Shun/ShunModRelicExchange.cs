@@ -143,24 +143,19 @@ public class ShunModRelicExchange : EventModel
         if (pool.Count == 0) return;
 
         var rolled = new HashSet<string>();
-        for (var i = 0; i < 2 && rolled.Count < pool.Count; i++)
+        _enchantA = PickUnique(pool, rolled);
+        _enchantB = PickUnique(pool, rolled);
+    }
+
+    /// <summary>从附魔池中随机选一个未被 roll 过的附魔</summary>
+    private static EnchantmentModel? PickUnique(List<EnchantmentModel> pool, HashSet<string> rolled)
+    {
+        for (var tries = 0; tries < pool.Count * 2; tries++)
         {
             var e = pool[Rnd.Next(pool.Count)];
-            var key = e.GetType().FullName!;
-            var tries = 0;
-            while (rolled.Contains(key) && tries < 10)
-            {
-                e = pool[Rnd.Next(pool.Count)];
-                key = e.GetType().FullName!;
-                tries++;
-            }
-            rolled.Add(key);
-            switch (i)
-            {
-                case 0: _enchantA = e; break;
-                case 1: _enchantB = e; break;
-            }
+            if (rolled.Add(e.GetType().FullName!)) return e;
         }
+        return null;
     }
 
     private static List<EnchantmentModel> GetEnchantPool()
