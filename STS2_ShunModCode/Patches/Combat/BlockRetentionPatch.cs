@@ -1,6 +1,6 @@
-using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
+using STS2ShunMod.STS2_ShunModCode.Core;
 namespace STS2ShunMod.STS2_ShunModCode.Patches.Combat;
 
 // ════════════════════════════════════════════════════════
@@ -9,29 +9,6 @@ namespace STS2ShunMod.STS2_ShunModCode.Patches.Combat;
 // PrepareForNextTurn：回合结束前记下格挡 → 结束后原样恢复
 // 仅对玩家生物生效，不影响怪物
 // ════════════════════════════════════════════════════════
-
-/// <summary>
-///     Creature 反射工具 — 访问 Creature 类型内部属性（Block / IsPlayer）。
-///     内联自原 Core/CreatureReflection.cs。
-/// </summary>
-internal static class CreatureReflection
-{
-    public static readonly Type? CreatureType =
-        AccessTools.TypeByName("MegaCrit.Sts2.Core.Entities.Creatures.Creature");
-
-    public static readonly PropertyInfo? BlockProperty =
-        AccessTools.Property(CreatureType, "Block");
-
-    public static readonly PropertyInfo? IsPlayerProperty =
-        AccessTools.Property(CreatureType, "IsPlayer");
-
-    public static int GetBlock(object creature) => BlockProperty?.GetValue(creature) as int? ?? 0;
-
-    public static void SetBlock(object creature, int value) => BlockProperty?.SetValue(creature, value);
-
-    public static bool IsPlayer(object? creature) =>
-        creature != null && IsPlayerProperty?.GetValue(creature) is true;
-}
 
 /// <summary>
 ///     Patch 1: 拦截 ClearBlock()，玩家生物不执行清格挡，直接跳过。
