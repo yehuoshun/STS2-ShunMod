@@ -195,7 +195,7 @@ public static class ShadowverseEvolutionPointPatch
         {
             try
             {
-                var target = f.IsStatic ? null : FindManagerInstance();
+                var target = f.IsStatic ? null : CompatibilityPatchUtil.FindManagerInstance(_evoMgrType!);
                 if (target != null || f.IsStatic)
                 {
                     f.SetValue(target, false);
