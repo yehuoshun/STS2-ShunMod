@@ -6,12 +6,15 @@ using STS2ShunMod.STS2_ShunModCode.Patches.Events;
 namespace STS2ShunMod.STS2_ShunModCode.Core;
 
 /// <summary>
-///     内容自动注册器 — 扫描 [CardPool] / [RelicPool] / [EventPool] 属性并注册。
+///     内容自动注册器 — 扫描 [CardPool] / [RelicPool] / [EventPool] 特性并注册。
+///     约定：一个类只能标记一种 Pool 类型，多重标记会被跳过只注册第一个。
 /// </summary>
 public static class ContentRegistry
 {
     /// <summary>
-    ///     扫描程序集中所有非抽象类，按属性类型分别注册。
+    ///     扫描程序集中所有非抽象类，按特性类型分别注册。
+    ///     用 else if 链而非 continue 是为了显式表达三者互斥：
+    ///     如果哪天有人误写双重属性，第二个会被静默跳过而不是意外执行。
     /// </summary>
     public static void RegisterAll(Assembly assembly)
     {
@@ -23,29 +26,29 @@ public static class ContentRegistry
         {
             if (type.IsAbstract) continue;
 
-            // 卡牌
             var cardAttr = type.GetCustomAttribute<CardPoolAttribute>();
             if (cardAttr != null)
             {
+                // 卡牌：直接注册到指定卡池（如 ColorlessCardPool）
                 ModHelper.AddModelToPool(cardAttr.PoolType, type);
                 cardCount++;
-                continue;
             }
-
-            // 遗物
-            var relicAttr = type.GetCustomAttribute<RelicPoolAttribute>();
-            if (relicAttr != null)
+            else
             {
-                ModHelper.AddModelToPool(relicAttr.PoolType, type);
-                relicCount++;
-                continue;
-            }
-
-            // 事件（收集类型，由 ShunModEventRegistry 在 ModelDb.Init 时实例化）
-            if (type.GetCustomAttribute<EventPoolAttribute>() != null)
-            {
-                ShunModEventRegistry.EventTypes.Add(type);
-                eventCount++;
+                var relicAttr = type.GetCustomAttribute<RelicPoolAttribute>();
+                if (relicAttr != null)
+                {
+                    // 遗物：直接注册到指定遗物池（如 SharedRelicPool）
+                    ModHelper.AddModelToPool(relicAttr.PoolType, type);
+                    relicCount++;
+                }
+                else if (type.GetCustomAttribute<EventPoolAttribute>() != null)
+                {
+                    // 事件：仅收集类型，真正实例化推迟到 ModelDb.Init SafeInit
+                    // （见 ShunModEventRegistry / ModelDbInit_SafePatch）
+                    ShunModEventRegistry.EventTypes.Add(type);
+                    eventCount++;
+                }
             }
         }
 
