@@ -1,4 +1,3 @@
-using System.Reflection;
 using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Players;
@@ -104,11 +103,11 @@ public class ShunModRelicExchange : EventModel
 
     private void SyncVars()
     {
-        SetStr("LOSE_RELIC_1", Resolve(_loseRelic1?.Title));
-        SetStr("GAIN_RELIC", Resolve(_gainRelic?.Title));
-        SetStr("LOSE_RELIC_2", Resolve(_loseRelic2?.Title));
-        SetStr("ENCHANT_NAME_A", Resolve(_enchantA?.Title));
-        SetStr("ENCHANT_NAME_B", Resolve(_enchantB?.Title));
+        DynamicVarHelper.SetStrValue(DynamicVars, "LOSE_RELIC_1", Resolve(_loseRelic1?.Title));
+        DynamicVarHelper.SetStrValue(DynamicVars, "GAIN_RELIC", Resolve(_gainRelic?.Title));
+        DynamicVarHelper.SetStrValue(DynamicVars, "LOSE_RELIC_2", Resolve(_loseRelic2?.Title));
+        DynamicVarHelper.SetStrValue(DynamicVars, "ENCHANT_NAME_A", Resolve(_enchantA?.Title));
+        DynamicVarHelper.SetStrValue(DynamicVars, "ENCHANT_NAME_B", Resolve(_enchantB?.Title));
     }
 
     private static string Resolve(LocString? loc)
@@ -124,19 +123,7 @@ public class ShunModRelicExchange : EventModel
         }
     }
 
-    /// <summary>
-    ///     给 StringVar 的字符串属性赋值。
-    ///     不猜属性名：直接反射查出 StringVar 上唯一可写的 string 属性，
-    ///     避免游戏 API 改名后静默失败。
-    /// </summary>
-    private void SetStr(string key, string val)
-    {
-        if (!DynamicVars.TryGetValue(key, out var dv) || dv is not StringVar sv) return;
-        var prop = sv.GetType()
-            .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-            .FirstOrDefault(p => p.CanWrite && p.PropertyType == typeof(string));
-        prop?.SetValue(sv, val);
-    }
+
 
     private void Roll()
     {
