@@ -3,7 +3,7 @@
 > 杀戮尖塔 2 原生模组
 > Shun's Slay the Spire 2 Mod — Native
 
-[![Version](https://img.shields.io/badge/version-v0.0.0-blue)](https://github.com/yehuoshun/STS2-ShunMod)
+[![Version](https://img.shields.io/github/v/release/yehuoshun/STS2-ShunMod)](https://github.com/yehuoshun/STS2-ShunMod/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Framework](https://img.shields.io/badge/framework-.NET%209.0-purple)](STS2_ShunMod.csproj)
 
