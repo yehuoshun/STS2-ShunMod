@@ -13,13 +13,9 @@ namespace STS2ShunMod.STS2_ShunModCode.Relics.Shun;
 ///     丰饶叶 — 每个回合开始时，用随机药水填满所有空药水栏位。
 /// </summary>
 [RelicPool(typeof(SharedRelicPool))]
-public sealed class ShunModBountifulFrond : RelicModel
+public sealed class ShunModBountifulFrond : ShunRelicModel<ShunModBountifulFrond>
 {
     public override RelicRarity Rarity => RelicRarity.Rare;
-
-    public override string PackedIconPath => ShunRelic.PackedIconPath<ShunModBountifulFrond>();
-    protected override string PackedIconOutlinePath => ShunRelic.PackedIconOutlinePath<ShunModBountifulFrond>();
-    protected override string BigIconPath => ShunRelic.BigIconPath<ShunModBountifulFrond>();
 
     public override async Task AfterPlayerTurnStart(PlayerChoiceContext choiceContext, Player player)
     {

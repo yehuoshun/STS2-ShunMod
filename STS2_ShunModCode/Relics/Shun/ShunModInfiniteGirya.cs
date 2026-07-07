@@ -24,7 +24,7 @@ namespace STS2ShunMod.STS2_ShunModCode.Relics.Shun;
 ///     无限壶铃 — 基于原版 Girya，去掉 maxLifts=3 限制，休息处无限举重获得力量。
 /// </summary>
 [RelicPool(typeof(SharedRelicPool))]
-public sealed class ShunModInfiniteGirya : RelicModel
+public sealed class ShunModInfiniteGirya : ShunRelicModel<ShunModInfiniteGirya>
 {
     private int _timesLifted;
 
@@ -33,10 +33,6 @@ public sealed class ShunModInfiniteGirya : RelicModel
     public override bool ShowCounter => true;
 
     public override int DisplayAmount => TimesLifted;
-
-    public override string PackedIconPath => ShunRelic.PackedIconPath<ShunModInfiniteGirya>();
-    protected override string PackedIconOutlinePath => ShunRelic.PackedIconOutlinePath<ShunModInfiniteGirya>();
-    protected override string BigIconPath => ShunRelic.BigIconPath<ShunModInfiniteGirya>();
 
     [SavedProperty]
     public int TimesLifted
