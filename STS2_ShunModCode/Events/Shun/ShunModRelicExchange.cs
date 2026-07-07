@@ -22,8 +22,9 @@ namespace STS2ShunMod.STS2_ShunModCode.Events.Shun;
 [EventPool]
 public class ShunModRelicExchange : EventModel
 {
-    private static readonly Random Rnd = new();
-
+    // 使用 Random.Shared 而非 new Random() 实例。
+    // .NET 9 的 Random.Shared 是线程安全的共享 RNG 实例，
+    // 避免每个类/模块创建独立的 Random 对象。
     private static readonly HashSet<RelicRarity> TradeableRarities =
         [RelicRarity.Common, RelicRarity.Uncommon, RelicRarity.Rare, RelicRarity.Shop, RelicRarity.None];
 
@@ -164,15 +165,16 @@ public class ShunModRelicExchange : EventModel
         _enchantB = PickUnique(pool, rolled);
     }
 
-    /// <summary>从附魔池中随机选一个未被 roll 过的附魔</summary>
+    /// <summary>
+    ///     从附魔池中随机选一个未被 roll 过的附魔。
+    ///     一次遍历过滤出所有候选，然后随机选一个，避免重试循环的概率性失败。
+    /// </summary>
     private static EnchantmentModel? PickUnique(List<EnchantmentModel> pool, HashSet<string> rolled)
     {
-        for (var tries = 0; tries < pool.Count * 2; tries++)
-        {
-            var e = pool[Rnd.Next(pool.Count)];
-            if (rolled.Add(e.GetType().FullName!)) return e;
-        }
-        return null;
+        var available = pool.Where(e => rolled.Add(e.GetType().FullName!)).ToArray();
+        return available.Length > 0
+            ? available[Random.Shared.Next(available.Length)]
+            : null;
     }
 
     /// <summary>获取附魔池（首次访问时执行一次全量扫描，之后返回缓存结果）。</summary>
@@ -204,7 +206,7 @@ public class ShunModRelicExchange : EventModel
                 .OfType<RelicModel>();
         }
         var pool = all.Where(IsTradeable).ToList();
-        return pool.Count > 0 ? pool[Rnd.Next(pool.Count)] : null;
+        return pool.Count > 0 ? pool[Random.Shared.Next(pool.Count)] : null;
     }
 
     private static bool IsTradeable(RelicModel r) => TradeableRarities.Contains(r.Rarity);
@@ -212,7 +214,7 @@ public class ShunModRelicExchange : EventModel
     private static RelicModel PreferCirclet(List<RelicModel> available)
     {
         var circlet = available.FirstOrDefault(r => r.GetType().Name == "Circlet");
-        return circlet ?? available[Rnd.Next(available.Count)];
+        return circlet ?? available[Random.Shared.Next(available.Count)];
     }
 
     private IReadOnlyList<EventOption> BuildOptions()
