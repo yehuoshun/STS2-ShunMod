@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.HoverTips;
+using MegaCrit.Sts2.Core.Models;
 
 namespace STS2ShunMod.STS2_ShunModCode.Core;
 
