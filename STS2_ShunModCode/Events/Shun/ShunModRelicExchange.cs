@@ -114,9 +114,14 @@ public class ShunModRelicExchange : EventModel
     private static string Resolve(LocString? loc)
     {
         if (loc == null) return "?";
-        try { return loc.GetRawText(); } catch (LocException) { }
-        try { return loc.GetFormattedText(); } catch (LocException) { }
-        return "?";
+        try
+        {
+            return loc.GetRawText() ?? loc.GetFormattedText() ?? "?";
+        }
+        catch (LocException)
+        {
+            return "?";
+        }
     }
 
     /// <summary>
