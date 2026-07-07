@@ -128,10 +128,10 @@ public class ShunModRelicExchange : ShunEventModel
             _loseRelic2 = PreferCirclet(remaining);
         }
 
-        RollTwoEnchants();
+        RollEnchants();
     }
 
-    private void RollTwoEnchants()
+    private void RollEnchants()
     {
         var pool = GetEnchantPool();
         if (pool.Count == 0) return;
@@ -143,14 +143,23 @@ public class ShunModRelicExchange : ShunEventModel
 
     /// <summary>
     ///     从附魔池中随机选一个未被 roll 过的附魔。
-    ///     先过滤出所有候选，再随机选一个，选中后标记已选 — 过滤和副作用互不干扰。
+    ///     蓄水池抽样（Reservoir Sampling），单遍遍历 + 零数组分配。
+    ///     对每个未选过的附魔，以 1/count 概率替换当前选中项，
+    ///     保证每个候选被选中的概率均等。
     /// </summary>
     private static EnchantmentModel? PickUnique(List<EnchantmentModel> pool, HashSet<string> rolled)
     {
-        var available = pool.Where(e => !rolled.Contains(e.GetType().FullName!)).ToArray();
-        if (available.Length == 0) return null;
-        var chosen = available[Random.Shared.Next(available.Length)];
-        rolled.Add(chosen.GetType().FullName!);
+        var chosen = default(EnchantmentModel);
+        var count = 0;
+        foreach (var e in pool)
+        {
+            if (rolled.Contains(e.GetType().FullName!)) continue;
+            count++;
+            if (Random.Shared.Next(count) == 0)
+                chosen = e;
+        }
+        if (count == 0) return null;
+        rolled.Add(chosen!.GetType().FullName!);
         return chosen;
     }
 
