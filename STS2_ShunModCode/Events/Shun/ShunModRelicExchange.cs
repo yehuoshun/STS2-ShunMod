@@ -9,7 +9,6 @@ using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Runs;
-using MegaCrit.Sts2.Core.Helpers;
 using Godot;
 using STS2ShunMod.STS2_ShunModCode.Core;
 
@@ -75,14 +74,7 @@ public class ShunModRelicExchange : EventModel
     // ════════════════════════════════════ 背景图 ════════════════════════════════════
 
     public override IEnumerable<string> GetAssetPaths(IRunState runState)
-    {
-        var paths = base.GetAssetPaths(runState).ToList();
-        var defaultPath = ImageHelper.GetImagePath($"events/{Id.Entry.ToLowerInvariant()}.png");
-        var i = paths.IndexOf(defaultPath);
-        if (i >= 0) paths[i] = EventImagePath;
-        else paths.Add(EventImagePath);
-        return paths;
-    }
+        => ShunModHelper.ReplaceEventImage(base.GetAssetPaths(runState), typeof(ShunModRelicExchange), Id.Entry);
 
     // ════════════════════════════════════ CalculateVars ════════════════════════════════════
 

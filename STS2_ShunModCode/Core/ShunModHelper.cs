@@ -1,7 +1,9 @@
 using System.Text.RegularExpressions;
 using MegaCrit.Sts2.Core.Entities.Relics;
+using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Runs;
 
 namespace STS2ShunMod.STS2_ShunModCode.Core;
 
@@ -93,5 +95,28 @@ public static class ShunModHelper
         {
             return new List<IHoverTip>();
         }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  事件图片路径替换
+    // ═══════════════════════════════════════════════════════════
+    //
+    //  为什么需要这个 helper：
+    //  每个自定义事件都要在 GetAssetPaths() 中重复 7 行样板代码——
+    //  base.GetAssetPaths → 找默认路径 → 替换成 mod 路径。
+    //  提取后新事件一行调用即可，避免重复复制。
+    //
+    // ═══════════════════════════════════════════════════════════
+    /// <summary>替换事件默认图片路径为 mod 自定义图片路径。</summary>
+    public static IEnumerable<string> ReplaceEventImage(
+        IEnumerable<string> paths, Type eventType, string entry)
+    {
+        var list = paths.ToList();
+        var defaultPath = ImageHelper.GetImagePath($"events/{entry.ToLowerInvariant()}.png");
+        var modPath = EventImagePath(eventType);
+        var i = list.IndexOf(defaultPath);
+        if (i >= 0) list[i] = modPath;
+        else list.Add(modPath);
+        return list;
     }
 }

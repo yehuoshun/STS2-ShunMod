@@ -94,19 +94,52 @@ internal static class ModelDbInit_SafePatch
 
 /// <summary>
 ///     劫持 EventModel.CreateInitialPortrait，将默认图片路径替换为 mod 资源路径。
+///     使用 Dictionary 缓存纹理引用，避免每次创建肖像都查文件系统。
 /// </summary>
 [HarmonyPatch(typeof(EventModel), "CreateInitialPortrait")]
 [HarmonyPriority(Priority.First)]
 public static class EventPortraitRedirectPatch
 {
+    // ═══════════════════════════════════════════════════════════
+    //  肖像纹理缓存
+    // ═══════════════════════════════════════════════════════════
+    //
+    //  缓存设计原因：
+    //  ResourceLoader.Exists 和 ResourceLoader.Load 都是文件系统 IO 操作。
+    //  事件类型在运行时不会变化，每个事件类型最多查一次就知道有没有自定义图片。
+    //  Dictionary 缓存后，后续创建肖像直接返回缓存的 Texture2D 或 null，
+    //  避免重复 IO。
+    //
+    //  注意：Dictionary 不是线程安全的，但 EventModel 创建在游戏主线程，
+    //  不存在并发访问问题。
+    //
+    // ═══════════════════════════════════════════════════════════
+    private static readonly Dictionary<Type, Texture2D?> CachedPortraits = new();
+
     [HarmonyPrefix]
     private static bool Prefix(EventModel __instance, ref Texture2D? __result)
     {
-        var modPath = ShunModHelper.EventImagePath(__instance.GetType());
+        var type = __instance.GetType();
 
-        if (!ResourceLoader.Exists(modPath)) return true;
+        // 如果缓存命中，直接返回缓存结果
+        if (CachedPortraits.TryGetValue(type, out var cached))
+        {
+            __result = cached;
+            return cached != null ? false : true;
+        }
 
-        __result = ResourceLoader.Load<Texture2D>(modPath);
-        return false;
+        var modPath = ShunModHelper.EventImagePath(type);
+
+        if (ResourceLoader.Exists(modPath))
+        {
+            var tex = ResourceLoader.Load<Texture2D>(modPath);
+            CachedPortraits[type] = tex;
+            __result = tex;
+            return false;
+        }
+
+        // 没有自定义图片，缓存 null 避免重复检查
+        CachedPortraits[type] = null;
+        return true;
     }
 }
