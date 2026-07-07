@@ -18,14 +18,16 @@ namespace STS2ShunMod.STS2_ShunModCode.Core;
 /// </summary>
 public static class DynamicVarHelper
 {
+    /// <summary>StringVar.Value 属性信息缓存（类初始化时解析一次，后续直接 SetValue）。</summary>
+    private static readonly PropertyInfo? StringValueProp = typeof(StringVar)
+        .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+        .FirstOrDefault(p => p.CanWrite && p.PropertyType == typeof(string));
+
     /// <summary>给 DynamicVars 中指定 key 的 StringVar 设置字符串值。</summary>
     public static void SetStrValue(dynamic dynamicVars, string key, string val)
     {
         if (!dynamicVars.TryGetValue(key, out object? dv)) return;
         if (dv is not StringVar sv) return;
-        var prop = sv.GetType()
-            .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-            .FirstOrDefault(p => p.CanWrite && p.PropertyType == typeof(string));
-        prop?.SetValue(sv, val);
+        StringValueProp?.SetValue(sv, val);
     }
 }
