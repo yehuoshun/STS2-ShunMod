@@ -175,9 +175,9 @@ public class ShunModRelicExchange : ShunEventModel
     {
         IEnumerable<RelicModel> all;
         try { all = ModelDb.AllRelics; }
-        catch (Exception ex) when (ex is InvalidOperationException or KeyNotFoundException)
+        catch (InvalidOperationException ex)
         {
-            Log.Warn($"[STS2_ShunMod] ModelDb.AllRelics 不可用，回退到反射枚举: {ex.GetType().Name}: {ex.Message}");
+            Log.Warn($"[STS2_ShunMod] ModelDb.AllRelics 不可用（池初始化顺序问题），回退到反射枚举: {ex.Message}");
             all = typeof(RelicModel).Assembly.GetTypes()
                 .Where(t => !t.IsAbstract && typeof(RelicModel).IsAssignableFrom(t))
                 .Select(t => ModelDb.GetByIdOrNull<RelicModel>(ModelDb.GetId(t)))
