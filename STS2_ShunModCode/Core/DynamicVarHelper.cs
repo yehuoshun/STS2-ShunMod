@@ -21,7 +21,8 @@ public static class DynamicVarHelper
     /// <summary>给 DynamicVars 中指定 key 的 StringVar 设置字符串值。</summary>
     public static void SetStrValue(dynamic dynamicVars, string key, string val)
     {
-        if (!dynamicVars.TryGetValue(key, out object? dv) || dv is not StringVar sv) return;
+        if (!dynamicVars.TryGetValue(key, out object? dv)) return;
+        if (dv is not StringVar sv) return;
         var prop = sv.GetType()
             .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
             .FirstOrDefault(p => p.CanWrite && p.PropertyType == typeof(string));
