@@ -13,6 +13,9 @@ namespace STS2ShunMod.STS2_ShunModCode.Core;
 public static class ShunModHelper
 {
     private const string ResourceRoot = "res://STS2_ShunMod/images";
+    private const string CardsPath = "cards/shunCards";
+    private const string RelicsPath = "relics/shunRelics";
+    private const string EventsPath = "events/shunEvents";
 
     // ═══════════════════════════════════════════════════════════
     //  PascalCase → snake_case 编译正则
@@ -46,27 +49,27 @@ public static class ShunModHelper
     /// <summary>卡牌肖像路径：cards/shunCards/colorless/{snake}.png</summary>
     public static string CardPortraitPath(Type type, string color = "colorless")
     {
-        return $"{ResourceRoot}/cards/shunCards/{color}/{ClassToSnakeCase(type)}.png";
+        return $"{ResourceRoot}/{CardsPath}/{color}/{ClassToSnakeCase(type)}.png";
     }
 
     /// <summary>遗物图标路径：relics/shunRelics/{snake}/{snake}.png</summary>
     public static string RelicIconPath(Type type)
     {
         var name = ClassToSnakeCase(type);
-        return $"{ResourceRoot}/relics/shunRelics/{name}/{name}.png";
+        return $"{ResourceRoot}/{RelicsPath}/{name}/{name}.png";
     }
 
     /// <summary>遗物描边图标路径：relics/shunRelics/{snake}/{snake}_outline.png</summary>
     public static string RelicOutlinePath(Type type)
     {
         var name = ClassToSnakeCase(type);
-        return $"{ResourceRoot}/relics/shunRelics/{name}/{name}_outline.png";
+        return $"{ResourceRoot}/{RelicsPath}/{name}/{name}_outline.png";
     }
 
     /// <summary>事件图片路径：events/shunEvents/{snake}.png</summary>
     public static string EventImagePath(Type type)
     {
-        return $"{ResourceRoot}/events/shunEvents/{ClassToSnakeCase(type)}.png";
+        return $"{ResourceRoot}/{EventsPath}/{ClassToSnakeCase(type)}.png";
     }
 
     // ═══════════════════════════════════════════════════════════
