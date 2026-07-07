@@ -148,14 +148,15 @@ public class ShunModRelicExchange : EventModel
 
     /// <summary>
     ///     从附魔池中随机选一个未被 roll 过的附魔。
-    ///     一次遍历过滤出所有候选，然后随机选一个，避免重试循环的概率性失败。
+    ///     先过滤出所有候选，再随机选一个，选中后标记已选 — 过滤和副作用互不干扰。
     /// </summary>
     private static EnchantmentModel? PickUnique(List<EnchantmentModel> pool, HashSet<string> rolled)
     {
-        var available = pool.Where(e => rolled.Add(e.GetType().FullName!)).ToArray();
-        return available.Length > 0
-            ? available[Random.Shared.Next(available.Length)]
-            : null;
+        var available = pool.Where(e => !rolled.Contains(e.GetType().FullName!)).ToArray();
+        if (available.Length == 0) return null;
+        var chosen = available[Random.Shared.Next(available.Length)];
+        rolled.Add(chosen.GetType().FullName!);
+        return chosen;
     }
 
     /// <summary>获取附魔池（首次访问时执行一次全量扫描，之后返回缓存结果）。</summary>
