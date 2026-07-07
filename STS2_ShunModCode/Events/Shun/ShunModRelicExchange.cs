@@ -6,6 +6,7 @@ using MegaCrit.Sts2.Core.Events;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
+using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Runs;
 using MegaCrit.Sts2.Core.Helpers;
@@ -190,8 +191,9 @@ public class ShunModRelicExchange : EventModel
     {
         IEnumerable<RelicModel> all;
         try { all = ModelDb.AllRelics; }
-        catch
+        catch (Exception ex) when (ex is InvalidOperationException or KeyNotFoundException)
         {
+            Log.Warn($"[STS2_ShunMod] ModelDb.AllRelics 不可用，回退到反射枚举: {ex.GetType().Name}: {ex.Message}");
             all = typeof(RelicModel).Assembly.GetTypes()
                 .Where(t => !t.IsAbstract && typeof(RelicModel).IsAssignableFrom(t))
                 .Select(t => ModelDb.GetByIdOrNull<RelicModel>(ModelDb.GetId(t)))
