@@ -35,6 +35,23 @@ public class ShunModRelicExchange : EventModel
         "Swift", "Glam", "Clone", "Goopy", "Momentum", "Inky",
     };
 
+    // ═══════════════════════════════════════════════════════════
+    //  附魔池缓存（延迟初始化）
+    // ═══════════════════════════════════════════════════════════
+    //
+    //  缓存设计原因：
+    //  1. 附魔池在游戏启动后不会再变化——类型集固定，ModelDb 初始化后稳定。
+    //  2. 玩家可在交易所反复交易，每次 Roll() → RollThreeEnchants() →
+    //     GetEnchantPool() 都会触发全量反射扫描（GetTypes + 遍历 + 查 ModelDb），
+    //     用 Lazy 缓存后首次访问只扫一次，后续直接返回缓存的 List。
+    //  3. 不用普通 static new List() 的原因是 ModelDb.GetByIdOrNull 在
+    //     ModEntry.Initialize 完成前不可用。Lazy<T> 的默认模式
+    //     (ExecutionAndPublication) 保证线程安全 + 延迟到首次访问才执行。
+    //
+    // ═══════════════════════════════════════════════════════════
+    private static readonly Lazy<List<EnchantmentModel>> EnchantPoolCache =
+        new(InitEnchantPool);
+
     private static string EventImagePath => ShunModHelper.EventImagePath(typeof(ShunModRelicExchange));
 
     // ── 状态 ──
@@ -158,7 +175,11 @@ public class ShunModRelicExchange : EventModel
         return null;
     }
 
-    private static List<EnchantmentModel> GetEnchantPool()
+    /// <summary>获取附魔池（首次访问时执行一次全量扫描，之后返回缓存结果）。</summary>
+    private static List<EnchantmentModel> GetEnchantPool() => EnchantPoolCache.Value;
+
+    /// <summary>首次初始化附魔池：全量反射扫描过滤 + ModelDb 解析。</summary>
+    private static List<EnchantmentModel> InitEnchantPool()
     {
         return typeof(EnchantmentModel).Assembly.GetTypes()
             .Where(t => !t.IsAbstract && typeof(EnchantmentModel).IsAssignableFrom(t)
@@ -167,7 +188,8 @@ public class ShunModRelicExchange : EventModel
                                       && t.Name != "MockFreeEnchantment"
                                       && !EnchantBlacklist.Contains(t.Name))
             .Select(t => ModelDb.GetByIdOrNull<EnchantmentModel>(ModelDb.GetId(t)))
-            .OfType<EnchantmentModel>().ToList();
+            .OfType<EnchantmentModel>()
+            .ToList();
     }
 
     private static RelicModel? RollRandomRelic()
