@@ -13,17 +13,22 @@ namespace STS2ShunMod.STS2_ShunModCode.Patches.Events;
 /// </summary>
 public static class ShunModEventRegistry
 {
-    /// <summary>EventModel 子类类型集合，由 ContentRegistry 和 ModelDbInit_SafePatch 消费。</summary>
-    public static readonly HashSet<Type> EventTypes = [];
+    private static readonly HashSet<Type> _eventTypes = [];
+    /// <summary>EventModel 子类类型集合（只读，写入通过 AddEventType）。</summary>
+    public static IReadOnlySet<Type> EventTypes => _eventTypes;
 
-    /// <summary>共享事件列表（非 act 限定），由 AllSharedEventsPatch 注入。</summary>
-    public static readonly List<EventModel> SharedEvents = [];
+    private static readonly List<EventModel> _sharedEvents = [];
+    /// <summary>共享事件列表（只读，写入通过 Register）。</summary>
+    public static IReadOnlyList<EventModel> SharedEvents => _sharedEvents;
+
+    /// <summary>添加事件类型。由 ContentRegistry 扫描 [EventPool] 时调用。</summary>
+    public static void AddEventType(Type type) => _eventTypes.Add(type);
 
     /// <summary>注册事件实例。若非 act 限定事件，加入 SharedEvents。</summary>
     public static void Register(EventModel eventModel)
     {
-        if (!SharedEvents.Contains(eventModel))
-            SharedEvents.Add(eventModel);
+        if (!_sharedEvents.Contains(eventModel))
+            _sharedEvents.Add(eventModel);
     }
 }
 
@@ -77,15 +82,12 @@ internal static class ModelDbInit_SafePatch
 
         Log.Info($"[STS2_ShunMod] SafeInit: {allTypes.Length} 类型, {created} 新建, {contentById.Count - created} 已存在, {ShunModEventRegistry.EventTypes.Count} 事件类型");
 
-        // 注册 ShunMod 事件
+        // 注册 ShunMod 事件（Register 内部含去重检查）
         foreach (var type in ShunModEventRegistry.EventTypes)
         {
             var id = ModelDb.GetId(type);
-            if (contentById.TryGetValue(id, out var model) && model is EventModel em
-                && !ShunModEventRegistry.SharedEvents.Contains(em))
-            {
+            if (contentById.TryGetValue(id, out var model) && model is EventModel em)
                 ShunModEventRegistry.Register(em);
-            }
         }
 
         return false; // 跳过原版 Init

@@ -46,7 +46,7 @@ public static class ContentRegistry
                 {
                     // 事件：仅收集类型，真正实例化推迟到 ModelDb.Init SafeInit
                     // （见 ShunModEventRegistry / ModelDbInit_SafePatch）
-                    ShunModEventRegistry.EventTypes.Add(type);
+                    ShunModEventRegistry.AddEventType(type);
                     eventCount++;
                 }
             }
