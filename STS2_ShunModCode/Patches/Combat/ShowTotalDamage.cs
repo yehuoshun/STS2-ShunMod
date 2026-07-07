@@ -14,7 +14,27 @@ namespace STS2ShunMod.STS2_ShunModCode.Patches.Combat;
 [HarmonyPatch]
 public static class ShowTotalDamage
 {
-    private static MethodBase? TargetMethod()
+    // ═══════════════════════════════════════════════════════════
+    //  目标方法缓存
+    // ═══════════════════════════════════════════════════════════
+    //
+    //  缓存设计原因：
+    //  1. CardModel.GetDescriptionForPile 是游戏内建私有方法，
+    //     程序集加载后不会变化。Harmony 的 TargetMethod() 在
+    //     Prepare 阶段会被调用，每次调用都全量反射扫描 CardModel
+    //     的所有方法（GetMethods + FirstOrDefault）是纯浪费。
+    //  2. C# static readonly 字段由 CLR 在类型加载时保证只初始化一次，
+    //     隐式线程安全，不需要额外同步。
+    //  3. 如果游戏移除了这个方法（BuildTargetMethod 返回 null），
+    //     TargetMethodCache 就是 null，Prepare 检测跳过补丁，
+    //     行为与原版本完全一致。
+    //
+    // ═══════════════════════════════════════════════════════════
+    private static readonly MethodBase? TargetMethodCache = BuildTargetMethod();
+
+    private static MethodBase? TargetMethod() => TargetMethodCache;
+
+    private static MethodBase? BuildTargetMethod()
     {
         return typeof(CardModel).GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
             .FirstOrDefault(m => m.Name == "GetDescriptionForPile" && m.GetParameters().Length == 3);
@@ -22,7 +42,7 @@ public static class ShowTotalDamage
 
     private static bool Prepare()
     {
-        if (TargetMethod() == null)
+        if (TargetMethodCache == null)
         {
             Log.Error("[总伤害] 未找到 CardModel.GetDescriptionForPile 私有方法，补丁跳过！");
             return false;
