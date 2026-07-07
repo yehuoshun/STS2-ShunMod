@@ -12,8 +12,10 @@ internal static class CompatibilityPatches
     /// <summary>安装所有已注册的第三方模组兼容补丁。</summary>
     public static void ApplyAll(Harmony harmony)
     {
+        // ── 在此追加新的兼容补丁 ──
         ShadowverseSkinLimitPatch.Apply(harmony);
         ShadowverseBgLimitPatch.Apply(harmony);
         ShadowverseEvolutionPointPatch.Apply(harmony);
+        // ──────────────────────────
     }
 }

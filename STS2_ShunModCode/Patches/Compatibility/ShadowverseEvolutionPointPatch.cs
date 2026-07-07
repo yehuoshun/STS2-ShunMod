@@ -32,12 +32,8 @@ public static class ShadowverseEvolutionPointPatch
 
     public static void Apply(Harmony harmony)
     {
-        _evoMgrType = FindType();
-        if (_evoMgrType == null)
-        {
-            Log.Info($"[{ModId}] Shadowverse mod not detected, skipping EvolutionPoint patch");
-            return;
-        }
+        _evoMgrType = CompatibilityPatchUtil.FindPatchType(ModId, TargetNs, TargetType);
+        if (_evoMgrType == null) return;
 
         // 发现 _points 字段（尝试 static，再尝试 instance）
         DiscoverFields();
@@ -335,5 +331,4 @@ public static class ShadowverseEvolutionPointPatch
         }
     }
 
-    private static Type? FindType() => CompatibilityPatchUtil.FindType(TargetNs, TargetType);
 }

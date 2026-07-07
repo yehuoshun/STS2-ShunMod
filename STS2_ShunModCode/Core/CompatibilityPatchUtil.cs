@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Reflection;
+using MegaCrit.Sts2.Core.Logging;
 
 namespace STS2ShunMod.STS2_ShunModCode.Core;
 
@@ -23,6 +24,15 @@ internal static class CompatibilityPatchUtil
     //
     // ═══════════════════════════════════════════════════════════
     private static readonly ConcurrentDictionary<Type, object?> ManagerInstanceCache = new();
+
+    /// <summary>查找兼容模组类型，未找到时自动日志跳过。</summary>
+    public static Type? FindPatchType(string modId, string ns, string typeName)
+    {
+        var type = FindType(ns, typeName);
+        if (type == null)
+            Log.Info($"[{modId}] {typeName} not detected, skipping patch");
+        return type;
+    }
 
     /// <summary>跨程序集查找类型</summary>
     public static Type? FindType(string ns, string typeName)

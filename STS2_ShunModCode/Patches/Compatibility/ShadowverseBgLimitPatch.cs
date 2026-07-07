@@ -35,12 +35,8 @@ public static class ShadowverseBgLimitPatch
 
     public static void Apply(Harmony harmony)
     {
-        _bgMgrType = FindType();
-        if (_bgMgrType == null)
-        {
-            Log.Info($"[{ModId}] Shadowverse BgPackManager not detected, skipping background limit patch");
-            return;
-        }
+        _bgMgrType = CompatibilityPatchUtil.FindPatchType(ModId, TargetNs, TargetType);
+        if (_bgMgrType == null) return;
 
         // 发现 _preferences 字段
         _prefsField = _bgMgrType.GetField(PrefsFieldName,
@@ -132,5 +128,5 @@ public static class ShadowverseBgLimitPatch
             || (inst.opcode == OpCodes.Ldc_I4 && inst.operand is int i && i == 7);
     }
 
-    private static Type? FindType() => CompatibilityPatchUtil.FindType(TargetNs, TargetType);
+
 }
