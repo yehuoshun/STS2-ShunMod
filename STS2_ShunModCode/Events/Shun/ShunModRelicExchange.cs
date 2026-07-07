@@ -18,7 +18,7 @@ namespace STS2ShunMod.STS2_ShunModCode.Events.Shun;
 ///     ①随机遗物换随机遗物 ②随机遗物换卡牌附魔 ③扣5HP刷新 ④退出
 /// </summary>
 [EventPool]
-public class ShunModRelicExchange : EventModel
+public class ShunModRelicExchange : ShunEventModel
 {
     // ═══════════════════════════════════════════════════════════
     //  静态数据
@@ -41,8 +41,6 @@ public class ShunModRelicExchange : EventModel
     private static readonly Lazy<List<EnchantmentModel>> EnchantPoolCache =
         new(InitEnchantPool);
 
-    private static string EventImagePath => ShunModHelper.EventImagePath(typeof(ShunModRelicExchange));
-
     // ═══════════════════════════════════════════════════════════
     //  实例状态
     // ═══════════════════════════════════════════════════════════
@@ -54,7 +52,7 @@ public class ShunModRelicExchange : EventModel
     private EnchantmentModel? _enchantB;
 
     // ═══════════════════════════════════════════════════════════
-    //  DynamicVars & 资源路径
+    //  DynamicVars
     // ═══════════════════════════════════════════════════════════
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
@@ -64,9 +62,6 @@ public class ShunModRelicExchange : EventModel
         new StringVar("ENCHANT_NAME_A"),
         new StringVar("ENCHANT_NAME_B"),
     ];
-
-    public override IEnumerable<string> GetAssetPaths(IRunState runState)
-        => ShunModHelper.ReplaceEventImage(base.GetAssetPaths(runState), typeof(ShunModRelicExchange), Id.Entry);
 
     // ═══════════════════════════════════════════════════════════
     //  事件生命周期
