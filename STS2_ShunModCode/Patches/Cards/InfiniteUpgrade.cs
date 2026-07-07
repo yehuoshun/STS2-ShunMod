@@ -11,17 +11,41 @@ public static class InfiniteUpgradeMaxUpgrade
 {
     private const int UpgradeCap = 99;
 
-    private static IEnumerable<MethodBase> TargetMethods()
+    // ═══════════════════════════════════════════════════════════
+    //  目标 Getter 缓存
+    // ═══════════════════════════════════════════════════════════
+    //
+    //  缓存设计原因：
+    //  1. 这个补丁需要 patch 基类 + 所有覆写了 MaxUpgradeLevel
+    //     的 CardModel 子类。原版游戏有 200+ 卡牌类型，用
+    //     TargetMethods() 每次产出都遍历 GetTypes() + 反射查
+    //     每个子类的属性 getter，开销巨大。
+    //  2. CardModel 子类集在程序集加载后不会变化，只扫一次
+    //     就够了。static readonly 由 CLR 类型初始化器保证
+    //     只执行一次，隐式线程安全。
+    //  3. Harmony 内部对 TargetMethods() 返回的 IEnumerable
+    //     只迭代一次，用 List<MethodBase> 替代无影响。
+    //
+    // ═══════════════════════════════════════════════════════════
+    private static readonly List<MethodBase> TargetGetterCache = BuildTargetGetters();
+
+    private static IEnumerable<MethodBase> TargetMethods() => TargetGetterCache;
+
+    private static List<MethodBase> BuildTargetGetters()
     {
+        var getters = new List<MethodBase>();
+
         var baseGetter = AccessTools.PropertyGetter(typeof(CardModel), nameof(CardModel.MaxUpgradeLevel));
-        if (baseGetter != null) yield return baseGetter;
+        if (baseGetter != null) getters.Add(baseGetter);
 
         foreach (var type in typeof(CardModel).Assembly.GetTypes())
         {
             if (type.IsAbstract || !typeof(CardModel).IsAssignableFrom(type)) continue;
             var getter = AccessTools.PropertyGetter(type, nameof(CardModel.MaxUpgradeLevel));
-            if (getter != null && getter.DeclaringType == type) yield return getter;
+            if (getter != null && getter.DeclaringType == type) getters.Add(getter);
         }
+
+        return getters;
     }
 
     [HarmonyPostfix]
