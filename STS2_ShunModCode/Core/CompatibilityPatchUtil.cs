@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Reflection;
 
 namespace STS2ShunMod.STS2_ShunModCode.Core;
@@ -7,6 +8,22 @@ namespace STS2ShunMod.STS2_ShunModCode.Core;
 /// </summary>
 internal static class CompatibilityPatchUtil
 {
+    // ═══════════════════════════════════════════════════════════
+    //  Manager 实例缓存
+    // ═══════════════════════════════════════════════════════════
+    //
+    //  缓存设计原因：
+    //  ShadowverseEvolutionPointPatch 在 Initialize_Postfix、
+    //  ResetAllBoolFlags、FirePointsChanged 中多次调用
+    //  FindManagerInstance(_evoMgrType)，每次调用都反射查
+    //  Instance 属性 → _instance 字段 → instance 字段。
+    //  管理器实例在游戏启动后不会变化，缓存后后续直接返回。
+    //
+    //  ConcurrentDictionary 保证线程安全，兼容 Harmony 多线程场景。
+    //
+    // ═══════════════════════════════════════════════════════════
+    private static readonly ConcurrentDictionary<Type, object?> ManagerInstanceCache = new();
+
     /// <summary>跨程序集查找类型</summary>
     public static Type? FindType(string ns, string typeName)
     {
@@ -19,8 +36,13 @@ internal static class CompatibilityPatchUtil
         return null;
     }
 
-    /// <summary>尝试通过 Instance 属性或 _instance/instance 字段获取单例</summary>
+    /// <summary>尝试通过 Instance 属性或 _instance/instance 字段获取单例（结果缓存）。</summary>
     public static object? FindManagerInstance(Type managerType)
+    {
+        return ManagerInstanceCache.GetOrAdd(managerType, ResolveManagerInstance);
+    }
+
+    private static object? ResolveManagerInstance(Type managerType)
     {
         var prop = managerType.GetProperty("Instance",
             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);

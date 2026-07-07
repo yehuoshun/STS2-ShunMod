@@ -9,7 +9,6 @@ using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Runs;
-using Godot;
 using STS2ShunMod.STS2_ShunModCode.Core;
 
 namespace STS2ShunMod.STS2_ShunModCode.Events.Shun;
@@ -21,6 +20,10 @@ namespace STS2ShunMod.STS2_ShunModCode.Events.Shun;
 [EventPool]
 public class ShunModRelicExchange : EventModel
 {
+    // ═══════════════════════════════════════════════════════════
+    //  静态数据
+    // ═══════════════════════════════════════════════════════════
+
     // 使用 Random.Shared 而非 new Random() 实例。
     // .NET 9 的 Random.Shared 是线程安全的共享 RNG 实例，
     // 避免每个类/模块创建独立的 Random 对象。
@@ -35,33 +38,24 @@ public class ShunModRelicExchange : EventModel
         "Swift", "Glam", "Clone", "Goopy", "Momentum", "Inky",
     };
 
-    // ═══════════════════════════════════════════════════════════
-    //  附魔池缓存（延迟初始化）
-    // ═══════════════════════════════════════════════════════════
-    //
-    //  缓存设计原因：
-    //  1. 附魔池在游戏启动后不会再变化——类型集固定，ModelDb 初始化后稳定。
-    //  2. 玩家可在交易所反复交易，每次 Roll() → RollThreeEnchants() →
-    //     GetEnchantPool() 都会触发全量反射扫描（GetTypes + 遍历 + 查 ModelDb），
-    //     用 Lazy 缓存后首次访问只扫一次，后续直接返回缓存的 List。
-    //  3. 不用普通 static new List() 的原因是 ModelDb.GetByIdOrNull 在
-    //     ModEntry.Initialize 完成前不可用。Lazy<T> 的默认模式
-    //     (ExecutionAndPublication) 保证线程安全 + 延迟到首次访问才执行。
-    //
-    // ═══════════════════════════════════════════════════════════
     private static readonly Lazy<List<EnchantmentModel>> EnchantPoolCache =
         new(InitEnchantPool);
 
     private static string EventImagePath => ShunModHelper.EventImagePath(typeof(ShunModRelicExchange));
 
-    // ── 状态 ──
+    // ═══════════════════════════════════════════════════════════
+    //  实例状态
+    // ═══════════════════════════════════════════════════════════
+
     private RelicModel? _loseRelic1;
     private RelicModel? _loseRelic2;
     private RelicModel? _gainRelic;
     private EnchantmentModel? _enchantA;
     private EnchantmentModel? _enchantB;
 
-    // ════════════════════════════════════ DynamicVars ════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════
+    //  DynamicVars & 资源路径
+    // ═══════════════════════════════════════════════════════════
 
     protected override IEnumerable<DynamicVar> CanonicalVars => [
         new StringVar("LOSE_RELIC_1"),
@@ -71,12 +65,12 @@ public class ShunModRelicExchange : EventModel
         new StringVar("ENCHANT_NAME_B"),
     ];
 
-    // ════════════════════════════════════ 背景图 ════════════════════════════════════
-
     public override IEnumerable<string> GetAssetPaths(IRunState runState)
         => ShunModHelper.ReplaceEventImage(base.GetAssetPaths(runState), typeof(ShunModRelicExchange), Id.Entry);
 
-    // ════════════════════════════════════ CalculateVars ════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════
+    //  事件生命周期
+    // ═══════════════════════════════════════════════════════════
 
     public override void CalculateVars()
     {
@@ -85,14 +79,14 @@ public class ShunModRelicExchange : EventModel
         SyncVars();
     }
 
-    // ════════════════════════════════════ GenerateInitialOptions ════════════════════════════════════
-
     protected override IReadOnlyList<EventOption> GenerateInitialOptions()
     {
         return BuildOptions();
     }
 
-    // ════════════════════════════════════ 内部实现 ════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════
+    //  Sync & Resolve
+    // ═══════════════════════════════════════════════════════════
 
     private void SyncVars()
     {
@@ -116,7 +110,9 @@ public class ShunModRelicExchange : EventModel
         }
     }
 
-
+    // ═══════════════════════════════════════════════════════════
+    //  Roll 逻辑
+    // ═══════════════════════════════════════════════════════════
 
     private void Roll()
     {
@@ -203,6 +199,10 @@ public class ShunModRelicExchange : EventModel
         return circlet ?? available[Random.Shared.Next(available.Count)];
     }
 
+    // ═══════════════════════════════════════════════════════════
+    //  选项构建
+    // ═══════════════════════════════════════════════════════════
+
     private IReadOnlyList<EventOption> BuildOptions()
     {
         var player = Owner;
@@ -282,6 +282,4 @@ public class ShunModRelicExchange : EventModel
         SyncVars();
         SetEventState(L10NLookup("pages.INITIAL.description"), BuildOptions());
     }
-
-
 }
