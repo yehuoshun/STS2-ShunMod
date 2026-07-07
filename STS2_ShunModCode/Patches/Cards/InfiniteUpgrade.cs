@@ -102,7 +102,7 @@ internal static class InfiniteUpgrade_SerializationContext
 
 internal static class InfiniteUpgrade_Safety
 {
-    private static readonly string[] DrawSensitiveMethods =
+    private static readonly HashSet<string> DrawSensitiveMethods =
         ["BeforeHandDraw", "AfterCardDrawn", "ModifyHandDraw"];
 
     private static readonly object SyncRoot = new();
