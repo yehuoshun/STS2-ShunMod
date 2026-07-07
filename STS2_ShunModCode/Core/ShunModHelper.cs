@@ -1,9 +1,11 @@
 using System.Text.RegularExpressions;
+using MegaCrit.Sts2.Core.Entities.Relics;
+using MegaCrit.Sts2.Core.HoverTips;
 
 namespace STS2ShunMod.STS2_ShunModCode.Core;
 
 /// <summary>
-///     ShunMod 资源路径工具 — 从类名自动推导图片路径。
+///     ShunMod 工具类 — 资源路径推导、遗物安全访问等通用方法。
 /// </summary>
 public static class ShunModHelper
 {
@@ -62,5 +64,33 @@ public static class ShunModHelper
     public static string EventImagePath(Type type)
     {
         return $"{ResourceRoot}/events/shunEvents/{ClassToSnakeCase(type)}.png";
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  遗物安全访问
+    // ═══════════════════════════════════════════════════════════
+    //
+    //  为什么需要这个方法：
+    //  某些 Mod 遗物没有注册到任何 Pool（如 EnergyIconHelper 所需的
+    //  池），直接访问 RelicModel.HoverTips 会抛 InvalidOperationException。
+    //  在事件 UI、遗物展示等场景中，这种异常应当被吞掉返回空提示，
+    //  而不是让整个 UI 崩溃。
+    //
+    //  提取到 Core 层的原因：
+    //  遗物悬浮提示的异常安全访问在多个场景（交易所、遗物展示、
+    //  未来可能的事件）中都需要，避免每个模块重复写 try-catch。
+    //
+    // ═══════════════════════════════════════════════════════════
+    /// <summary>安全获取遗物悬浮提示，捕获 Pool 缺失导致的异常。</summary>
+    public static List<IHoverTip> SafeRelicHoverTips(RelicModel relic)
+    {
+        try
+        {
+            return relic.HoverTips.ToList();
+        }
+        catch (InvalidOperationException)
+        {
+            return new List<IHoverTip>();
+        }
     }
 }
