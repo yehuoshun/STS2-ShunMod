@@ -90,12 +90,12 @@ public class ShunModLiftRestSiteOption : RestSiteOption
 
     public ShunModLiftRestSiteOption(Player owner) : base(owner) { }
 
-    public override async Task<bool> OnSelect()
+    public override Task<bool> OnSelect()
     {
         var relic = Owner.GetRelic<ShunModInfiniteGirya>();
         if (relic != null)
             relic.TimesLifted++;
-        return await Task.FromResult(true);
+        return Task.FromResult(true);
     }
 
     public override Task DoLocalPostSelectVfx(CancellationToken ct = default)
