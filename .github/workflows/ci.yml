@@ -39,10 +39,10 @@ jobs:
           fi
 
       - name: Restore
-        run: dotnet restore STS2-ShunMod.sln
+        run: dotnet restore STS2_ShunMod.sln
 
       - name: Build all projects
-        run: dotnet build STS2-ShunMod.sln -c Release -p:Sts2DataDir="$(realpath deps)" --no-restore
+        run: dotnet build STS2_ShunMod.sln -c Release -p:Sts2DataDir="$(realpath deps)" --no-restore
 
       - name: Export .pck (Shun only)
         run: |

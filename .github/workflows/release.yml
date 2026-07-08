@@ -65,8 +65,8 @@ for f in files:
 
       - name: Restore & Build all projects
         run: |
-          dotnet restore STS2-ShunMod.sln
-          dotnet build STS2-ShunMod.sln -c Release -p:Sts2DataDir="$(realpath deps)"
+          dotnet restore STS2_ShunMod.sln
+          dotnet build STS2_ShunMod.sln -c Release -p:Sts2DataDir="$(realpath deps)"
 
       - name: Export .pck (Shun only)
         run: |

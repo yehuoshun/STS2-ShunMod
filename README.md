@@ -5,7 +5,7 @@
 
 [![Version](https://img.shields.io/github/v/release/yehuoshun/STS2-ShunMod)](https://github.com/yehuoshun/STS2-ShunMod/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Framework](https://img.shields.io/badge/framework-.NET%209.0-purple)](STS2-ShunMod.sln)
+[![Framework](https://img.shields.io/badge/framework-.NET%209.0-purple)](STS2_ShunMod.sln)
 
 ---
 
@@ -87,7 +87,7 @@ Mods/
 
 ```
 STS2-ShunMod/
-├── STS2-ShunMod.sln                    # 4 项目 Solution
+├── STS2_ShunMod.sln                    # 4 项目 Solution
 │
 ├── ShunMod.Core/                       # 共享基础框架
 │   ├── ShunMod.Core.csproj             # AssemblyName: ShunMod_Core
@@ -225,7 +225,7 @@ internal static class CompatibilityPatches
 
 ```bash
 # 编辑 Sts2PathDiscovery.props，设置 Sts2Path 指向 STS2 安装目录
-dotnet build STS2-ShunMod.sln
+dotnet build STS2_ShunMod.sln
 ```
 
 产物输出到 `.godot/mono/temp/bin/Release/`，每个模块独立 dll：
