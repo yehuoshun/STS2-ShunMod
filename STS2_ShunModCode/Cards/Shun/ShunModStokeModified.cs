@@ -46,11 +46,9 @@ public class ShunModStokeModified : CardModel
         foreach (var card in selected)
             await CardCmd.Exhaust(choiceContext, card);
 
-        // 生成等量的随机牌
-        var unlocked = owner.Character.CardPool.GetUnlockedCards(
-            owner.UnlockState, owner.RunState.CardMultiplayerConstraint);
+        // 生成等量的随机牌（全卡池，不限定角色）
         var cards = CardFactory.GetForCombat(
-            owner, unlocked, exhaustCount,
+            owner, ModelDb.AllCards, exhaustCount,
             owner.RunState.Rng.CombatCardGeneration).ToList();
 
         // 升级后：生成的牌自动升级
