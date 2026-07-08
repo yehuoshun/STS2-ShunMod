@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Text.Json;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
@@ -17,27 +16,8 @@ public static class ModEntry
     private static bool _initialized;
     private static Harmony? _harmony;
 
-    /// <summary>从 assets/STS2_ShunMod.json 读取模组 ID，缓存</summary>
-    private static string? _modId;
-    private static string ModId => _modId ??= ReadModId();
-
-    private static string ReadModId()
-    {
-        try
-        {
-            var jsonRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "STS2_ShunMod.json");
-            // Godot 导出后资源在 res:// 下，PCK 内路径不同；JSON 由 ModHelper 解析
-            // 回退到硬编码，保证总是有值
-            if (!File.Exists(jsonRoot)) return "STS2_ShunMod";
-            var json = File.ReadAllText(jsonRoot);
-            using var doc = JsonDocument.Parse(json);
-            return doc.RootElement.TryGetProperty("id", out var id) ? id.GetString() ?? "STS2_ShunMod" : "STS2_ShunMod";
-        }
-        catch
-        {
-            return "STS2_ShunMod";
-        }
-    }
+    /// <summary>模组 ID（硬编码，JSON 由 ModHelper 解析，不重复读盘）</summary>
+    private const string ModId = "STS2_ShunMod";
 
     public static void Initialize()
     {
