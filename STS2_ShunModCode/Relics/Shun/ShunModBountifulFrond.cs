@@ -17,10 +17,13 @@ public sealed class ShunModBountifulFrond : ShunRelicModel<ShunModBountifulFrond
 {
     public override RelicRarity Rarity => RelicRarity.Rare;
 
+    private const int MaxPotionFillAttempts = 20;
+
     public override async Task AfterPlayerTurnStart(PlayerChoiceContext choiceContext, Player player)
     {
         Flash();
-        while (player.HasOpenPotionSlots)
+        var attempts = 0;
+        while (player.HasOpenPotionSlots && attempts++ < MaxPotionFillAttempts)
         {
             var potion = PotionFactory
                 .CreateRandomPotionOutOfCombat(player, player.RunState.Rng.CombatPotionGeneration)
