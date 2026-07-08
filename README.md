@@ -143,9 +143,9 @@ STS2-ShunMod/
 │       ├── ShadowverseSkinLimitPatch.cs       # 影之诗皮肤限制解除
 │       └── ShadowverseBgLimitPatch.cs         # 影之诗背景包限制解除
 │
-├── STS2_ShunMod/                       # Godot 资源（图片/本地化）
-│   ├── images/                         # 卡牌/遗物/事件美术
-│   └── localization/                   # 中英双语本地化
+│   └── assets/                         # Godot 资源（图片/本地化）
+│       ├── images/                     # 卡牌/遗物/事件美术
+│       └── localization/               # 中英双语本地化
 ├── project.godot                       # Godot 4.5 项目
 ├── Sts2PathDiscovery.props             # 路径发现配置
 └── .github/workflows/                  # CI/CD

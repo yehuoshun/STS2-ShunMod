@@ -12,7 +12,7 @@ config_version=5
 
 config/name="STS2_ShunMod"
 config/features=PackedStringArray("4.5", "C#", "Mobile")
-config/icon="res://STS2_ShunMod/mod_image.png"
+config/icon="res://ShunMod.Shun/assets/mod_image.png"
 
 [display]
 
@@ -24,7 +24,7 @@ window/stretch/aspect="expand"
 
 [dotnet]
 
-project/assembly_name="STS2_ShunMod"
+project/assembly_name="ShunMod_Shun"
 
 [rendering]
 

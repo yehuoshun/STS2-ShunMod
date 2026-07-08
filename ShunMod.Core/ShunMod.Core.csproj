@@ -37,12 +37,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <AdditionalFiles Include="..\STS2_ShunMod\localization\**\*.json" />
+        <AdditionalFiles Include="..\ShunMod.Shun\assets\localization\**\*.json" />
     </ItemGroup>
 
     <ItemGroup>
         <None Include="..\project.godot"/>
-        <None Include="..\STS2_ShunMod\**" />
+        <None Include="..\ShunMod.Shun\assets\**" />
     </ItemGroup>
 
     <ItemGroup>
