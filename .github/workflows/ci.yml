@@ -46,20 +46,19 @@ jobs:
 
       - name: Package individual zips
         run: |
-          BUILD_DIR=.godot/mono/temp/bin/Release
-          # 项目目录与 AssemblyName 对照
           for entry in "Core|ShunMod.Core" "Shun|ShunMod.Shun" "Tweaks|ShunMod.Tweaks" "Compat|ShunMod.Compat"; do
             PROJ="${entry%%|*}"
             DIR="${entry##*|}"
             ASM="ShunMod_${PROJ}"
+            PROJ_BUILD="${DIR}/.godot/mono/temp/bin/Release"
             echo "=== Packaging ${ASM} ==="
             mkdir -p "publish/${ASM}"
-            cp "$BUILD_DIR/${ASM}.dll" "publish/${ASM}/"
+            cp "$PROJ_BUILD/${ASM}.dll" "publish/${ASM}/"
             cp "${DIR}/${ASM}.json" "publish/${ASM}/"
             # Shun 项目有 pck
-            PCK=$(find . -maxdepth 1 -name "${ASM}.pck" -type f 2>/dev/null | head -1)
+            PCK=$(find "$PROJ_BUILD" -name "${ASM}.pck" -type f 2>/dev/null | head -1)
             if [ -z "$PCK" ]; then
-              PCK=$(find "$BUILD_DIR" -name "${ASM}.pck" -type f 2>/dev/null | head -1)
+              PCK=$(find . -maxdepth 1 -name "${ASM}.pck" -type f 2>/dev/null | head -1)
             fi
             if [ -n "$PCK" ]; then
               cp "$PCK" "publish/${ASM}/"
@@ -71,20 +70,19 @@ jobs:
 
       - name: Package full zip
         run: |
-          BUILD_DIR=.godot/mono/temp/bin/Release
           mkdir -p publish
           for entry in "Core|ShunMod.Core" "Shun|ShunMod.Shun" "Tweaks|ShunMod.Tweaks" "Compat|ShunMod.Compat"; do
             PROJ="${entry%%|*}"
             DIR="${entry##*|}"
             ASM="ShunMod_${PROJ}"
             mkdir -p "publish/${ASM}"
-            cp "$BUILD_DIR/${ASM}.dll" "publish/${ASM}/"
+            cp "${DIR}/.godot/mono/temp/bin/Release/${ASM}.dll" "publish/${ASM}/"
             cp "${DIR}/${ASM}.json" "publish/${ASM}/"
           done
           # Shun 的 pck
-          PCK=$(find . -maxdepth 1 -name "ShunMod_Shun.pck" -type f 2>/dev/null | head -1)
+          PCK=$(find "ShunMod.Shun/.godot/mono/temp/bin/Release" -name "ShunMod_Shun.pck" -type f 2>/dev/null | head -1)
           if [ -z "$PCK" ]; then
-            PCK=$(find "$BUILD_DIR" -name "ShunMod_Shun.pck" -type f 2>/dev/null | head -1)
+            PCK=$(find . -maxdepth 1 -name "ShunMod_Shun.pck" -type f 2>/dev/null | head -1)
           fi
           if [ -n "$PCK" ]; then
             cp "$PCK" "publish/ShunMod_Shun/"
