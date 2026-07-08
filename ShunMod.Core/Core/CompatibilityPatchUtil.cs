@@ -7,7 +7,7 @@ namespace ShunMod.Core;
 /// <summary>
 ///     第三方模组兼容补丁共享工具 — 类型查找、单例发现。
 /// </summary>
-internal static class CompatibilityPatchUtil
+public static class CompatibilityPatchUtil
 {
     // ═══════════════════════════════════════════════════════════
     //  Manager 实例缓存

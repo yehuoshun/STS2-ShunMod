@@ -8,7 +8,7 @@ namespace ShunMod.Core;
 ///     格挡保留、未来可能有的战斗补丁均通过此类操作 Creature 属性，
 ///     避免直接引用游戏内部 API 导致硬依赖。
 /// </summary>
-internal static class CreatureReflection
+public static class CreatureReflection
 {
     public static readonly Type? CreatureType =
         AccessTools.TypeByName("MegaCrit.Sts2.Core.Entities.Creatures.Creature");
