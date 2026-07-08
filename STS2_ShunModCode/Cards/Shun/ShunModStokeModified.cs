@@ -57,7 +57,7 @@ public class ShunModStokeModified : CardModel
         if (IsUpgraded)
             CardCmd.Upgrade(cards, CardPreviewStyle.None);
 
-        await CardPileCmd.AddGeneratedCardsToCombat(
-            cards, PileType.Hand, addedByPlayer: true);
+        await CardPileCmd.Add(
+            cards, PileType.Hand);
     }
 }
