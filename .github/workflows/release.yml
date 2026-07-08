@@ -102,10 +102,10 @@ jobs:
           if [ -z "$LAST" ]; then
             NEW="v0.1.0"
           else
-            # 去掉 v 前缀，递增 minor
+            # 去掉 v 前缀，递增 patch
             V="${LAST#v}"
             IFS='.' read -r maj min pat <<< "$V"
-            NEW="v${maj}.$((min + 1)).0"
+            NEW="v${maj}.${min}.$((pat + 1))"
           fi
           echo "last: $LAST  ->  new: $NEW"
           echo "TAG=$NEW" >> $GITHUB_OUTPUT
