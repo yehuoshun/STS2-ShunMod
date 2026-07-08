@@ -19,37 +19,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Bump version in all JSON
-        run: |
-          python3 -c "
-import json, os
-
-# 读取 Core 的版本号作为主版本
-with open('ShunMod.Core/ShunMod_Core.json') as f:
-    cur = json.load(f)['version']
-
-maj, min, pat = cur.lstrip('v').split('.')
-new = 'v' + maj + '.' + min + '.' + str(int(pat) + 1)
-print(f'{cur} \u2192 {new}')
-
-files = [
-    'ShunMod.Core/ShunMod_Core.json',
-    'ShunMod.Shun/ShunMod_Shun.json',
-    'ShunMod.Tweaks/ShunMod_Tweaks.json',
-    'ShunMod.Compat/ShunMod_Compat.json',
-]
-for f in files:
-    d = json.load(open(f))
-    d['version'] = new
-    json.dump(d, open(f, 'w'), indent=2, ensure_ascii=False)
-    print(f'  Updated: {f}')
-"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add ShunMod.*/ShunMod_*.json
-          git commit -m "chore: bump to $(python3 -c "import json; print(json.load(open('ShunMod.Core/ShunMod_Core.json'))['version'])")"
-          git push origin HEAD:main
-
       - name: Setup .NET 9.0
         uses: actions/setup-dotnet@v4
         with:
@@ -114,7 +83,6 @@ for f in files:
             cp "${DIR}/.godot/mono/temp/bin/Release/${ASM}.dll" "publish/${ASM}/"
             cp "${DIR}/${ASM}.json" "publish/${ASM}/"
           done
-          # Shun 的 pck
           PCK=$(find "ShunMod.Shun/.godot/mono/temp/bin/Release" -name "ShunMod_Shun.pck" -type f 2>/dev/null | head -1)
           if [ -z "$PCK" ]; then
             PCK=$(find . -maxdepth 1 -name "ShunMod_Shun.pck" -type f 2>/dev/null | head -1)
@@ -126,62 +94,68 @@ for f in files:
           cd publish && zip -r "../STS2_ShunMod.zip" . && cd ..
           echo "  Packaged: $(ls -lh STS2_ShunMod.zip | awk '{print $5}')"
 
-      - name: Get version
+      - name: Get release tag
         id: ver
         run: |
-          V=$(python3 -c "import json; d=json.load(open('ShunMod.Core/ShunMod_Core.json')); print(d['version'])")
-          echo "version: $V"
-          echo "TAG=$V" >> $GITHUB_OUTPUT
+          # 找最新的 release tag，不存在则初始 v0.1.0
+          LAST=$(git tag --list 'v*' --sort=-v:refname | head -1)
+          if [ -z "$LAST" ]; then
+            NEW="v0.1.0"
+          else
+            # 去掉 v 前缀，递增 minor
+            V="${LAST#v}"
+            IFS='.' read -r maj min pat <<< "$V"
+            NEW="v${maj}.$((min + 1)).0"
+          fi
+          echo "last: $LAST  ->  new: $NEW"
+          echo "TAG=$NEW" >> $GITHUB_OUTPUT
 
       - name: Generate release notes
         run: |
           PREV=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          TAG="${{ steps.ver.outputs.TAG }}"
+
+          # 收集各模块当前版本
+          CORE_V=$(python3 -c "import json; print(json.load(open('ShunMod.Core/ShunMod_Core.json'))['version'])")
+          SHUN_V=$(python3 -c "import json; print(json.load(open('ShunMod.Shun/ShunMod_Shun.json'))['version'])")
+          TWEAKS_V=$(python3 -c "import json; print(json.load(open('ShunMod.Tweaks/ShunMod_Tweaks.json'))['version'])")
+          COMPAT_V=$(python3 -c "import json; print(json.load(open('ShunMod.Compat/ShunMod_Compat.json'))['version'])")
 
           if [ -n "$PREV" ]; then
-            LOG=$(git log ${PREV}..HEAD --pretty=format:"%s|||%h|||%H" --reverse | grep -v "^chore: bump to")
+            LOG=$(git log ${PREV}..HEAD --pretty=format:"%s|||%h|||%H" --reverse | grep -v "^chore:")
           else
-            LOG=$(git log --pretty=format:"%s|||%h|||%H" --reverse | grep -v "^chore: bump to")
+            LOG=$(git log --pretty=format:"%s|||%h|||%H" --reverse | grep -v "^chore:")
           fi
 
           FEATS=$(echo "$LOG" | grep "^feat" || true)
           FIXES=$(echo "$LOG" | grep "^fix" || true)
           REFACTORS=$(echo "$LOG" | grep "^refactor" || true)
-          DOCS=$(echo "$LOG" | grep "^docs" || true)
-          CHORES=$(echo "$LOG" | grep "^chore" || true)
-          OTHERS=$(echo "$LOG" | grep -v "^feat\|^fix\|^refactor\|^docs\|^chore" || true)
+          OTHERS=$(echo "$LOG" | grep -v "^feat\|^fix\|^refactor" || true)
 
           fmt() {
             echo "$1" | while IFS='|||' read -r msg hash full; do
               [ -z "$msg" ] && continue
-              echo "- ${msg#feat: }${msg#fix: }${msg#refactor: }${msg#docs: }${msg#chore: } ([${hash}](https://github.com/${{ github.repository }}/commit/${full}))"
+              echo "- ${msg#feat: }${msg#fix: }${msg#refactor: } ([${hash}](https://github.com/${{ github.repository }}/commit/${full}))"
             done
           }
 
           {
-            echo "## \u{1F680} 安装"
+            echo "# STS2-ShunMod ${TAG}"
             echo ""
-            echo "下载 \`STS2_ShunMod.zip\`，解压到 \`Mods/\`，包含 4 个模块："
+            echo "## \u{1F4E6} 安装"
             echo ""
-            echo "| 模块 | 文件夹 | 说明 |"
-            echo "|------|--------|------|"
-            echo "| \`ShunMod_Core\` | \`Mods/ShunMod_Core/\` | 共享基础框架（必需） |"
-            echo "| \`ShunMod_Shun\` | \`Mods/ShunMod_Shun/\` | 舜角色内容（卡牌/遗物/事件） |"
-            echo "| \`ShunMod_Tweaks\` | \`Mods/ShunMod_Tweaks/\` | 数值/机制修改 |"
-            echo "| \`ShunMod_Compat\` | \`Mods/ShunMod_Compat/\` | 第三方模组兼容补丁 |"
+            echo "下载 \`STS2_ShunMod.zip\`，解压到 \`Mods/\` 目录，包含 4 个模块："
             echo ""
-            echo "> 也可以单独下载各模块的独立 zip（ShunMod_Core.zip / ShunMod_Shun.zip / ShunMod_Tweaks.zip / ShunMod_Compat.zip）"
-            echo ""
-            echo "---"
-            echo ""
-            V=$(python3 -c "import json; d=json.load(open('ShunMod.Core/ShunMod_Core.json')); print(d['version'])")
-            echo "## \u{26A0}\u{FE0F} 已知问题"
-            echo ""
-            echo "- 无"
+            echo "| 模块 | 版本 | 文件夹 |"
+            echo "|------|------|--------|"
+            echo "| \`ShunMod_Core\` | ${CORE_V} | \`Mods/ShunMod_Core/\` |"
+            echo "| \`ShunMod_Shun\` | ${SHUN_V} | \`Mods/ShunMod_Shun/\` |"
+            echo "| \`ShunMod_Tweaks\` | ${TWEAKS_V} | \`Mods/ShunMod_Tweaks/\` |"
+            echo "| \`ShunMod_Compat\` | ${COMPAT_V} | \`Mods/ShunMod_Compat/\` |"
             echo ""
             echo "---"
             echo ""
-
-            echo "## 更新内容"
+            echo "## \u{1F4DD} 更新内容"
             echo ""
             if [ -n "$PREV" ]; then
               echo "> 自 \`$PREV\` 以来的更改"
@@ -203,21 +177,15 @@ for f in files:
               fmt "$REFACTORS"
               echo ""
             fi
-            if [ -n "$DOCS" ]; then
-              echo "### \u{1F4DD} 文档"
-              fmt "$DOCS"
-              echo ""
-            fi
-            if [ -n "$CHORES" ]; then
-              echo "### \u{1F527} 杂项"
-              fmt "$CHORES"
-              echo ""
-            fi
             if [ -n "$OTHERS" ]; then
               echo "### \u{1F4E6} 其他"
               fmt "$OTHERS"
               echo ""
             fi
+            echo ""
+            echo "---"
+            echo ""
+            echo "各模块独立 Version：Core=${CORE_V} / Shun=${SHUN_V} / Tweaks=${TWEAKS_V} / Compat=${COMPAT_V}"
           } > release_notes.md
 
       - name: Upload to NexusMods
