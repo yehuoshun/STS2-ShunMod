@@ -128,10 +128,10 @@ public class ShunModRelicExchange : ShunEventModel
             _loseRelic2 = PreferCirclet(remaining);
         }
 
-        RollThreeEnchants();
+        RollTwoEnchants();
     }
 
-    private void RollThreeEnchants()
+    private void RollTwoEnchants()
     {
         var pool = GetEnchantPool();
         if (pool.Count == 0) return;
