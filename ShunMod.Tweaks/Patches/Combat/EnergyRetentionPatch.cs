@@ -1,0 +1,19 @@
+using HarmonyLib;
+using MegaCrit.Sts2.Core.Hooks;
+namespace ShunMod.Tweaks.Combat;
+
+/// <summary>
+///     能量保留（冰激凌逻辑）
+///     回合开始时能量不清零，剩余能量累积到下一回合。
+///     直接拦截 Hook.ShouldPlayerResetEnergy，始终返回 false。
+/// </summary>
+[HarmonyPatch(typeof(Hook), nameof(Hook.ShouldPlayerResetEnergy))]
+public static class EnergyRetentionPatch
+{
+    [HarmonyPrefix]
+    private static bool Prefix(ref bool __result)
+    {
+        __result = false;
+        return false;
+    }
+}

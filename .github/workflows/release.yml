@@ -19,20 +19,35 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Bump version
+      - name: Bump version in all JSON
         run: |
-          CUR=$(python3 -c "import json; d=json.load(open('STS2_ShunMod.json')); print(d['version'])")
-          MAJOR=$(echo "${CUR#v}" | cut -d. -f1)
-          MINOR=$(echo "${CUR#v}" | cut -d. -f2)
-          PATCH=$(echo "${CUR#v}" | cut -d. -f3)
-          NEW=$((PATCH + 1))
-          V="v${MAJOR}.${MINOR}.${NEW}"
-          echo "${CUR} → ${V}"
-          python3 -c "import json; d=json.load(open('STS2_ShunMod.json')); d['version']='${V}'; json.dump(d, open('STS2_ShunMod.json','w'), indent=2, ensure_ascii=False)"
+          python3 -c "
+import json, os
+
+# 读取 Core 的版本号作为主版本
+with open('ShunMod.Core/ShunMod_Core.json') as f:
+    cur = json.load(f)['version']
+
+maj, min, pat = cur.lstrip('v').split('.')
+new = 'v' + maj + '.' + min + '.' + str(int(pat) + 1)
+print(f'{cur} \u2192 {new}')
+
+files = [
+    'ShunMod.Core/ShunMod_Core.json',
+    'ShunMod.Shun/ShunMod_Shun.json',
+    'ShunMod.Tweaks/ShunMod_Tweaks.json',
+    'ShunMod.Compat/ShunMod_Compat.json',
+]
+for f in files:
+    d = json.load(open(f))
+    d['version'] = new
+    json.dump(d, open(f, 'w'), indent=2, ensure_ascii=False)
+    print(f'  Updated: {f}')
+"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add STS2_ShunMod.json
-          git commit -m "chore: bump to ${V}"
+          git add ShunMod.*/ShunMod_*.json
+          git commit -m "chore: bump to $(python3 -c "import json; print(json.load(open('ShunMod.Core/ShunMod_Core.json'))['version'])")"
           git push origin HEAD:main
 
       - name: Setup .NET 9.0
@@ -48,39 +63,58 @@ jobs:
           curl -sL "${DEPS_URL}/0Harmony.dll" -o deps/0Harmony.dll
           ls -la deps/
 
-      - name: Build & Export .pck
+      - name: Restore & Build all projects
         run: |
-          dotnet build STS2_ShunMod.csproj -c Release -p:Sts2DataDir="$(realpath deps)"
-          echo "=== 下载 Godot 4.5.1 Mono ==="
-          GODOT_URL="https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_mono_linux_x86_64.zip"
-          curl -sL "$GODOT_URL" -o godot.zip || { echo "❌ 下载失败，回退到资源目录"; exit 0; }
-          unzip -q godot.zip -d godot 2>/dev/null
-          GODOT=$(find godot -name "Godot*" -type f -executable | head -1)
-          [ -z "$GODOT" ] && { echo "❌ 未找到 Godot 可执行文件"; exit 0; }
-          chmod +x "$GODOT"
-          echo "=== 导出 .pck ==="
-          "$GODOT" --headless --export-pack "BasicExport" STS2_ShunMod.pck
-          ls -la STS2_ShunMod.pck 2>/dev/null || echo "⚠️ 导出失败"
+          dotnet restore STS2-ShunMod.sln
+          dotnet build STS2-ShunMod.sln -c Release -p:Sts2DataDir="$(realpath deps)"
 
-      - name: Package
+      - name: Package individual zips
+        run: |
+          BUILD_DIR=.godot/mono/temp/bin/Release
+          for proj in Core Shun Tweaks Compat; do
+            ASM="ShunMod_${proj}"
+            echo "=== Packaging ${ASM} ==="
+            mkdir -p "publish/${ASM}"
+            cp "$BUILD_DIR/${ASM}.dll" "publish/${ASM}/"
+            cp "${ASM}/${ASM}.json" "publish/${ASM}/"
+            PCK=$(find . -maxdepth 1 -name "${ASM}.pck" -type f 2>/dev/null | head -1)
+            if [ -z "$PCK" ]; then
+              PCK=$(find "$BUILD_DIR" -name "${ASM}.pck" -type f 2>/dev/null | head -1)
+            fi
+            if [ -n "$PCK" ]; then
+              cp "$PCK" "publish/${ASM}/"
+            fi
+            ls -la "publish/${ASM}/"
+            cd publish && zip -r "../${ASM}.zip" "${ASM}/" && cd ..
+            echo "  Packaged: $(ls -lh ${ASM}.zip | awk '{print $5}')"
+          done
+
+      - name: Package full zip
         run: |
           BUILD_DIR=.godot/mono/temp/bin/Release
           mkdir -p publish
-          cp "$BUILD_DIR/STS2_ShunMod.dll" publish/
-          cp STS2_ShunMod.json publish/
-          PCK=$(find . -maxdepth 1 -name "STS2_ShunMod.pck" -type f 2>/dev/null | head -1)
+          for proj in Core Shun Tweaks Compat; do
+            ASM="ShunMod_${proj}"
+            mkdir -p "publish/${ASM}"
+            cp "$BUILD_DIR/${ASM}.dll" "publish/${ASM}/"
+            cp "${ASM}/${ASM}.json" "publish/${ASM}/"
+          done
+          # Shun 的 pck
+          PCK=$(find . -maxdepth 1 -name "ShunMod_Shun.pck" -type f 2>/dev/null | head -1)
+          if [ -z "$PCK" ]; then
+            PCK=$(find "$BUILD_DIR" -name "ShunMod_Shun.pck" -type f 2>/dev/null | head -1)
+          fi
           if [ -n "$PCK" ]; then
-            cp "$PCK" publish/
-          else
-            echo "⚠️ 无 .pck"
+            cp "$PCK" "publish/ShunMod_Shun/"
           fi
           ls -la publish/
-          cd publish && zip -r ../STS2_ShunMod.zip .
+          cd publish && zip -r "../STS2_ShunMod.zip" . && cd ..
+          echo "  Packaged: $(ls -lh STS2_ShunMod.zip | awk '{print $5}')"
 
       - name: Get version
         id: ver
         run: |
-          V=$(python3 -c "import json; d=json.load(open('STS2_ShunMod.json')); print(d['version'])")
+          V=$(python3 -c "import json; d=json.load(open('ShunMod.Core/ShunMod_Core.json')); print(d['version'])")
           echo "version: $V"
           echo "TAG=$V" >> $GITHUB_OUTPUT
 
@@ -88,14 +122,12 @@ jobs:
         run: |
           PREV=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
 
-          # 过滤掉版本号 bump 提交
           if [ -n "$PREV" ]; then
             LOG=$(git log ${PREV}..HEAD --pretty=format:"%s|||%h|||%H" --reverse | grep -v "^chore: bump to")
           else
             LOG=$(git log --pretty=format:"%s|||%h|||%H" --reverse | grep -v "^chore: bump to")
           fi
 
-          # 按前缀分类
           FEATS=$(echo "$LOG" | grep "^feat" || true)
           FIXES=$(echo "$LOG" | grep "^fix" || true)
           REFACTORS=$(echo "$LOG" | grep "^refactor" || true)
@@ -111,19 +143,29 @@ jobs:
           }
 
           {
-            echo "## 🚀 安装"
+            echo "## \u{1F680} 安装"
             echo ""
-            echo "下载 \`STS2_ShunMod.zip\`，解压到 \`Mods/STS2_ShunMod/\`，启动游戏。"
+            echo "下载 \`STS2_ShunMod.zip\`，解压到 \`Mods/\`，包含 4 个模块："
+            echo ""
+            echo "| 模块 | 文件夹 | 说明 |"
+            echo "|------|--------|------|"
+            echo "| \`ShunMod_Core\` | \`Mods/ShunMod_Core/\` | 共享基础框架（必需） |"
+            echo "| \`ShunMod_Shun\` | \`Mods/ShunMod_Shun/\` | 舜角色内容（卡牌/遗物/事件） |"
+            echo "| \`ShunMod_Tweaks\` | \`Mods/ShunMod_Tweaks/\` | 数值/机制修改 |"
+            echo "| \`ShunMod_Compat\` | \`Mods/ShunMod_Compat/\` | 第三方模组兼容补丁 |"
+            echo ""
+            echo "> 也可以单独下载各模块的独立 zip（ShunMod_Core.zip / ShunMod_Shun.zip / ShunMod_Tweaks.zip / ShunMod_Compat.zip）"
             echo ""
             echo "---"
             echo ""
-            V=$(python3 -c "import json; d=json.load(open('STS2_ShunMod.json')); print(d['version'])")
-            echo "## ⚠️ 已知问题"
+            V=$(python3 -c "import json; d=json.load(open('ShunMod.Core/ShunMod_Core.json')); print(d['version'])")
+            echo "## \u{26A0}\u{FE0F} 已知问题"
             echo ""
             echo "- 无"
             echo ""
             echo "---"
             echo ""
+
             echo "## 更新内容"
             echo ""
             if [ -n "$PREV" ]; then
@@ -132,32 +174,32 @@ jobs:
             fi
 
             if [ -n "$FEATS" ]; then
-              echo "### ✨ 新功能"
+              echo "### \u{2728} 新功能"
               fmt "$FEATS"
               echo ""
             fi
             if [ -n "$FIXES" ]; then
-              echo "### 🐛 修复"
+              echo "### \u{1F41B} 修复"
               fmt "$FIXES"
               echo ""
             fi
             if [ -n "$REFACTORS" ]; then
-              echo "### ♻️ 重构"
+              echo "### \u{267B}\u{FE0F} 重构"
               fmt "$REFACTORS"
               echo ""
             fi
             if [ -n "$DOCS" ]; then
-              echo "### 📝 文档"
+              echo "### \u{1F4DD} 文档"
               fmt "$DOCS"
               echo ""
             fi
             if [ -n "$CHORES" ]; then
-              echo "### 🔧 杂项"
+              echo "### \u{1F527} 杂项"
               fmt "$CHORES"
               echo ""
             fi
             if [ -n "$OTHERS" ]; then
-              echo "### 📦 其他"
+              echo "### \u{1F4E6} 其他"
               fmt "$OTHERS"
               echo ""
             fi
@@ -178,6 +220,11 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.ver.outputs.TAG }}
-          files: STS2_ShunMod.zip
+          files: |
+            STS2_ShunMod.zip
+            ShunMod_Core.zip
+            ShunMod_Shun.zip
+            ShunMod_Tweaks.zip
+            ShunMod_Compat.zip
           body_path: release_notes.md
           prerelease: ${{ github.event.inputs.prerelease || false }}

@@ -1,0 +1,62 @@
+<Project Sdk="Godot.NET.Sdk/4.5.1">
+    <Import Project="..\Sts2PathDiscovery.props"/>
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <RootNamespace>ShunMod.Core</RootNamespace>
+        <AssemblyName>ShunMod_Core</AssemblyName>
+        <ImplicitUsings>true</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <DefaultItemExcludes>packages/**</DefaultItemExcludes>
+        <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
+        <PathMap>$(AppOutputBase)=\.\</PathMap>
+        <GodotDisabledSourceGenerators>GodotPluginsInitializer</GodotDisabledSourceGenerators>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <NoWarn>$(NoWarn);MSB3270</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup Condition="Exists('$(Sts2DataDir)/sts2.dll')" >
+        <Reference Include="0Harmony">
+            <HintPath>$(Sts2DataDir)/0Harmony.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="sts2">
+            <HintPath>$(Sts2DataDir)/sts2.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(PublicizeSts)' != 'false'">
+        <Publicize Include="sts2" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Krafs.Publicizer" Version="2.3.0" PrivateAssets="All"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <AdditionalFiles Include="..\STS2_ShunMod\localization\**\*.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="..\project.godot"/>
+        <None Include="..\STS2_ShunMod\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="..\.gitignore" />
+        <None Include="ShunMod_Core.json" />
+    </ItemGroup>
+
+    <Target Name="CheckDependencyPaths" BeforeTargets="CoreCompile">
+        <Error Text=" Slay the Spire 2 data not found at path '$(Sts2DataDir)'" Condition="'$(Sts2DataDir)' == '' or !Exists('$(Sts2DataDir)/sts2.dll')" />
+    </Target>
+
+    <Target Name="CopyToModsFolderOnBuild" AfterTargets="PostBuildEvent">
+        <Message Text="Copying .dll and manifest to mods folder." Importance="high" />
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModsPath)$(AssemblyName)/" />
+        <Copy SourceFiles="ShunMod_Core.json" DestinationFolder="$(ModsPath)$(AssemblyName)/" />
+    </Target>
+</Project>

@@ -39,49 +39,63 @@ jobs:
           fi
 
       - name: Restore
-        run: dotnet restore STS2_ShunMod.csproj
+        run: dotnet restore STS2-ShunMod.sln
 
-      - name: Build DLL
-        run: dotnet build STS2_ShunMod.csproj -c Release -p:Sts2DataDir="$(realpath deps)" --no-restore
+      - name: Build all projects
+        run: dotnet build STS2-ShunMod.sln -c Release -p:Sts2DataDir="$(realpath deps)" --no-restore
 
-      - name: Export .pck
+      - name: Package individual zips
         run: |
-          echo "=== Downloading Godot 4.5.1 Mono ==="
-          GODOT_URL="https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_mono_linux_x86_64.zip"
-          curl -sL "$GODOT_URL" -o godot.zip || { echo "Download failed"; exit 0; }
-          unzip -q godot.zip -d godot 2>/dev/null
-          GODOT=$(find godot -name "Godot*" -type f -executable | head -1)
-          [ -z "$GODOT" ] && { echo "Godot not found"; exit 0; }
-          chmod +x "$GODOT"
-          echo "=== Exporting .pck ==="
-          "$GODOT" --headless --export-pack "BasicExport" STS2_ShunMod.pck
-          ls -la STS2_ShunMod.pck 2>/dev/null || echo "Export failed"
+          BUILD_DIR=.godot/mono/temp/bin/Release
+          for proj in Core Shun Tweaks Compat; do
+            ASM="ShunMod_${proj}"
+            echo "=== Packaging ${ASM} ==="
+            mkdir -p "publish/${ASM}"
+            cp "$BUILD_DIR/${ASM}.dll" "publish/${ASM}/"
+            cp "${ASM}/${ASM}.json" "publish/${ASM}/"
+            # Shun 项目有 pck
+            PCK=$(find . -maxdepth 1 -name "${ASM}.pck" -type f 2>/dev/null | head -1)
+            if [ -z "$PCK" ]; then
+              PCK=$(find "$BUILD_DIR" -name "${ASM}.pck" -type f 2>/dev/null | head -1)
+            fi
+            if [ -n "$PCK" ]; then
+              cp "$PCK" "publish/${ASM}/"
+            fi
+            ls -la "publish/${ASM}/"
+            cd publish && zip -r "../${ASM}.zip" "${ASM}/" && cd ..
+            echo "  Packaged: $(ls -lh ${ASM}.zip | awk '{print $5}')"
+          done
 
-      - name: Package
+      - name: Package full zip
         run: |
-          DLL=$(find .godot/mono/temp/bin -name "STS2_ShunMod.dll" -type f 2>/dev/null | head -1)
-          if [ -z "$DLL" ]; then
-            echo "DLL not found"
-            find . -name "*.dll" -type f 2>/dev/null || true
-            exit 1
-          fi
-          echo "DLL: $DLL"
+          BUILD_DIR=.godot/mono/temp/bin/Release
           mkdir -p publish
-          cp "$DLL" publish/
-          cp STS2_ShunMod.json publish/
-          PCK=$(find . -maxdepth 1 -name "STS2_ShunMod.pck" -type f 2>/dev/null | head -1)
+          for proj in Core Shun Tweaks Compat; do
+            ASM="ShunMod_${proj}"
+            mkdir -p "publish/${ASM}"
+            cp "$BUILD_DIR/${ASM}.dll" "publish/${ASM}/"
+            cp "${ASM}/${ASM}.json" "publish/${ASM}/"
+          done
+          # Shun 的 pck
+          PCK=$(find . -maxdepth 1 -name "ShunMod_Shun.pck" -type f 2>/dev/null | head -1)
+          if [ -z "$PCK" ]; then
+            PCK=$(find "$BUILD_DIR" -name "ShunMod_Shun.pck" -type f 2>/dev/null | head -1)
+          fi
           if [ -n "$PCK" ]; then
-            cp "$PCK" publish/
-          else
-            echo "No .pck"
+            cp "$PCK" "publish/ShunMod_Shun/"
           fi
           ls -la publish/
-          cd publish && zip -r ../STS2_ShunMod.zip .
-          echo "Packaged: $(ls -lh ../STS2_ShunMod.zip | awk '{print $5}')"
+          cd publish && zip -r "../STS2_ShunMod.zip" . && cd ..
+          echo "  Packaged: $(ls -lh STS2_ShunMod.zip | awk '{print $5}')"
 
-      - name: Upload artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: STS2_ShunMod
-          path: STS2_ShunMod.zip
+          name: ShunMod-Build
+          path: |
+            ShunMod_Core.zip
+            ShunMod_Shun.zip
+            ShunMod_Tweaks.zip
+            ShunMod_Compat.zip
+            STS2_ShunMod.zip
           if-no-files-found: error

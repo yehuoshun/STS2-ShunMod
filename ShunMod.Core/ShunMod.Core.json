@@ -1,0 +1,11 @@
+{
+  "id": "ShunMod_Core",
+  "name": "ShunMod Core",
+  "author": "yehuoshun",
+  "description": "ShunMod shared framework",
+  "version": "v0.0.87",
+  "has_pck": false,
+  "has_dll": true,
+  "dependencies": [],
+  "affects_gameplay": true
+}
