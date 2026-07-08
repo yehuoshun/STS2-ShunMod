@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Models;
@@ -105,8 +106,7 @@ internal static class InfiniteUpgrade_Safety
     private static readonly HashSet<string> DrawSensitiveMethods =
         ["BeforeHandDraw", "AfterCardDrawn", "ModifyHandDraw"];
 
-    private static readonly object SyncRoot = new();
-    private static readonly Dictionary<Type, bool> DrawSensitiveCache = new();
+    private static readonly ConcurrentDictionary<Type, bool> DrawSensitiveCache = new();
 
     public static bool CanUseUnlimitedGrowth(CardModel card, int originalMaxUpgradeLevel)
     {
@@ -141,24 +141,20 @@ internal static class InfiniteUpgrade_Safety
 
     private static bool IsDrawSensitive(Type cardType)
     {
-        lock (SyncRoot)
-        {
-            if (DrawSensitiveCache.TryGetValue(cardType, out var cached)) return cached;
-        }
+        return DrawSensitiveCache.GetOrAdd(cardType, ComputeDrawSensitive);
+    }
 
-        var sensitive = false;
+    private static bool ComputeDrawSensitive(Type cardType)
+    {
         for (var t = cardType; t != null && typeof(CardModel).IsAssignableFrom(t); t = t.BaseType)
         {
             foreach (var methodName in DrawSensitiveMethods)
             {
                 var method = t.GetMethod(methodName,
                     BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-                if (method != null && !method.IsAbstract) { sensitive = true; break; }
+                if (method != null && !method.IsAbstract) return true;
             }
-            if (sensitive) break;
         }
-
-        lock (SyncRoot) { DrawSensitiveCache[cardType] = sensitive; }
-        return sensitive;
+        return false;
     }
 }
