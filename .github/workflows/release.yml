@@ -71,12 +71,14 @@ for f in files:
       - name: Package individual zips
         run: |
           BUILD_DIR=.godot/mono/temp/bin/Release
-          for proj in Core Shun Tweaks Compat; do
-            ASM="ShunMod_${proj}"
+          for entry in "Core|ShunMod.Core" "Shun|ShunMod.Shun" "Tweaks|ShunMod.Tweaks" "Compat|ShunMod.Compat"; do
+            PROJ="${entry%%|*}"
+            DIR="${entry##*|}"
+            ASM="ShunMod_${PROJ}"
             echo "=== Packaging ${ASM} ==="
             mkdir -p "publish/${ASM}"
             cp "$BUILD_DIR/${ASM}.dll" "publish/${ASM}/"
-            cp "${ASM}/${ASM}.json" "publish/${ASM}/"
+            cp "${DIR}/${ASM}.json" "publish/${ASM}/"
             PCK=$(find . -maxdepth 1 -name "${ASM}.pck" -type f 2>/dev/null | head -1)
             if [ -z "$PCK" ]; then
               PCK=$(find "$BUILD_DIR" -name "${ASM}.pck" -type f 2>/dev/null | head -1)
@@ -93,11 +95,13 @@ for f in files:
         run: |
           BUILD_DIR=.godot/mono/temp/bin/Release
           mkdir -p publish
-          for proj in Core Shun Tweaks Compat; do
-            ASM="ShunMod_${proj}"
+          for entry in "Core|ShunMod.Core" "Shun|ShunMod.Shun" "Tweaks|ShunMod.Tweaks" "Compat|ShunMod.Compat"; do
+            PROJ="${entry%%|*}"
+            DIR="${entry##*|}"
+            ASM="ShunMod_${PROJ}"
             mkdir -p "publish/${ASM}"
             cp "$BUILD_DIR/${ASM}.dll" "publish/${ASM}/"
-            cp "${ASM}/${ASM}.json" "publish/${ASM}/"
+            cp "${DIR}/${ASM}.json" "publish/${ASM}/"
           done
           # Shun 的 pck
           PCK=$(find . -maxdepth 1 -name "ShunMod_Shun.pck" -type f 2>/dev/null | head -1)
