@@ -19,6 +19,9 @@ namespace ShunMod.Shun.Cards;
 [CardPool(typeof(ColorlessCardPool))]
 public class ShunModForeverStrike : CardModel
 {
+    public override bool CanBeGeneratedByModifiers => false;
+    public override bool CanBeGeneratedInCombat => false;
+
     public ShunModForeverStrike()
         : base(0, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy)
     {
