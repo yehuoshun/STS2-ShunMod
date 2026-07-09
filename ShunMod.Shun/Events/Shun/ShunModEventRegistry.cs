@@ -83,11 +83,23 @@ internal static class ModelDbInit_SafePatch
         Log.Info($"[ShunMod_Shun] SafeInit: {allTypes.Length} 类型, {created} 新建, {contentById.Count - created} 已存在, {ShunModEventRegistry.EventTypes.Count} 事件类型");
 
         // 注册 ShunMod 事件（Register 内部含去重检查）
+        // 注意：mod 程序集中的类型不在 AllAbstractModelSubtypes 中，
+        // 需要手动创建实例，否则 contentById 里找不到，事件不会出现。
         foreach (var type in ShunModEventRegistry.EventTypes)
         {
             var id = ModelDb.GetId(type);
             if (contentById.TryGetValue(id, out var model) && model is EventModel em)
+            {
                 ShunModEventRegistry.Register(em);
+            }
+            else
+            {
+                // mod 类型不在 AllAbstractModelSubtypes 中，手动创建
+                em = (EventModel)Activator.CreateInstance(type)!;
+                contentById[id] = em;
+                ShunModEventRegistry.Register(em);
+                created++;
+            }
         }
 
         return false; // 跳过原版 Init
