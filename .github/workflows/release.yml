@@ -94,21 +94,46 @@ jobs:
           cd publish && zip -r "../STS2_ShunMod.zip" . && cd ..
           echo "  Packaged: $(ls -lh STS2_ShunMod.zip | awk '{print $5}')"
 
+      - name: Bump all module versions
+        run: |
+          bump_json() {
+            local file="$1"
+            local cur=$(python3 -c "import json; print(json.load(open('${file}'))['version'])")
+            local maj=$(echo "${cur#v}" | cut -d. -f1)
+            local min=$(echo "${cur#v}" | cut -d. -f2)
+            local pat=$(echo "${cur#v}" | cut -d. -f3)
+            local new="v${maj}.${min}.$((pat + 1))"
+            echo "  ${file}: ${cur} → ${new}"
+            python3 -c "import json; d=json.load(open('${file}')); d['version']='${new}'; json.dump(d, open('${file}','w'), indent=2, ensure_ascii=False)"
+            git add "${file}"
+          }
+
+          echo "=== Bumping versions ==="
+          bump_json "ShunMod.Core/ShunMod_Core.json"
+          bump_json "ShunMod.Shun/ShunMod_Shun.json"
+          bump_json "ShunMod.Tweaks/ShunMod_Tweaks.json"
+          bump_json "ShunMod.Compat/ShunMod_Compat.json"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: bump module versions"
+          git push origin HEAD:main
+
       - name: Get release tag
         id: ver
         run: |
           # 找最新的 release tag，不存在则初始 v0.1.0
-          LAST=$(git tag --list 'v*' --sort=-v:refname | head -1)
-          if [ -z "$LAST" ]; then
-            NEW="v0.1.0"
-          else
-            # 去掉 v 前缀，递增 patch
-            V="${LAST#v}"
-            IFS='.' read -r maj min pat <<< "$V"
-            NEW="v${maj}.${min}.$((pat + 1))"
-          fi
-          echo "last: $LAST  ->  new: $NEW"
-          echo "TAG=$NEW" >> $GITHUB_OUTPUT
+          # 也可以用各模块最高版本作为 tag
+          CORE_V=$(python3 -c "import json; print(json.load(open('ShunMod.Core/ShunMod_Core.json'))['version'])")
+          SHUN_V=$(python3 -c "import json; print(json.load(open('ShunMod.Shun/ShunMod_Shun.json'))['version'])")
+          TWEAKS_V=$(python3 -c "import json; print(json.load(open('ShunMod.Tweaks/ShunMod_Tweaks.json'))['version'])")
+          COMPAT_V=$(python3 -c "import json; print(json.load(open('ShunMod.Compat/ShunMod_Compat.json'))['version'])")
+
+          # 取最高版本作为 release tag
+          HIGHEST=$(echo -e "${CORE_V}\n${SHUN_V}\n${TWEAKS_V}\n${COMPAT_V}" | sort -V | tail -1)
+          echo "modules: Core=${CORE_V} Shun=${SHUN_V} Tweaks=${TWEAKS_V} Compat=${COMPAT_V}"
+          echo "release tag: ${HIGHEST}"
+          echo "TAG=${HIGHEST}" >> $GITHUB_OUTPUT
 
       - name: Generate release notes
         run: |
