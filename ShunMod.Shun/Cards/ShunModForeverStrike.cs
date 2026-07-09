@@ -20,7 +20,7 @@ namespace ShunMod.Shun.Cards;
 public class ShunModForeverStrike : CardModel
 {
     public ShunModForeverStrike()
-        : base(0, CardType.Attack, CardRarity.Common, TargetType.Enemy)
+        : base(0, CardType.Attack, CardRarity.Common, TargetType.AnyEnemy)
     {
     }
 
