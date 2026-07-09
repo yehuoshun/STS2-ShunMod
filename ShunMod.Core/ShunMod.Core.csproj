@@ -37,12 +37,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <AdditionalFiles Include="..\ShunMod.Shun\assets\localization\**\*.json" />
-    </ItemGroup>
-
-    <ItemGroup>
         <None Include="..\project.godot"/>
-        <None Include="..\ShunMod.Shun\assets\**" />
     </ItemGroup>
 
     <ItemGroup>

@@ -11,6 +11,10 @@
         <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
         <PathMap>$(AppOutputBase)=\.\</PathMap>
         <GodotDisabledSourceGenerators>GodotPluginsInitializer</GodotDisabledSourceGenerators>
+        <!-- PckPacker: 只打包 assets/，排除 .cs 文件，输出用 AssemblyName 命名 -->
+        <PckPackerSourceDir>assets/</PckPackerSourceDir>
+        <PckPackerResPrefix>$(AssemblyName)</PckPackerResPrefix>
+        <PckPackerOutputPath>$(OutputPath)$(AssemblyName).pck</PckPackerOutputPath>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -42,16 +46,16 @@
     </ItemGroup>
 
     <ItemGroup>
-        <AdditionalFiles Include="..\ShunMod.Shun\assets\localization\**\*.json" />
+        <AdditionalFiles Include="assets\localization\**\*.json" />
     </ItemGroup>
 
     <ItemGroup>
         <None Include="..\project.godot"/>
-        <None Include="..\ShunMod.Shun\assets\**" />
+        <None Include="assets\**" />
     </ItemGroup>
 
     <ItemGroup>
-        <GodotResourceFiles Include="..\ShunMod.Shun\assets\**"/>
+        <GodotResourceFiles Include="assets\**"/>
     </ItemGroup>
 
     <ItemGroup>
