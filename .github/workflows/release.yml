@@ -97,82 +97,82 @@ jobs:
       - name: Bump changed modules
         run: |
           python3 << 'PYEOF'
-import json, os, subprocess
+          import json, os, subprocess
 
-MODULES = [
-    ('ShunMod.Core/ShunMod_Core.json', 'ShunMod.Core'),
-    ('ShunMod.Shun/ShunMod_Shun.json', 'ShunMod.Shun'),
-    ('ShunMod.Tweaks/ShunMod_Tweaks.json', 'ShunMod.Tweaks'),
-    ('ShunMod.Compat/ShunMod_Compat.json', 'ShunMod.Compat'),
-]
+          MODULES = [
+              ('ShunMod.Core/ShunMod_Core.json', 'ShunMod.Core'),
+              ('ShunMod.Shun/ShunMod_Shun.json', 'ShunMod.Shun'),
+              ('ShunMod.Tweaks/ShunMod_Tweaks.json', 'ShunMod.Tweaks'),
+              ('ShunMod.Compat/ShunMod_Compat.json', 'ShunMod.Compat'),
+          ]
 
-prev = subprocess.run(
-    ['git', 'describe', '--tags', '--abbrev=0', 'HEAD^'],
-    capture_output=True, text=True
-).stdout.strip() or None
+          prev = subprocess.run(
+              ['git', 'describe', '--tags', '--abbrev=0', 'HEAD^'],
+              capture_output=True, text=True
+          ).stdout.strip() or None
 
-bumped = []
-for json_path, check_dir in MODULES:
-    if prev:
-        r = subprocess.run(
-            ['git', 'diff', f'{prev}..HEAD', '--name-only', '--', f'{check_dir}/'],
-            capture_output=True, text=True
-        )
-        changed = bool(r.stdout.strip())
-    else:
-        changed = True
+          bumped = []
+          for json_path, check_dir in MODULES:
+              if prev:
+                  r = subprocess.run(
+                      ['git', 'diff', f'{prev}..HEAD', '--name-only', '--', f'{check_dir}/'],
+                      capture_output=True, text=True
+                  )
+                  changed = bool(r.stdout.strip())
+              else:
+                  changed = True
 
-    if changed:
-        with open(json_path) as f:
-            d = json.load(f)
-        parts = d['version'].lstrip('v').split('.')
-        new_v = f'v{parts[0]}.{parts[1]}.{int(parts[2]) + 1}'
-        print(f'  {json_path}: {d["version"]} -> {new_v}')
-        d['version'] = new_v
-        with open(json_path, 'w') as f:
-            json.dump(d, f, indent=2, ensure_ascii=False)
-        f.flush()
-        os.fsync(f.fileno())
-        subprocess.run(['git', 'add', json_path], check=True)
-        bumped.append(json_path)
-    else:
-        print(f'  {json_path}: unchanged, skipped')
+              if changed:
+                  with open(json_path) as f:
+                      d = json.load(f)
+                  parts = d['version'].lstrip('v').split('.')
+                  new_v = f'v{parts[0]}.{parts[1]}.{int(parts[2]) + 1}'
+                  print(f'  {json_path}: {d["version"]} -> {new_v}')
+                  d['version'] = new_v
+                  with open(json_path, 'w') as f:
+                      json.dump(d, f, indent=2, ensure_ascii=False)
+                  f.flush()
+                  os.fsync(f.fileno())
+                  subprocess.run(['git', 'add', json_path], check=True)
+                  bumped.append(json_path)
+              else:
+                  print(f'  {json_path}: unchanged, skipped')
 
-if not bumped:
-    print('No modules changed, nothing to bump.')
-    exit(0)
+          if not bumped:
+              print('No modules changed, nothing to bump.')
+              exit(0)
 
-subprocess.run(['git', 'config', 'user.name', 'github-actions[bot]'], check=True)
-subprocess.run(['git', 'config', 'user.email', 'github-actions[bot]@users.noreply.github.com'], check=True)
-subprocess.run(['git', 'commit', '-m', 'chore: bump module versions'], check=True)
-subprocess.run(['git', 'push', 'origin', 'HEAD:main'], check=True)
-PYEOF
+          subprocess.run(['git', 'config', 'user.name', 'github-actions[bot]'], check=True)
+          subprocess.run(['git', 'config', 'user.email', 'github-actions[bot]@users.noreply.github.com'], check=True)
+          subprocess.run(['git', 'commit', '-m', 'chore: bump module versions'], check=True)
+          subprocess.run(['git', 'push', 'origin', 'HEAD:main'], check=True)
+          PYEOF
 
       - name: Get release tag
         id: ver
         run: |
           python3 << 'PYEOF'
-import json, os
+          import json, os
 
-modules = [
-    'ShunMod.Core/ShunMod_Core.json',
-    'ShunMod.Shun/ShunMod_Shun.json',
-    'ShunMod.Tweaks/ShunMod_Tweaks.json',
-    'ShunMod.Compat/ShunMod_Compat.json',
-]
+          modules = [
+              'ShunMod.Core/ShunMod_Core.json',
+              'ShunMod.Shun/ShunMod_Shun.json',
+              'ShunMod.Tweaks/ShunMod_Tweaks.json',
+              'ShunMod.Compat/ShunMod_Compat.json',
+          ]
 
-versions = []
-for path in modules:
-    with open(path) as f:
-        d = json.load(f)
-    versions.append(d['version'])
+          versions = []
+          for path in modules:
+              with open(path) as f:
+                  d = json.load(f)
+              versions.append(d['version'])
 
-highest = sorted(versions, key=lambda v: [int(x) for x in v.lstrip('v').split('.')])[-1]
-print(f'module versions: {versions}')
-print(f'release tag: {highest}')
-with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
-    f.write(f'TAG={highest}\n')
-PYEOF
+          highest = sorted(versions, key=lambda v: [int(x) for x in v.lstrip('v').split('.')])[-1]
+          print(f'module versions: {versions}')
+          print(f'release tag: {highest}')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'TAG={highest}\n')
+          PYEOF
 
       - name: Generate release notes
         run: |

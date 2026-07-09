@@ -19,46 +19,46 @@ jobs:
       - name: Bump version (push only)
         if: github.event_name == 'push'
         run: |
-          python3 -c "
-import json, subprocess
+          python3 << 'PYEOF'
+          import json, subprocess
 
-result = subprocess.run(
-    ['git', 'diff', '--name-only', 'HEAD~1', 'HEAD'],
-    capture_output=True, text=True
-)
-changed = result.stdout.splitlines()
-print('Changed files:', changed)
+          result = subprocess.run(
+              ['git', 'diff', '--name-only', 'HEAD~1', 'HEAD'],
+              capture_output=True, text=True
+          )
+          changed = result.stdout.splitlines()
+          print('Changed files:', changed)
 
-modules = {
-    'ShunMod.Core':   'ShunMod.Core/ShunMod_Core.json',
-    'ShunMod.Shun':   'ShunMod.Shun/ShunMod_Shun.json',
-    'ShunMod.Tweaks': 'ShunMod.Tweaks/ShunMod_Tweaks.json',
-    'ShunMod.Compat': 'ShunMod.Compat/ShunMod_Compat.json',
-}
+          modules = {
+              'ShunMod.Core':   'ShunMod.Core/ShunMod_Core.json',
+              'ShunMod.Shun':   'ShunMod.Shun/ShunMod_Shun.json',
+              'ShunMod.Tweaks': 'ShunMod.Tweaks/ShunMod_Tweaks.json',
+              'ShunMod.Compat': 'ShunMod.Compat/ShunMod_Compat.json',
+          }
 
-touched = set()
-for f in changed:
-    for mod, json_path in modules.items():
-        if f.startswith(mod + '/'):
-            touched.add(mod)
+          touched = set()
+          for f in changed:
+              for mod, json_path in modules.items():
+                  if f.startswith(mod + '/'):
+                      touched.add(mod)
 
-if not touched:
-    print('No module code changed, skip bump')
-    exit(0)
+          if not touched:
+              print('No module code changed, skip bump')
+              exit(0)
 
-print('Touched modules:', touched)
+          print('Touched modules:', touched)
 
-for mod, json_path in modules.items():
-    if mod not in touched:
-        continue
-    d = json.load(open(json_path))
-    cur = d['version']
-    maj, min, pat = cur.lstrip('v').split('.')
-    new = 'v' + maj + '.' + min + '.' + str(int(pat) + 1)
-    d['version'] = new
-    json.dump(d, open(json_path, 'w'), indent=2, ensure_ascii=False)
-    print(f'  {mod}: {cur} -> {new}')
-"
+          for mod, json_path in modules.items():
+              if mod not in touched:
+                  continue
+              d = json.load(open(json_path))
+              cur = d['version']
+              maj, min, pat = cur.lstrip('v').split('.')
+              new = 'v' + maj + '.' + min + '.' + str(int(pat) + 1)
+              d['version'] = new
+              json.dump(d, open(json_path, 'w'), indent=2, ensure_ascii=False)
+              print(f'  {mod}: {cur} -> {new}')
+          PYEOF
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add ShunMod.*/ShunMod_*.json
