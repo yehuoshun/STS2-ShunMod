@@ -33,19 +33,6 @@ public static class ShunModEventRegistry
 }
 
 /// <summary>
-///     将 ShunModEventRegistry.SharedEvents 注入 ModelDb.AllSharedEvents。
-/// </summary>
-[HarmonyPatch(typeof(ModelDb), nameof(ModelDb.AllSharedEvents), MethodType.Getter)]
-internal static class AllSharedEvents_InjectPatch
-{
-    [HarmonyPostfix]
-    private static IEnumerable<EventModel> Postfix(IEnumerable<EventModel> __result)
-    {
-        return __result.Concat(ShunModEventRegistry.SharedEvents).ToList();
-    }
-}
-
-/// <summary>
 ///     ModelDb.Init Prefix — 跳过原版 Init，改为 SafeInit 去重构造。
 ///     原版 Init 遍历 AllAbstractModelSubtypes 会触发 DuplicateModelException。
 ///     return false 跳过原版 Init，ExecuteEssential 中后续的 ModelIdSerializationCache.Init + InitIds 正常执行。
@@ -61,9 +48,25 @@ internal static class ModelDbInit_SafePatch
     [HarmonyPrefix]
     private static bool Prefix()
     {
-        if (ContentByIdField?.GetValue(null) is not IDictionary<ModelId, AbstractModel> contentById)
+        // 检查字段是否存在
+        if (ContentByIdField == null)
         {
-            Log.Warn("[ShunMod_Shun] _contentById 字段不可用，回退到原版 Init");
+            Log.Warn("[ShunMod_Shun] _contentById 字段不存在，回退到原版 Init");
+            return true;
+        }
+
+        // 获取字段值，如果为 null 则创建新字典（原版 Init 尚未初始化该字段）
+        var rawValue = ContentByIdField.GetValue(null);
+        if (rawValue == null)
+        {
+            Log.Info("[ShunMod_Shun] _contentById 为 null，创建新字典");
+            rawValue = new Dictionary<ModelId, AbstractModel>();
+            ContentByIdField.SetValue(null, rawValue);
+        }
+
+        if (rawValue is not IDictionary<ModelId, AbstractModel> contentById)
+        {
+            Log.Warn("[ShunMod_Shun] _contentById 类型不匹配，回退到原版 Init");
             return true;
         }
 
@@ -107,7 +110,45 @@ internal static class ModelDbInit_SafePatch
 }
 
 /// <summary>
-///     劫持 EventModel.CreateInitialPortrait，将默认图片路径替换为 mod 资源路径。
+///     将 ShunModEventRegistry.SharedEvents 注入 ModelDb.AllSharedEvents。
+///     兜底创建：如果 ModelDbInit_SafePatch 因故未执行（如 _contentById 字段不可用），
+///     在 AllSharedEvents 首次被访问时自动创建事件实例并注册。
+/// </summary>
+[HarmonyPatch(typeof(ModelDb), nameof(ModelDb.AllSharedEvents), MethodType.Getter)]
+internal static class AllSharedEvents_InjectPatch
+{
+    [HarmonyPostfix]
+    private static IEnumerable<EventModel> Postfix(IEnumerable<EventModel> __result)
+    {
+        // 兜底：如果 SafeInit 没跑，这里自己创建事件
+        if (ShunModEventRegistry.SharedEvents.Count == 0)
+        {
+            TryRegisterEvents();
+        }
+
+        return __result.Concat(ShunModEventRegistry.SharedEvents).ToList();
+    }
+
+    private static void TryRegisterEvents()
+    {
+        foreach (var type in ShunModEventRegistry.EventTypes)
+        {
+            try
+            {
+                var em = (EventModel)Activator.CreateInstance(type)!;
+                ShunModEventRegistry.Register(em);
+                Log.Info($"[ShunMod_Shun] 兜底注册事件: {type.Name}");
+            }
+            catch (Exception ex)
+            {
+                Log.Warn($"[ShunMod_Shun] 兜底注册事件 {type.Name} 失败: {ex.Message}");
+            }
+        }
+    }
+}
+
+/// <summary>
+///     劫持 EventModel.CreateInitialPortrait，将默认图片路径替换为 mod 资源路径
 ///     使用 Dictionary 缓存纹理引用，避免每次创建肖像都查文件系统。
 /// </summary>
 [HarmonyPatch(typeof(EventModel), "CreateInitialPortrait")]
