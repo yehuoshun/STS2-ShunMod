@@ -38,6 +38,9 @@ public static class ModEntry
                 Log.Error($"[{id}]   \u2192 inner: {e.InnerException.GetType().Name}: {e.InnerException.Message}");
         }
 
+        // 初始化自定义词条系统
+        ShunKeywordInit.Initialize();
+
         Log.Info($"[{id}] Initialization complete");
         Log.Info($"[{id}] ============================================================");
     }

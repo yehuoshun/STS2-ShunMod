@@ -2,5 +2,7 @@
   "SHUN_MOD_SUPER_APOTHEOSIS.title": "Super Apotheosis",
   "SHUN_MOD_SUPER_APOTHEOSIS.description": "Upgrade all cards in your hand for the rest of combat. Also upgrade all cards in your deck.",
   "SHUN_MOD_STOKE_MODIFIED.title": "Stoke·Modified",
-  "SHUN_MOD_STOKE_MODIFIED.description": "Select any cards in your hand to [gold]Exhaust[/gold].\nAdd 1 random {IfUpgraded:show:[gold]Upgraded[/gold] |}card into your [gold]Hand[/gold] for each card [gold]Exhausted[/gold]."
+  "SHUN_MOD_STOKE_MODIFIED.description": "Select any cards in your hand to [gold]Exhaust[/gold].\nAdd 1 random {IfUpgraded:show:[gold]Upgraded[/gold] |}card into your [gold]Hand[/gold] for each card [gold]Exhausted[/gold].",
+  "SHUN_MOD_FOREVER_STRIKE.title": "Forever Strike",
+  "SHUN_MOD_FOREVER_STRIKE.description": "Deal {Dmg} damage.\n[gold]Forever[/gold]."
 }

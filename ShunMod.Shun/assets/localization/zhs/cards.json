@@ -2,5 +2,7 @@
   "SHUN_MOD_SUPER_APOTHEOSIS.title": "超级神化",
   "SHUN_MOD_SUPER_APOTHEOSIS.description": "升级所有卡牌。同时升级牌组中的所有卡牌。 ",
   "SHUN_MOD_STOKE_MODIFIED.title": "添柴·改",
-  "SHUN_MOD_STOKE_MODIFIED.description": "选择任意手牌[gold]消耗[/gold]。\n每[gold]消耗[/gold]一张牌，将1张随机{IfUpgraded:show:已[gold]升级[/gold]的|}牌加入你的[gold]手牌[/gold]。"
+  "SHUN_MOD_STOKE_MODIFIED.description": "选择任意手牌[gold]消耗[/gold]。\n每[gold]消耗[/gold]一张牌，将1张随机{IfUpgraded:show:已[gold]升级[/gold]的|}牌加入你的[gold]手牌[/gold]。",
+  "SHUN_MOD_FOREVER_STRIKE.title": "永远打击",
+  "SHUN_MOD_FOREVER_STRIKE.description": "造成 {Dmg} 点伤害。\n[gold]永远[/gold]。"
 }
