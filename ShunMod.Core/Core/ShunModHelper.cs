@@ -12,7 +12,7 @@ namespace ShunMod.Core;
 /// </summary>
 public static class ShunModHelper
 {
-    private const string ResourceRoot = "res://ShunMod.Shun/assets/images";
+    private const string ResourceRoot = "res://ShunMod_Shun/images";
     private const string ShunModCardsPath = "cards/shunCards";
     private const string ShunModRelicsPath = "relics/shunRelics";
     private const string ShunModEventsPath = "events/shunEvents";
