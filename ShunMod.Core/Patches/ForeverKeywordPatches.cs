@@ -1,7 +1,4 @@
-using System.Linq;
-using System.Threading.Tasks;
 using HarmonyLib;
-using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Models;
@@ -11,108 +8,57 @@ namespace ShunMod.Core.Patches;
 
 /// <summary>
 ///     【永远】词条核心补丁。
-///     效果：拥有"永远"词条的卡牌，在任何时候都会自动回到手牌。
+///     效果：拥有"永远"词条的卡牌，任何时刻进入非手牌堆都会立即跳回手牌。
+///     （打出、消耗、洗回抽牌堆、弃牌——全部拦截。）
 /// </summary>
 [HarmonyPatch]
 public static class ForeverKeywordPatches
 {
     private const string ForeverId = "forever";
 
+    [ThreadStatic]
+    private static bool _isRedirecting;
+
     // ═══════════════════════════════════════════════════════════
-    //  1. 卡牌打出后 → 直接返回手牌
+    //  1. 拦截所有堆添加操作 → 转去手牌
     // ═══════════════════════════════════════════════════════════
-    //  GetResultPileType() 决定卡牌打出后去哪个堆。
-    //  对"永远"卡牌返回 Hand，让卡牌打出后直接回到手牌。
+    //  AddInternal 是所有堆操作的最底层方法。
+    //  Prefix 返回 false 跳过原方法，手动加到 Hand 堆。
+    // ═══════════════════════════════════════════════════════════
+    [HarmonyPatch(typeof(CardPile), nameof(CardPile.AddInternal))]
+    [HarmonyPrefix]
+    static bool AddInternal_Prefix(CardPile __instance, CardModel card)
+    {
+        // 递归保护
+        if (_isRedirecting) return true;
+        // 没有"永远"词条 → 放行
+        if (!CustomKeywordRegistry.HasKeyword(card, ForeverId)) return true;
+        // 非战斗状态 → 放行（卡牌组构建等）
+        if (!CombatManager.Instance.IsInProgress) return true;
+        // 目标已经是手牌或被打出中 → 放行
+        if (__instance.Type == PileType.Hand || __instance.Type == PileType.Play) return true;
+
+        // 跳转到手牌
+        var handPile = PileType.Hand.GetPile(card.Owner);
+        _isRedirecting = true;
+        handPile.AddInternal(card);
+        _isRedirecting = false;
+        return false; // 跳过原 AddInternal 调用
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  2. 卡牌打出后 → 直接返回手牌
+    // ═══════════════════════════════════════════════════════════
+    //  配合 AddInternal 拦截，确保 OnPlayWrapper 的 resultPile
+    //  不会把卡牌送到弃牌/消耗堆。
     // ═══════════════════════════════════════════════════════════
     [HarmonyPatch(typeof(CardModel), "GetResultPileType")]
     [HarmonyPostfix]
     static void GetResultPileType_Postfix(CardModel __instance, ref PileType __result)
     {
-        if (!CustomKeywordRegistry.HasKeyword(__instance, ForeverId))
-            return;
-        if (!CombatManager.Instance.IsInProgress)
-            return;
+        if (!CustomKeywordRegistry.HasKeyword(__instance, ForeverId)) return;
+        if (!CombatManager.Instance.IsInProgress) return;
 
         __result = PileType.Hand;
-    }
-
-    // ═══════════════════════════════════════════════════════════
-    //  2. 回合结束时→ 从所有非手牌堆回到手牌
-    // ═══════════════════════════════════════════════════════════
-    //  EndPlayerTurnPhaseTwoInternal 结束后，扫描抽牌堆/弃牌堆/消耗堆，
-    //  将"永远"卡牌移回手牌。
-    // ═══════════════════════════════════════════════════════════
-    [HarmonyPatch(typeof(CombatManager), "EndPlayerTurnPhaseTwoInternal")]
-    [HarmonyPostfix]
-    static async Task EndPlayerTurn_Postfix(CombatManager __instance)
-    {
-        var state = __instance.DebugOnlyGetState();
-        if (state == null) return;
-
-        foreach (var player in state.Players)
-        {
-            // 收集所有非手牌堆中的"永远"卡牌
-            var foreverCards = new List<CardModel>();
-
-            void ScanPile(PileType pileType)
-            {
-                var pile = pileType.GetPile(player);
-                if (pile == null) return;
-                foreach (var card in pile.Cards.ToList())
-                {
-                    if (CustomKeywordRegistry.HasKeyword(card, ForeverId))
-                        foreverCards.Add(card);
-                }
-            }
-
-            ScanPile(PileType.Draw);
-            ScanPile(PileType.Discard);
-            ScanPile(PileType.Exhaust);
-
-            if (foreverCards.Count == 0) continue;
-
-            // 移回手牌
-            var handPile = PileType.Hand.GetPile(player);
-            foreach (var card in foreverCards)
-            {
-                if (card.Pile?.Type == PileType.Hand) continue;
-
-                card.RemoveFromCurrentPile();
-                handPile.AddInternal(card);
-            }
-        }
-    }
-
-    // ═══════════════════════════════════════════════════════════
-    //  3. 战斗开始时→ 将抽牌堆中的"永远"卡牌移入手牌
-    // ═══════════════════════════════════════════════════════════
-    [HarmonyPatch(typeof(CombatManager), "StartTurn")]
-    [HarmonyPostfix]
-    static async Task StartTurn_Postfix(CombatManager __instance)
-    {
-        var state = __instance.DebugOnlyGetState();
-        if (state == null) return;
-
-        // 只在玩家回合开始时检查
-        if (state.CurrentSide != CombatSide.Player) return;
-
-        foreach (var player in state.Players)
-        {
-            var drawPile = PileType.Draw.GetPile(player);
-            if (drawPile == null) continue;
-
-            var foreverCards = drawPile.Cards
-                .Where(c => CustomKeywordRegistry.HasKeyword(c, ForeverId))
-                .ToList();
-
-            if (foreverCards.Count == 0) continue;
-
-            var handPile = PileType.Hand.GetPile(player);
-            foreach (var card in foreverCards)
-            {
-                card.RemoveFromCurrentPile();
-                handPile.AddInternal(card);
-            }
-        }
     }
 }
