@@ -36,6 +36,11 @@
         <Sts2DataDir>$(Sts2Path)/data_sts2_linuxbsd_x86_64</Sts2DataDir>
     </PropertyGroup>
 
+    <!-- Debug 构建跳过 Publicizer（3x 加速），Release 构建正常跑 -->
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+        <PublicizeSts>false</PublicizeSts>
+    </PropertyGroup>
+
     <!-- macOS -->
     <PropertyGroup Condition="'$(IsOSX)' == 'true'">
         <SteamLibraryPath Condition="'$(SteamLibraryPath)' == ''">$(HOME)/Library/Application Support/Steam/steamapps</SteamLibraryPath>
