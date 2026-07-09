@@ -22,28 +22,30 @@ public static class ForeverKeywordPatches
     // ═══════════════════════════════════════════════════════════
     //  1. 拦截所有堆添加操作 → 转去手牌
     // ═══════════════════════════════════════════════════════════
-    //  AddInternal 是所有堆操作的最底层方法。
-    //  Prefix 返回 false 跳过原方法，手动加到 Hand 堆。
+    //  必须用 Postfix：Prefix 破坏 CardPileCmd.Add 的内部状态追踪
+    //  （卡被从原堆移除但未加进目标堆，后续 hook/视觉更新全乱）。
+    //  Postfix 在卡牌已加入目标堆后立即转移到手牌，CardPileCmd.Add
+    //  的流程不受影响。
     // ═══════════════════════════════════════════════════════════
     [HarmonyPatch(typeof(CardPile), nameof(CardPile.AddInternal))]
-    [HarmonyPrefix]
-    static bool AddInternal_Prefix(CardPile __instance, CardModel card)
+    [HarmonyPostfix]
+    static void AddInternal_Postfix(CardPile __instance, CardModel card)
     {
         // 递归保护
-        if (_isRedirecting) return true;
-        // 没有"永远"词条 → 放行
-        if (!CustomKeywordRegistry.HasKeyword(card, ForeverId)) return true;
-        // 非战斗状态 → 放行（卡牌组构建等）
-        if (!CombatManager.Instance.IsInProgress) return true;
-        // 目标已经是手牌或被打出中 → 放行
-        if (__instance.Type == PileType.Hand || __instance.Type == PileType.Play) return true;
+        if (_isRedirecting) return;
+        // 没有"永远"词条 → 不处理
+        if (!CustomKeywordRegistry.HasKeyword(card, ForeverId)) return;
+        // 非战斗状态 → 不处理（卡牌组构建等）
+        if (!CombatManager.Instance.IsInProgress) return;
+        // 目标已经是手牌或被正常打出中 → 不处理
+        if (__instance.Type == PileType.Hand || __instance.Type == PileType.Play) return;
 
-        // 跳转到手牌
+        // 从当前堆移除，加入手牌
         var handPile = PileType.Hand.GetPile(card.Owner);
         _isRedirecting = true;
+        card.RemoveFromCurrentPile();
         handPile.AddInternal(card);
         _isRedirecting = false;
-        return false; // 跳过原 AddInternal 调用
     }
 
     // ═══════════════════════════════════════════════════════════
