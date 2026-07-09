@@ -40,7 +40,7 @@ public class ShunModRelicExchange : ShunEventModel
         new(InitEnchantPool);
 
     // ═══════════════════════════════════════════════════════════
-    //  状态机
+    //  状态
     // ═══════════════════════════════════════════════════════════
 
     private enum TradeState { Menu, SelectLose, SelectGain, SelectEnchant }
@@ -50,18 +50,30 @@ public class ShunModRelicExchange : ShunEventModel
     private TradeMode _mode = TradeMode.Relic;
     private RelicModel? _selectedLoseRelic;
 
+    /// <summary>候选遗物交易池（3 个随机遗物选项）。</summary>
+    private readonly List<RelicModel> _gainOptions = [];
+
+    /// <summary>候选附魔交易池（2 个随机附魔选项）。</summary>
+    private readonly List<EnchantmentModel> _enchantOptions = [];
+
     // ═══════════════════════════════════════════════════════════
-    //  随机选项池（每次 Menu 刷新时重新生成）
+    //  DynamicVars — 固定 10 个槽位，按需使用
+    //  选遗物用 LOSE_1~LOSE_10，选增益用 GAIN_1~GAIN_5，选附魔用 ENCH_1~ENCH_5
     // ═══════════════════════════════════════════════════════════
 
-    private List<RelicModel> _gainOptions = [];
-    private List<EnchantmentModel> _enchantOptions = [];
+    protected override IEnumerable<DynamicVar> CanonicalVars => BuildCanonicalVars();
 
-    // ═══════════════════════════════════════════════════════════
-    //  DynamicVars
-    // ═══════════════════════════════════════════════════════════
-
-    protected override IEnumerable<DynamicVar> CanonicalVars => [];
+    private static IEnumerable<DynamicVar> BuildCanonicalVars()
+    {
+        // 放弃遗物槽位 (10)
+        for (var i = 1; i <= 10; i++) yield return new StringVar($"LOSE_{i}");
+        // 增益遗物槽位 (5)
+        for (var i = 1; i <= 5; i++) yield return new StringVar($"GAIN_{i}");
+        // 附魔槽位 (5)
+        for (var i = 1; i <= 5; i++) yield return new StringVar($"ENCH_{i}");
+        // 放弃遗物名（附魔时的描述）
+        yield return new StringVar("LOSE_RELIC");
+    }
 
     // ═══════════════════════════════════════════════════════════
     //  事件生命周期
@@ -71,7 +83,9 @@ public class ShunModRelicExchange : ShunEventModel
     {
         if (Owner == null) return;
         _state = TradeState.Menu;
+        _selectedLoseRelic = null;
         RollGainOptions();
+        ClearVars();
     }
 
     protected override IReadOnlyList<EventOption> GenerateInitialOptions()
@@ -83,17 +97,17 @@ public class ShunModRelicExchange : ShunEventModel
     //  Roll 逻辑
     // ═══════════════════════════════════════════════════════════
 
-    /// <summary>刷新候选遗物/附魔池（每次 Menu 刷新时调用）。</summary>
     private void RollGainOptions()
     {
-        _gainOptions = Enumerable.Range(0, 3)
+        _gainOptions.Clear();
+        _gainOptions.AddRange(Enumerable.Range(0, 3)
             .Select(_ => RollRandomRelic())
             .OfType<RelicModel>()
             .Distinct()
-            .Take(3)
-            .ToList();
+            .Take(3));
 
-        _enchantOptions = RollRandomEnchants(2);
+        _enchantOptions.Clear();
+        _enchantOptions.AddRange(RollRandomEnchants(2));
     }
 
     private static List<EnchantmentModel> RollRandomEnchants(int count)
@@ -161,10 +175,39 @@ public class ShunModRelicExchange : ShunEventModel
     private static bool IsTradeable(RelicModel r) => TradeableRarities.Contains(r.Rarity);
 
     // ═══════════════════════════════════════════════════════════
-    //  选项构建
+    //  DynamicVar 辅助
     // ═══════════════════════════════════════════════════════════
 
-    /// <summary>主菜单 — 可选：遗物换遗物 / 遗物换附魔 / 扣血刷新 / 离开</summary>
+    private void ClearVars()
+    {
+        for (var i = 1; i <= 10; i++) SetVar($"LOSE_{i}", "");
+        for (var i = 1; i <= 5; i++) SetVar($"GAIN_{i}", "");
+        for (var i = 1; i <= 5; i++) SetVar($"ENCH_{i}", "");
+        SetVar("LOSE_RELIC", "");
+    }
+
+    private void SetVar(string key, string val)
+    {
+        DynamicVarHelper.SetStrValue(DynamicVars, key, val);
+    }
+
+    private static string Str(LocString? loc)
+    {
+        if (loc == null) return "";
+        try
+        {
+            return loc.GetRawText() ?? loc.GetFormattedText() ?? "";
+        }
+        catch (LocException)
+        {
+            return "";
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  主菜单选项
+    // ═══════════════════════════════════════════════════════════
+
     private IReadOnlyList<EventOption> BuildMenuOptions()
     {
         var player = Owner;
@@ -173,7 +216,6 @@ public class ShunModRelicExchange : ShunEventModel
 
         if (!hasTradeable)
         {
-            // 没有可交易的遗物，只能离开
             list.Add(BuildLeaveOption());
             return list;
         }
@@ -217,64 +259,73 @@ public class ShunModRelicExchange : ShunEventModel
         return list;
     }
 
-    /// <summary>选择要放弃的遗物 — 每个可交易遗物一个选项。</summary>
+    // ═══════════════════════════════════════════════════════════
+    //  选放弃遗物
+    // ═══════════════════════════════════════════════════════════
+
     private void ShowSelectLose()
     {
         var player = Owner;
         if (player == null) return;
 
         var available = player.Relics.Where(IsTradeable).ToList();
-        if (available.Count == 0)
-        {
-            ShowMenu();
-            return;
-        }
+        if (available.Count == 0) { ShowMenu(); return; }
 
-        var options = available.Select<RelicModel, EventOption>(relic =>
-        {
-            var lose = relic;
-            var tips = ShunModHelper.SafeRelicHoverTips(lose);
-            var title = BuildLocString($"失去 {Resolve(lose.Title)}");
+        // 设置 DynamicVars
+        var count = Math.Min(available.Count, 10);
+        for (var i = 0; i < count; i++)
+            SetVar($"LOSE_{i + 1}", Str(available[i].Title));
 
-            return new EventOption(this, async () =>
+        // 可选遗物不够 10 个时，空槽位显示空
+        for (var i = count + 1; i <= 10; i++)
+            SetVar($"LOSE_{i}", "");
+
+        var options = new List<EventOption>();
+        for (var i = 0; i < count; i++)
+        {
+            var idx = i;
+            var relic = available[i];
+            var tips = ShunModHelper.SafeRelicHoverTips(relic);
+
+            options.Add(new EventOption(this, async () =>
             {
-                _selectedLoseRelic = lose;
-                if (_mode == TradeMode.Relic)
-                {
-                    _state = TradeState.SelectGain;
-                    ShowSelectGain();
-                }
-                else
-                {
-                    _state = TradeState.SelectEnchant;
-                    ShowSelectEnchant();
-                }
-            }, title, tips);
-        }).ToList();
+                _selectedLoseRelic = relic;
+                if (_mode == TradeMode.Relic) ShowSelectGain();
+                else ShowSelectEnchant();
+            }, $"{Id.Entry}.pages.SELECT_LOSE.options.OPT_LOSE_{idx + 1}", tips));
+        }
 
         SetEventState(L10NLookup("pages.SELECT_LOSE.description"), options);
     }
 
-    /// <summary>选择要获得的遗物 — 3 个随机遗物选项。</summary>
+    // ═══════════════════════════════════════════════════════════
+    //  选获得的遗物
+    // ═══════════════════════════════════════════════════════════
+
     private void ShowSelectGain()
     {
         var player = Owner;
         if (player == null || _gainOptions.Count == 0 || _selectedLoseRelic == null)
-        {
-            ShowMenu();
-            return;
-        }
+        { ShowMenu(); return; }
 
-        var options = _gainOptions.Select<RelicModel, EventOption>((gain, _) =>
+        var count = Math.Min(_gainOptions.Count, 5);
+        for (var i = 0; i < count; i++)
+            SetVar($"GAIN_{i + 1}", Str(_gainOptions[i].Title));
+        for (var i = count + 1; i <= 5; i++)
+            SetVar($"GAIN_{i}", "");
+
+        var options = new List<EventOption>();
+        for (var i = 0; i < count; i++)
         {
-            var lose = _selectedLoseRelic!;
+            var idx = i;
+            var gain = _gainOptions[i];
+            var lose = _selectedLoseRelic;
             var mutableGain = (RelicModel)gain.MutableClone();
             var tips = new List<IHoverTip>();
             tips.AddRange(ShunModHelper.SafeRelicHoverTips(lose));
             tips.AddRange(ShunModHelper.SafeRelicHoverTips(mutableGain));
-            var title = BuildLocString($"获得 {Resolve(mutableGain.Title)}");
 
-            return new EventOption(this, async () =>
+            options.Add(new EventOption(this, async () =>
             {
                 await RelicCmd.Remove(lose);
                 await RelicCmd.Obtain(mutableGain, player);
@@ -282,8 +333,8 @@ public class ShunModRelicExchange : ShunEventModel
                 _selectedLoseRelic = null;
                 RollGainOptions();
                 ShowMenu();
-            }, title, tips);
-        }).ToList();
+            }, $"{Id.Entry}.pages.SELECT_GAIN.options.OPT_GAIN_{idx + 1}", tips));
+        }
 
         // 返回按钮
         options.Add(MenuOpt(() =>
@@ -296,32 +347,41 @@ public class ShunModRelicExchange : ShunEventModel
         SetEventState(L10NLookup("pages.SELECT_GAIN.description"), options);
     }
 
-    /// <summary>选择附魔 — 先选附魔，再选卡牌。</summary>
+    // ═══════════════════════════════════════════════════════════
+    //  选附魔
+    // ═══════════════════════════════════════════════════════════
+
     private void ShowSelectEnchant()
     {
         var player = Owner;
         if (player == null || _enchantOptions.Count == 0 || _selectedLoseRelic == null)
-        {
-            ShowMenu();
-            return;
-        }
+        { ShowMenu(); return; }
 
-        var options = _enchantOptions.Select<EnchantmentModel, EventOption>(ench =>
+        var count = Math.Min(_enchantOptions.Count, 5);
+        for (var i = 0; i < count; i++)
+            SetVar($"ENCH_{i + 1}", Str(_enchantOptions[i].Title));
+        for (var i = count + 1; i <= 5; i++)
+            SetVar($"ENCH_{i}", "");
+
+        SetVar("LOSE_RELIC", Str(_selectedLoseRelic.Title));
+
+        var options = new List<EventOption>();
+        for (var i = 0; i < count; i++)
         {
-            var lose = _selectedLoseRelic!;
+            var idx = i;
+            var ench = _enchantOptions[i];
+            var lose = _selectedLoseRelic;
             var mutableEnch = (EnchantmentModel)ench.MutableClone();
             mutableEnch.Amount = 5;
             var tips = new List<IHoverTip>();
             tips.AddRange(ShunModHelper.SafeRelicHoverTips(lose));
             tips.AddRange(mutableEnch.HoverTips);
-            var title = BuildLocString($"附魔「{Resolve(mutableEnch.Title)}」");
 
-            return new EventOption(this, async () =>
+            options.Add(new EventOption(this, async () =>
             {
                 var deck = player!.Deck.Cards;
                 if (!deck.Any(c => mutableEnch.CanEnchant(c)))
                 {
-                    // 没有可附魔的卡牌，回到选择附魔
                     ShowSelectEnchant();
                     return;
                 }
@@ -331,7 +391,6 @@ public class ShunModRelicExchange : ShunEventModel
                     c => mutableEnch.CanEnchant(c));
                 if (!picked.Any())
                 {
-                    // 取消选择，回到选择附魔
                     ShowSelectEnchant();
                     return;
                 }
@@ -343,8 +402,8 @@ public class ShunModRelicExchange : ShunEventModel
                 _selectedLoseRelic = null;
                 RollGainOptions();
                 ShowMenu();
-            }, title, tips);
-        }).ToList();
+            }, $"{Id.Entry}.pages.SELECT_ENCHANT.options.OPT_ENCH_{idx + 1}", tips));
+        }
 
         // 返回按钮
         options.Add(MenuOpt(() =>
@@ -358,7 +417,7 @@ public class ShunModRelicExchange : ShunEventModel
     }
 
     // ═══════════════════════════════════════════════════════════
-    //  辅助方法
+    //  辅助
     // ═══════════════════════════════════════════════════════════
 
     private void ShowMenu()
@@ -376,25 +435,5 @@ public class ShunModRelicExchange : ShunEventModel
         return new EventOption(this, async () =>
                 SetEventFinished(L10NLookup("pages.CLOSE.description")),
             $"{Id.Entry}.pages.MENU.options.OPT_LEAVE");
-    }
-
-    /// <summary>从原始字符串构建 LocString（用于动态显示遗物/附魔名）。</summary>
-    private static LocString BuildLocString(string rawText)
-    {
-        // LocString 具有 FromRaw 工厂方法，从原始字符串创建
-        return LocString.FromRaw(rawText);
-    }
-
-    private static string Resolve(LocString? loc)
-    {
-        if (loc == null) return "?";
-        try
-        {
-            return loc.GetRawText() ?? loc.GetFormattedText() ?? "?";
-        }
-        catch (LocException)
-        {
-            return "?";
-        }
     }
 }
