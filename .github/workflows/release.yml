@@ -94,53 +94,91 @@ jobs:
           cd publish && zip -r "../STS2_ShunMod.zip" . && cd ..
           echo "  Packaged: $(ls -lh STS2_ShunMod.zip | awk '{print $5}')"
 
-      - name: Bump all module versions
+      - name: Bump changed modules
         run: |
-          bump_json() {
-            local file="$1"
-            local cur=$(python3 -c "import json; print(json.load(open('${file}'))['version'])")
-            local maj=$(echo "${cur#v}" | cut -d. -f1)
-            local min=$(echo "${cur#v}" | cut -d. -f2)
-            local pat=$(echo "${cur#v}" | cut -d. -f3)
-            local new="v${maj}.${min}.$((pat + 1))"
-            echo "  ${file}: ${cur} → ${new}"
-            python3 -c "import json; d=json.load(open('${file}')); d['version']='${new}'; json.dump(d, open('${file}','w'), indent=2, ensure_ascii=False)"
-            git add "${file}"
-          }
+          python3 << 'PYEOF'
+import json, os, subprocess
 
-          echo "=== Bumping versions ==="
-          bump_json "ShunMod.Core/ShunMod_Core.json"
-          bump_json "ShunMod.Shun/ShunMod_Shun.json"
-          bump_json "ShunMod.Tweaks/ShunMod_Tweaks.json"
-          bump_json "ShunMod.Compat/ShunMod_Compat.json"
+MODULES = [
+    ('ShunMod.Core/ShunMod_Core.json', 'ShunMod.Core'),
+    ('ShunMod.Shun/ShunMod_Shun.json', 'ShunMod.Shun'),
+    ('ShunMod.Tweaks/ShunMod_Tweaks.json', 'ShunMod.Tweaks'),
+    ('ShunMod.Compat/ShunMod_Compat.json', 'ShunMod.Compat'),
+]
 
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore: bump module versions"
-          git push origin HEAD:main
+prev = subprocess.run(
+    ['git', 'describe', '--tags', '--abbrev=0', 'HEAD^'],
+    capture_output=True, text=True
+).stdout.strip() or None
+
+bumped = []
+for json_path, check_dir in MODULES:
+    if prev:
+        r = subprocess.run(
+            ['git', 'diff', f'{prev}..HEAD', '--name-only', '--', f'{check_dir}/'],
+            capture_output=True, text=True
+        )
+        changed = bool(r.stdout.strip())
+    else:
+        changed = True
+
+    if changed:
+        with open(json_path) as f:
+            d = json.load(f)
+        parts = d['version'].lstrip('v').split('.')
+        new_v = f'v{parts[0]}.{parts[1]}.{int(parts[2]) + 1}'
+        print(f'  {json_path}: {d["version"]} -> {new_v}')
+        d['version'] = new_v
+        with open(json_path, 'w') as f:
+            json.dump(d, f, indent=2, ensure_ascii=False)
+        f.flush()
+        os.fsync(f.fileno())
+        subprocess.run(['git', 'add', json_path], check=True)
+        bumped.append(json_path)
+    else:
+        print(f'  {json_path}: unchanged, skipped')
+
+if not bumped:
+    print('No modules changed, nothing to bump.')
+    exit(0)
+
+subprocess.run(['git', 'config', 'user.name', 'github-actions[bot]'], check=True)
+subprocess.run(['git', 'config', 'user.email', 'github-actions[bot]@users.noreply.github.com'], check=True)
+subprocess.run(['git', 'commit', '-m', 'chore: bump module versions'], check=True)
+subprocess.run(['git', 'push', 'origin', 'HEAD:main'], check=True)
+PYEOF
 
       - name: Get release tag
         id: ver
         run: |
-          # 找最新的 release tag，不存在则初始 v0.1.0
-          # 也可以用各模块最高版本作为 tag
-          CORE_V=$(python3 -c "import json; print(json.load(open('ShunMod.Core/ShunMod_Core.json'))['version'])")
-          SHUN_V=$(python3 -c "import json; print(json.load(open('ShunMod.Shun/ShunMod_Shun.json'))['version'])")
-          TWEAKS_V=$(python3 -c "import json; print(json.load(open('ShunMod.Tweaks/ShunMod_Tweaks.json'))['version'])")
-          COMPAT_V=$(python3 -c "import json; print(json.load(open('ShunMod.Compat/ShunMod_Compat.json'))['version'])")
+          python3 << 'PYEOF'
+import json, os
 
-          # 取最高版本作为 release tag
-          HIGHEST=$(echo -e "${CORE_V}\n${SHUN_V}\n${TWEAKS_V}\n${COMPAT_V}" | sort -V | tail -1)
-          echo "modules: Core=${CORE_V} Shun=${SHUN_V} Tweaks=${TWEAKS_V} Compat=${COMPAT_V}"
-          echo "release tag: ${HIGHEST}"
-          echo "TAG=${HIGHEST}" >> $GITHUB_OUTPUT
+modules = [
+    'ShunMod.Core/ShunMod_Core.json',
+    'ShunMod.Shun/ShunMod_Shun.json',
+    'ShunMod.Tweaks/ShunMod_Tweaks.json',
+    'ShunMod.Compat/ShunMod_Compat.json',
+]
+
+versions = []
+for path in modules:
+    with open(path) as f:
+        d = json.load(f)
+    versions.append(d['version'])
+
+highest = sorted(versions, key=lambda v: [int(x) for x in v.lstrip('v').split('.')])[-1]
+print(f'module versions: {versions}')
+print(f'release tag: {highest}')
+with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+    f.write(f'TAG={highest}\n')
+PYEOF
 
       - name: Generate release notes
         run: |
           PREV=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
           TAG="${{ steps.ver.outputs.TAG }}"
 
-          # 收集各模块当前版本
           CORE_V=$(python3 -c "import json; print(json.load(open('ShunMod.Core/ShunMod_Core.json'))['version'])")
           SHUN_V=$(python3 -c "import json; print(json.load(open('ShunMod.Shun/ShunMod_Shun.json'))['version'])")
           TWEAKS_V=$(python3 -c "import json; print(json.load(open('ShunMod.Tweaks/ShunMod_Tweaks.json'))['version'])")
@@ -167,7 +205,7 @@ jobs:
           {
             echo "# STS2-ShunMod ${TAG}"
             echo ""
-            echo "## \u{1F4E6} 安装"
+            echo "## 安装"
             echo ""
             echo "下载 \`STS2_ShunMod.zip\`，解压到 \`Mods/\` 目录，包含 4 个模块："
             echo ""
@@ -180,7 +218,7 @@ jobs:
             echo ""
             echo "---"
             echo ""
-            echo "## \u{1F4DD} 更新内容"
+            echo "## 更新内容"
             echo ""
             if [ -n "$PREV" ]; then
               echo "> 自 \`$PREV\` 以来的更改"
@@ -188,22 +226,22 @@ jobs:
             fi
 
             if [ -n "$FEATS" ]; then
-              echo "### \u{2728} 新功能"
+              echo "### 新功能"
               fmt "$FEATS"
               echo ""
             fi
             if [ -n "$FIXES" ]; then
-              echo "### \u{1F41B} 修复"
+              echo "### 修复"
               fmt "$FIXES"
               echo ""
             fi
             if [ -n "$REFACTORS" ]; then
-              echo "### \u{267B}\u{FE0F} 重构"
+              echo "### 重构"
               fmt "$REFACTORS"
               echo ""
             fi
             if [ -n "$OTHERS" ]; then
-              echo "### \u{1F4E6} 其他"
+              echo "### 其他"
               fmt "$OTHERS"
               echo ""
             fi
