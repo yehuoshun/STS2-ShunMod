@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+"""
+pre-commit hook: 自动 bump 被修改模块的 patch 版本号。
+
+检测逻辑：
+  - 获取本次 staged 的文件列表
+  - 匹配各模块目录（ShunMod.Core/ ShunMod.Shun/ ShunMod.Tweaks/ ShunMod.Compat/）
+  - 被触及的模块，patch 版本 +1
+  - 更新 JSON 并重新 git add
+
+安装：cp .git/hooks/pre-commit.sample .git/hooks/pre-commit
+（或直接写入本文件后 chmod +x）
+"""
+
+import json
+import os
+import subprocess
+import sys
+
+REPO_ROOT = subprocess.run(
+    ['git', 'rev-parse', '--show-toplevel'],
+    capture_output=True, text=True
+).stdout.strip()
+
+# ── 模块目录 → JSON 路径映射 ──
+MODULES = {
+    'ShunMod.Core':   'ShunMod.Core/ShunMod_Core.json',
+    'ShunMod.Shun':   'ShunMod.Shun/ShunMod_Shun.json',
+    'ShunMod.Tweaks': 'ShunMod.Tweaks/ShunMod_Tweaks.json',
+    'ShunMod.Compat': 'ShunMod.Compat/ShunMod_Compat.json',
+}
+
+# ── 获取 staged 文件 ──
+result = subprocess.run(
+    ['git', 'diff', '--cached', '--name-only'],
+    capture_output=True, text=True
+)
+staged = result.stdout.splitlines()
+
+# ── 检查哪些模块被触及 ──
+touched = set()
+for f in staged:
+    for mod_dir in MODULES:
+        if f.startswith(mod_dir + '/'):
+            # 排除 JSON 自身变更（避免循环 bump）
+            if f == MODULES[mod_dir]:
+                continue
+            touched.add(mod_dir)
+
+if not touched:
+    sys.exit(0)  # 没有模块变更，跳过
+
+# ── Bump 版本 ──
+for mod_dir in touched:
+    json_path = os.path.join(REPO_ROOT, MODULES[mod_dir])
+    if not os.path.exists(json_path):
+        print(f"⚠️  {MODULES[mod_dir]} not found, skip")
+        continue
+
+    with open(json_path) as f:
+        data = json.load(f)
+
+    cur = data['version']
+    parts = cur.lstrip('v').split('.')
+    new = f'v{parts[0]}.{parts[1]}.{int(parts[2]) + 1}'
+    data['version'] = new
+
+    with open(json_path, 'w') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+        f.write('\n')
+
+    # 重新 staged
+    subprocess.run(['git', 'add', MODULES[mod_dir]], check=True)
+    print(f"  🔼 {mod_dir}: {cur} → {new}")
