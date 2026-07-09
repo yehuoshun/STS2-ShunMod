@@ -108,14 +108,14 @@ STS2-ShunMod/
 │   ├── ShunMod.Shun.csproj             # AssemblyName: ShunMod_Shun → 引用 Core
 │   ├── ShunMod_Shun.json               # 模组清单，依赖 ShunMod_Core
 │   ├── ModEntry.cs                     # Harmony.PatchAll + ContentRegistry
-│   ├── Cards/Shun/
+│   ├── Cards/
 │   │   ├── ShunModStokeModified.cs     # 添柴·改
 │   │   └── ShunModSuperApotheosis.cs   # 超级神化
-│   ├── Relics/Shun/
+│   ├── Relics/
 │   │   ├── ShunModBossTrophy.cs        # 首领奖杯
 │   │   ├── ShunModBountifulFrond.cs    # 丰饶叶
 │   │   └── ShunModInfiniteGirya.cs     # 无限壶铃
-│   └── Events/Shun/
+│   └── Events/
 │       ├── ShunModRelicExchange.cs     # 遗物交易所
 │       └── ShunModEventRegistry.cs     # 事件注册 + 注入补丁
 │
