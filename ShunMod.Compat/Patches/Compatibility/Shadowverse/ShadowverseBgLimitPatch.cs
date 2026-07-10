@@ -22,11 +22,11 @@ public static class ShadowverseBgLimitPatch
     private const string TargetType = "BgPackManager";
 
     // AppliedFlag 而非 bool：OnAssemblyLoad 局部函数需捕获该字段，C# 不允许捕获 ref 参数
-    private static readonly LimitPatchHelper.AppliedFlag _applied = new();
+    private static readonly LimitPatchHelper.AppliedFlag Applied = new();
 
     public static void Apply(Harmony harmony) =>
         LimitPatchHelper.Apply(harmony, ModId, TargetNs, TargetType, "Shadow verse BgLimit",
-            _applied, typeof(ShadowverseBgLimitPatch),
+            Applied, typeof(ShadowverseBgLimitPatch),
             nameof(ScanInstalledPacks_Transpiler), nameof(SetEnabled_Transpiler));
 
     // ═══════════════════════════════════════════════
