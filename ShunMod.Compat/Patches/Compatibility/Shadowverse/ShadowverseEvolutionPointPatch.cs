@@ -134,7 +134,6 @@ public static class ShadowverseEvolutionPointPatch
         return false; // 跳过原方法 → 进化点不递减
     }
     // ReSharper restore All
-
     /// <summary>
     /// MarkEvolveUsedThisTurn / MarkSuperEvolveUsedThisTurn Prefix — 跳过标记。
     /// 阻止 player 被加入 _evolveUsedThisTurn / _superEvolveUsedThisTurn HashSet。
