@@ -14,3 +14,4 @@ logs/-e
 artifact.zip
 tmp_artifact/
 tmp_original.png
+deps/
