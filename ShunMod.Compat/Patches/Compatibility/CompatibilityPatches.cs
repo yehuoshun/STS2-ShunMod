@@ -2,6 +2,8 @@ using HarmonyLib;
 
 namespace ShunMod.Compat.Patches.Compatibility;
 
+using Shadowverse;
+
 /// <summary>
 /// 第三方模组兼容补丁统一入口。
 /// 包装各 Apply 调用，避免 ModEntry 初期化逻辑被兼容性代码打散。
