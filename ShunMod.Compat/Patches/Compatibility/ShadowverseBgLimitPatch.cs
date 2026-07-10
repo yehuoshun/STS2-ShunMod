@@ -103,8 +103,7 @@ public static class ShadowverseBgLimitPatch
         {
             if (_prefsField != null)
             {
-                var prefs = _prefsField.GetValue(null) as IDictionary<string, bool>;
-                if (prefs != null)
+                if (_prefsField.GetValue(null) is IDictionary<string, bool> prefs)
                 {
                     prefs[packId] = enabled;
                     __result = true;
