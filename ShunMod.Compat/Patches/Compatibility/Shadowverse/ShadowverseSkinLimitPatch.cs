@@ -60,7 +60,8 @@ public static class ShadowverseSkinLimitPatch
 
     /// <summary>
     /// 是否已打补丁。Interlocked.CompareExchange 原子守卫。
-    /// OnAssemblyLoad 快速路径的 if (_applied) 是竞态允许的优化——
+    /// 引用类型（AppliedFlag）而非 bool，因为 OnAssemblyLoad 局部函数
+    /// 需要捕获该字段，C# 不允许局部函数捕获 ref 参数。
     /// 即使多个线程同时读 false，ApplyPatches 的 CompareExchange 保证只执行一次。
     /// </summary>
     private static readonly LimitPatchHelper.AppliedFlag _applied = new();
