@@ -74,7 +74,7 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
     //  构造
     // ═══════════════════════════════════════════════════════════
 
-    private ShunModRelicExchangeScreen(Player player)
+    internal ShunModRelicExchangeScreen(Player player)
     {
         _player = player;
         Name = "ShunModRelicExchange";
@@ -158,11 +158,24 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
     {
         try
         {
-            return ModelDb.AllEnchantments
-                .Where(e => !EnchantBlacklist.Contains(e.Id.Entry))
-                .OrderBy(_ => Random.Shared.Next())
-                .Take(5)
+            // 通过反射从程序集获取所有非抽象 EnchantmentModel 子类
+            var enchantTypes = typeof(EnchantmentModel).Assembly.GetTypes()
+                .Where(t => !t.IsAbstract && typeof(EnchantmentModel).IsAssignableFrom(t))
                 .ToList();
+
+            var result = new List<EnchantmentModel>();
+            foreach (var type in enchantTypes)
+            {
+                try
+                {
+                    var enchant = (EnchantmentModel)Activator.CreateInstance(type)!;
+                    if (!EnchantBlacklist.Contains(enchant.Id.Entry))
+                        result.Add(enchant);
+                }
+                catch { /* 跳过无法实例化的附魔 */ }
+            }
+
+            return result.OrderBy(_ => Random.Shared.Next()).Take(5).ToList();
         }
         catch (Exception ex)
         {
@@ -245,7 +258,9 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
             MaxFontSize = 42,
             MinFontSize = 28
         };
-        ApplyDefaultMegaLabelTheme(title);
+        title.AddThemeColorOverride("font_color", new Color(0.96f, 0.97f, 0.99f, 0.98f));
+        title.AddThemeColorOverride("font_outline_color", new Color(0f, 0f, 0f, 0.4f));
+        title.AddThemeConstantOverride("outline_size", 1);
         title.Modulate = TextPrimary;
         title.SetTextAutoSize("遗物交易所");
         root.AddChild(title);
@@ -258,7 +273,9 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
             MaxFontSize = 24,
             MinFontSize = 18
         };
-        ApplyDefaultMegaLabelTheme(relicsTitle);
+        relicsTitle.AddThemeColorOverride("font_color", new Color(0.96f, 0.97f, 0.99f, 0.98f));
+        relicsTitle.AddThemeColorOverride("font_outline_color", new Color(0f, 0f, 0f, 0.4f));
+        relicsTitle.AddThemeConstantOverride("outline_size", 1);
         relicsTitle.Modulate = TextPrimary;
         relicsTitle.SetTextAutoSize("选择要卖掉的遗物");
         root.AddChild(relicsTitle);
@@ -290,7 +307,9 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
             MaxFontSize = 24,
             MinFontSize = 18
         };
-        ApplyDefaultMegaLabelTheme(rewardTitle);
+        rewardTitle.AddThemeColorOverride("font_color", new Color(0.96f, 0.97f, 0.99f, 0.98f));
+        rewardTitle.AddThemeColorOverride("font_outline_color", new Color(0f, 0f, 0f, 0.4f));
+        rewardTitle.AddThemeConstantOverride("outline_size", 1);
         rewardTitle.Modulate = TextPrimary;
         rewardTitle.SetTextAutoSize("选择要获得的奖励");
         root.AddChild(rewardTitle);
@@ -323,7 +342,9 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
             MinFontSize = 15,
             Visible = false
         };
-        ApplyDefaultMegaLabelTheme(_statusLabel);
+        _statusLabel.AddThemeColorOverride("font_color", new Color(0.96f, 0.97f, 0.99f, 0.98f));
+        _statusLabel.AddThemeColorOverride("font_outline_color", new Color(0f, 0f, 0f, 0.4f));
+        _statusLabel.AddThemeConstantOverride("outline_size", 1);
         _statusLabel.Modulate = new Color(0.88f, 0.92f, 0.97f, 0.82f);
         root.AddChild(_statusLabel);
 
@@ -478,7 +499,9 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
             MaxFontSize = 22,
             MinFontSize = 15
         };
-        ApplyDefaultMegaLabelTheme(nameLabel);
+        nameLabel.AddThemeColorOverride("font_color", new Color(0.96f, 0.97f, 0.99f, 0.98f));
+        nameLabel.AddThemeColorOverride("font_outline_color", new Color(0f, 0f, 0f, 0.4f));
+        nameLabel.AddThemeConstantOverride("outline_size", 1);
         nameLabel.Modulate = TextPrimary;
         nameLabel.SetTextAutoSize(relic.Title.GetFormattedText());
         content.AddChild(nameLabel);
@@ -495,7 +518,7 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
             BbcodeEnabled = true,
             MouseFilter = MouseFilterEnum.Ignore
         };
-        ApplyDefaultMegaRichTextTheme(desc);
+        desc.AddThemeColorOverride("default_color", new Color(0.9f, 0.93f, 0.97f, 0.92f));
         desc.AddThemeColorOverride("default_color", TextBody);
         desc.SetTextAutoSize(relic.DynamicDescription.GetFormattedText());
         content.AddChild(desc);
@@ -564,7 +587,9 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
             MaxFontSize = 36,
             MinFontSize = 24
         };
-        ApplyDefaultMegaLabelTheme(enchantLabel);
+        enchantLabel.AddThemeColorOverride("font_color", new Color(0.96f, 0.97f, 0.99f, 0.98f));
+        enchantLabel.AddThemeColorOverride("font_outline_color", new Color(0f, 0f, 0f, 0.4f));
+        enchantLabel.AddThemeConstantOverride("outline_size", 1);
         enchantLabel.Modulate = new Color(0.6f, 0.9f, 0.6f);
         enchantLabel.SetTextAutoSize("⚡");
         iconBox.AddChild(enchantLabel);
@@ -578,7 +603,9 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
             MaxFontSize = 22,
             MinFontSize = 15
         };
-        ApplyDefaultMegaLabelTheme(nameLabel);
+        nameLabel.AddThemeColorOverride("font_color", new Color(0.96f, 0.97f, 0.99f, 0.98f));
+        nameLabel.AddThemeColorOverride("font_outline_color", new Color(0f, 0f, 0f, 0.4f));
+        nameLabel.AddThemeConstantOverride("outline_size", 1);
         nameLabel.Modulate = new Color(0.6f, 0.9f, 0.6f);
         nameLabel.SetTextAutoSize(enchant.Title.GetFormattedText());
         content.AddChild(nameLabel);
@@ -595,7 +622,7 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
             BbcodeEnabled = true,
             MouseFilter = MouseFilterEnum.Ignore
         };
-        ApplyDefaultMegaRichTextTheme(desc);
+        desc.AddThemeColorOverride("default_color", new Color(0.9f, 0.93f, 0.97f, 0.92f));
         desc.AddThemeColorOverride("default_color", TextBody);
         desc.SetTextAutoSize(enchant.Description.GetFormattedText());
         content.AddChild(desc);

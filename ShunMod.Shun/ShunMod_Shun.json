@@ -3,7 +3,7 @@
   "name": "ShunMod Shun",
   "author": "yehuoshun",
   "description": "Shun character content (cards, relics, events)",
-  "version": "v0.0.13",
+  "version": "v0.0.16",
   "has_pck": true,
   "has_dll": true,
   "dependencies": [

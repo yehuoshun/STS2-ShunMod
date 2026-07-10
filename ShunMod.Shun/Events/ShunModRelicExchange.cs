@@ -65,25 +65,23 @@ public class ShunModRelicExchange : ShunEventModel
                 // 弹出 Overlay 屏幕
                 await ShunModRelicExchangeCoordinator.ShowExchange(player);
             }, $"{Id.Entry}.pages.INITIAL.options.OPT_ENTER.title",
-                BuildEnterHoverTips()),
+                BuildEnterHoverTips().ToArray()),
 
             new(this, async () =>
             {
                 // 扣血刷新（保留旧版功能）
                 if (player == null) return;
-                if (player.CurrentHealth > 5)
+                if (player.Creature.CurrentHp > 5)
                 {
                     player.Creature.LoseHpInternal(5, 0);
                     Log.Info("[ShunMod_Shun] RelicExchange: HP refresh, options will re-roll on next entry");
                 }
-            }, $"{Id.Entry}.pages.INITIAL.options.OPT_REFRESH.title",
-                $"{Id.Entry}.pages.INITIAL.options.OPT_REFRESH.description"),
+            }, $"{Id.Entry}.pages.INITIAL.options.OPT_REFRESH.title"),
 
-            new(this, async () =>
+            new(this, () =>
             {
                 // 离开
-            }, $"{Id.Entry}.pages.INITIAL.options.OPT_LEAVE.title",
-                $"{Id.Entry}.pages.INITIAL.options.OPT_LEAVE.description"),
+            }, $"{Id.Entry}.pages.INITIAL.options.OPT_LEAVE.title"),
         };
     }
 
