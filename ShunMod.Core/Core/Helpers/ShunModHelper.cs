@@ -1,9 +1,7 @@
 using System.Text.RegularExpressions;
-using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.Runs;
 
 namespace ShunMod.Core.Core.Helpers;
 
@@ -41,7 +39,7 @@ public static class ShunModHelper
     }
 
     /// <summary>类名字符串 → snake_case（使用编译正则，只初始化一次）</summary>
-    public static string ClassNameToSnakeCase(string className)
+    private static string ClassNameToSnakeCase(string className)
     {
         return PascalToSnake.Replace(className, "$1_$2").ToLowerInvariant();
     }
