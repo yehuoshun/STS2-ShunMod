@@ -216,14 +216,9 @@ public static class ShadowverseEvolutionPointPatch
             ?? _evoMgrType.GetField("_points",
                 BindingFlags.NonPublic | BindingFlags.Instance);
 
-        if (_pointsField != null)
-        {
-            Log.Info($"[{ModId}] EvolutionPoint: _points field found (static={_pointsField.IsStatic})");
-        }
-        else
-        {
-            Log.Info($"[{ModId}] EvolutionPoint: _points field NOT found — Postfix fallback will be skipped");
-        }
+        Log.Info(_pointsField != null
+            ? $"[{ModId}] EvolutionPoint: _points field found (static={_pointsField.IsStatic})"
+            : $"[{ModId}] EvolutionPoint: _points field NOT found — Postfix fallback will be skipped");
 
         // PointsChanged: 可能是 event 或 field
         var evt = _evoMgrType.GetEvent("PointsChanged",
