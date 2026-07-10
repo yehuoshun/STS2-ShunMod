@@ -8,6 +8,7 @@ using MegaCrit.Sts2.Core.Rewards;
 using MegaCrit.Sts2.Core.Rooms;
 using ShunMod.Core;
 using ShunMod.Core.Core.Registry;
+using ShunMod.Shun.Base;
 
 namespace ShunMod.Shun.Relics;
 

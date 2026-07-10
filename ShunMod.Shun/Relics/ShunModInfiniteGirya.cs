@@ -18,6 +18,7 @@ using MegaCrit.Sts2.Core.Runs;
 using MegaCrit.Sts2.Core.Saves.Runs;
 using ShunMod.Core;
 using ShunMod.Core.Core.Registry;
+using ShunMod.Shun.Base;
 
 namespace ShunMod.Shun.Relics;
 

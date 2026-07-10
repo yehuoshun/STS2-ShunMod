@@ -7,6 +7,7 @@ using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.RelicPools;
 using ShunMod.Core;
 using ShunMod.Core.Core.Registry;
+using ShunMod.Shun.Base;
 
 namespace ShunMod.Shun.Relics;
 

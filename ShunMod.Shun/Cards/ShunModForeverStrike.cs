@@ -7,7 +7,7 @@ using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.CardPools;
 using ShunMod.Core;
-using ShunMod.Core.Core.Base;
+using ShunMod.Shun.Base;
 using ShunMod.Core.Core.Registry;
 using MegaCrit.Sts2.Core.ValueProps;
 

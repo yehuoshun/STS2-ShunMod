@@ -1,8 +1,8 @@
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Runs;
-using ShunMod.Core.Core.Helpers;
+using ShunMod.Shun.Helpers;
 
-namespace ShunMod.Core.Core.Base;
+namespace ShunMod.Shun.Base;
 
 /// <summary>
 ///     ShunMod 事件基类 — 自动替换默认图片路径为 mod 自定义图片路径。

@@ -4,7 +4,7 @@ using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using Godot;
 using ShunMod.Core;
-using ShunMod.Core.Core.Helpers;
+using ShunMod.Shun.Helpers;
 
 namespace ShunMod.Shun.Events;
 
