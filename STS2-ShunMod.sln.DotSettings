@@ -82,4 +82,5 @@ public class $CLASS$() : BaseLib.Abstracts.CustomRelicModel {
     public override MegaCrit.Sts2.Core.Entities.Relics.RelicRarity Rarity =&gt; MegaCrit.Sts2.Core.Entities.Relics.RelicRarity.$RARITY$;
     
     $END$
-}</s:String></wpf:ResourceDictionary>
+}</s:String>	<s:String x:Key="/Default/UserDictionary/Words/=Shadowverse/@EntryIndexedValue">Shadowverse</s:String>
+</wpf:ResourceDictionary>
