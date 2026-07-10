@@ -4,9 +4,7 @@ using HarmonyLib;
 namespace ShunMod.Core.Core.Helpers;
 
 /// <summary>
-///     Creature 反射工具 — 通过反射访问 Creature 类型内部属性（Block / IsPlayer）。
-///     格挡保留、未来可能有的战斗补丁均通过此类操作 Creature 属性，
-///     避免直接引用游戏内部 API 导致硬依赖。
+///     Creature 反射工具 — 通过反射访问 Creature 内部属性（Block / IsPlayer）。
 /// </summary>
 public static class CreatureReflection
 {

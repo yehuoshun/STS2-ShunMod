@@ -15,21 +15,7 @@ public static class ShunModHelper
     private const string ShunModRelicsPath = "relics/shunRelics";
     private const string ShunModEventsPath = "events/shunEvents";
 
-    // ═══════════════════════════════════════════════════════════
-    //  PascalCase → snake_case 编译正则
-    // ═══════════════════════════════════════════════════════════
-    //
-    //  为什么用 static readonly + RegexOptions.Compiled：
-    //  1. Regex.Replace(string, string, string) 静态重载每次调用都
-    //     重新解析正则模式 + 编译内部匹配状态机，不会缓存。
-    //  2. ClassNameToSnakeCase 被 CardPortraitPath / RelicIconPath /
-    //     RelicOutlinePath / EventImagePath 调用，每张卡/遗物/事件
-    //     初始化至少走一次，随着内容增多次数线性增长。
-    //  3. static readonly 让模式只编译一次，CLR 类型初始化器保证
-    //     线程安全。RegexOptions.Compiled 将正则编译为 IL，
-    //     匹配速度比解释模式快 5-10x。
-    //
-    // ═══════════════════════════════════════════════════════════
+    // PascalCase → snake_case 编译正则（static readonly 实例化一次，RegexOptions.Compiled 加速匹配）
     private static readonly Regex PascalToSnake = new("([a-z])([A-Z])", RegexOptions.Compiled);
 
     /// <summary>类名 → snake_case（如 ShunModSuperApotheosis → shun_mod_super_apotheosis）</summary>
@@ -70,21 +56,7 @@ public static class ShunModHelper
         return $"{ResourceRoot}/{ShunModEventsPath}/{ClassToSnakeCase(type)}.png";
     }
 
-    // ═══════════════════════════════════════════════════════════
-    //  遗物安全访问
-    // ═══════════════════════════════════════════════════════════
-    //
-    //  为什么需要这个方法：
-    //  某些 Mod 遗物没有注册到任何 Pool（如 EnergyIconHelper 所需的
-    //  池），直接访问 RelicModel.HoverTips 会抛 InvalidOperationException。
-    //  在事件 UI、遗物展示等场景中，这种异常应当被吞掉返回空提示，
-    //  而不是让整个 UI 崩溃。
-    //
-    //  提取到 Core 层的原因：
-    //  遗物悬浮提示的异常安全访问在多个场景（交易所、遗物展示、
-    //  未来可能的事件）中都需要，避免每个模块重复写 try-catch。
-    //
-    // ═══════════════════════════════════════════════════════════
+    // 未注册 Pool 的遗物直接访问 HoverTips 会抛 InvalidOperationException，吞掉防 UI 崩
     /// <summary>安全获取遗物悬浮提示，捕获 Pool 缺失导致的异常。</summary>
     public static List<IHoverTip> SafeRelicHoverTips(RelicModel relic)
     {
@@ -98,16 +70,7 @@ public static class ShunModHelper
         }
     }
 
-    // ═══════════════════════════════════════════════════════════
-    //  事件图片路径替换
-    // ═══════════════════════════════════════════════════════════
-    //
-    //  为什么需要这个 helper：
-    //  每个自定义事件都要在 GetAssetPaths() 中重复 7 行样板代码——
-    //  base.GetAssetPaths → 找默认路径 → 替换成 mod 路径。
-    //  提取后新事件一行调用即可，避免重复复制。
-    //
-    // ═══════════════════════════════════════════════════════════
+    // 自定义事件 GetAssetPaths() 样板提取，替换默认路径为 mod 图片路径
     /// <summary>替换事件默认图片路径为 mod 自定义图片路径。</summary>
     public static IEnumerable<string> ReplaceEventImage(
         IEnumerable<string> paths, Type eventType, string entry)
