@@ -45,7 +45,7 @@ public static class ShadowverseBgLimitPatch
 
         void OnAssemblyLoad(object? sender, AssemblyLoadEventArgs args)
         {
-            if (_applied) return;
+            if (Volatile.Read(ref _applied)) return;
             if (FindType() is { } t)
             {
                 AppDomain.CurrentDomain.AssemblyLoad -= OnAssemblyLoad;
