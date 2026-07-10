@@ -26,7 +26,7 @@ public static class ShadowverseBgLimitPatch
     private const string TargetType = "BgPackManager";
 
     private static bool _applied;
-    private static readonly object _applyLock = new();
+    private static readonly object ApplyLock = new();
 
     public static void Apply(Harmony harmony)
     {
@@ -96,7 +96,7 @@ public static class ShadowverseBgLimitPatch
     /// <summary>尝试获取应用锁。返回 false 说明已有其他路径完成补丁。</summary>
     private static bool TryLock()
     {
-        lock (_applyLock)
+        lock (ApplyLock)
         {
             if (_applied) return false;
             _applied = true;
