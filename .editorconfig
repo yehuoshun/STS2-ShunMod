@@ -1,7 +1,0 @@
-root = true
-
-# ── Harmony 补丁参数命名规则 ──
-# __result, __instance, __state 等双下划线前缀参数是 Harmony2 标准约定，
-# 不触发命名警告。
-[*.cs]
-resharper_inconsistent_naming_highlighting = none
