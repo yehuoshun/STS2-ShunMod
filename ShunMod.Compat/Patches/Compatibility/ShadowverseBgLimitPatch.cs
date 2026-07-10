@@ -94,7 +94,12 @@ public static class ShadowverseBgLimitPatch
     /// Prefix: 跳过 BgPackManager.SetEnabled 原方法。
     /// 直接修改 _preferences 字典并返回 true。
     /// </summary>
+    /// <remarks>
+    /// __result 是 Harmony2 保留参数名，IDE 命名规则警告由 #pragma 抑制。
+    /// </remarks>
+#pragma warning disable IDE1006
     private static bool SetEnabled_Prefix(string packId, bool enabled, ref bool __result)
+#pragma warning restore IDE1006
     {
         try
         {
