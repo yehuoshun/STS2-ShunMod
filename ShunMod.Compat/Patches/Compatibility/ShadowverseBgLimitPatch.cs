@@ -22,7 +22,6 @@ namespace ShunMod.Compat.Patches.Compatibility;
 ///
 /// 纯反射，不引用 shadowverse.dll。
 /// </summary>
-// ReSharper disable once IdentifierTypo
 public static class ShadowverseBgLimitPatch
 {
     private const string ModId = "STS2ShunMod";
@@ -50,7 +49,7 @@ public static class ShadowverseBgLimitPatch
             harmony.Patch(scanMethod,
                 transpiler: new HarmonyMethod(typeof(ShadowverseBgLimitPatch),
                     nameof(ScanInstalledPacks_Transpiler)));
-            Log.Info($"[{ModId}] Shadowverse BgLimit: ScanInstalledPacks cap removed (7→unlimited)");
+            Log.Info($"[{ModId}] Shadow verse BgLimit: ScanInstalledPacks cap removed (7→unlimited)");
         }
 
         // ── Patch 2: SetEnabled Prefix — 跳过原方法 ──
@@ -61,7 +60,7 @@ public static class ShadowverseBgLimitPatch
             harmony.Patch(setEnabledMethod,
                 prefix: new HarmonyMethod(typeof(ShadowverseBgLimitPatch),
                     nameof(SetEnabled_Prefix)));
-            Log.Info($"[{ModId}] Shadowverse BgLimit: SetEnabled cap removed (Prefix, unlimited)");
+            Log.Info($"[{ModId}] Shadow verse BgLimit: SetEnabled cap removed (Prefix, unlimited)");
         }
     }
 

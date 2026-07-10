@@ -19,7 +19,6 @@ namespace ShunMod.Compat.Patches.Compatibility;
 ///
 /// 纯反射，不引用 shadowverse.dll。
 /// </summary>
-// ReSharper disable once IdentifierTypo
 public static class ShadowverseEvolutionPointPatch
 {
     private const string ModId = "STS2ShunMod";
@@ -47,11 +46,11 @@ public static class ShadowverseEvolutionPointPatch
             harmony.Patch(initMethod,
                 prefix: new HarmonyMethod(typeof(ShadowverseEvolutionPointPatch), nameof(Initialize_Prefix)),
                 postfix: new HarmonyMethod(typeof(ShadowverseEvolutionPointPatch), nameof(Initialize_Postfix)));
-            Log.Info($"[{ModId}] Shadowverse EvolutionPoint: Initialize patched (Prefix+Postfix, 2→1, no consumption)");
+            Log.Info($"[{ModId}] Shadow verse EvolutionPoint: Initialize patched (Prefix+Postfix, 2→1, no consumption)");
         }
         else
         {
-            Log.Info($"[{ModId}] Shadowverse EvolutionPoint: Initialize method not found");
+            Log.Info($"[{ModId}] Shadow verse EvolutionPoint: Initialize method not found");
         }
 
         // ── 不追加 AddEvolvePoints/AddSuperEvolvePoints Transpiler ──
