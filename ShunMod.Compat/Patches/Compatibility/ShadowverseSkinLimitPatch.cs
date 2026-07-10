@@ -21,6 +21,7 @@ namespace ShunMod.Compat.Patches.Compatibility;
 /// 防时序问题：如果 Apply() 执行时 Shadowverse DLL 尚未加载（模组加载顺序问题），
 /// 通过 AppDomain.AssemblyLoad 事件兜底，DLL 加载后自动重试。
 /// </summary>
+// ReSharper disable once IdentifierTypo
 public static class ShadowverseSkinLimitPatch
 {
     private const string ModId = "STS2ShunMod";

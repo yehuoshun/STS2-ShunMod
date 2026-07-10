@@ -19,6 +19,7 @@ namespace ShunMod.Compat.Patches.Compatibility;
 ///
 /// 纯反射，不引用 shadowverse.dll。
 /// </summary>
+// ReSharper disable once IdentifierTypo
 public static class ShadowverseEvolutionPointPatch
 {
     private const string ModId = "STS2ShunMod";
