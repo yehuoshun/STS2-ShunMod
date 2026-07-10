@@ -113,6 +113,9 @@ public static class ShadowverseEvolutionPointPatch
     /// 编译器在调用点内联了默认值 (evolve=2, superEvolve=2)，ref 参数可以截获。
     /// 设 1 而不是 0，因为 UI 可能根据 GetPoints() 返回值决定是否显示进化入口。
     /// 实际进化不消耗点数，1 点够用整局。
+    ///
+    /// IDE 警告："ref 参数值在读取前被覆盖"，这是故意的。
+    /// Prefix 的职责就是拦截并改写参数，覆写就是目的。
     /// </summary>
     private static void Initialize_Prefix(ref int evolvePoints, ref int superEvolvePoints)
     {
@@ -124,6 +127,9 @@ public static class ShadowverseEvolutionPointPatch
     /// TryUseEvolvePoint / TryUseSuperEvolvePoint Prefix — 跳过原方法，进化始终成功。
     /// Harmony Prefix 返回 false 时跳过原方法体，__result 设为 true。
     /// 原方法中"检查点数 → 减 1"的逻辑不会执行，实现"不消耗点数"。
+    ///
+    /// IDE 警告："__result 值在读取前被覆盖"，这是故意的。
+    /// Prefix 的职责就是拦截 __result 并设返回值，覆写就是目的。
     /// </summary>
     private static bool TryUse_Prefix(ref bool __result)
     {
