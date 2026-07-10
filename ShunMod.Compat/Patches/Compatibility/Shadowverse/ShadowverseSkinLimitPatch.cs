@@ -1,4 +1,3 @@
-using System.Reflection.Emit;
 using HarmonyLib;
 
 namespace ShunMod.Compat.Patches.Compatibility.Shadowverse;
