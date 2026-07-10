@@ -756,7 +756,7 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
         };
         desc.AddThemeColorOverride("default_color", new Color(0.9f, 0.93f, 0.97f, 0.92f));
         desc.AddThemeColorOverride("default_color", TextBody);
-        desc.SetTextAutoSize(enchant.Description.GetFormattedText());
+        desc.SetTextAutoSize(enchant.DynamicDescription.GetFormattedText());
         content.AddChild(desc);
 
         button.Pressed += () => OnRewardSelected(null, enchant);
