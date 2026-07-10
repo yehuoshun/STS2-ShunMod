@@ -26,7 +26,7 @@ public static class ShadowverseBgLimitPatch
     private const string TargetType = "BgPackManager";
 
     private static bool _applied;
-    private static readonly object ApplyLock = new();
+    private static readonly System.Threading.Lock ApplyLock = new();
 
     public static void Apply(Harmony harmony)
     {
