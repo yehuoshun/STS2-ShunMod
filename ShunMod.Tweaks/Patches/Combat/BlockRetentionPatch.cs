@@ -2,6 +2,7 @@ using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using ShunMod.Core;
+using ShunMod.Core.Core.Helpers;
 namespace ShunMod.Tweaks.Combat;
 
 // ════════════════════════════════════════════════════════

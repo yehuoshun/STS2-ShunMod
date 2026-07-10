@@ -6,6 +6,7 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.RelicPools;
 using ShunMod.Core;
+using ShunMod.Core.Core.Registry;
 
 namespace ShunMod.Shun.Relics;
 

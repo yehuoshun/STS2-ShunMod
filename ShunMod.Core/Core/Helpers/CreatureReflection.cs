@@ -1,7 +1,7 @@
 using System.Reflection;
 using HarmonyLib;
 
-namespace ShunMod.Core;
+namespace ShunMod.Core.Core.Helpers;
 
 /// <summary>
 ///     Creature 反射工具 — 通过反射访问 Creature 类型内部属性（Block / IsPlayer）。

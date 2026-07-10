@@ -2,7 +2,7 @@ using System.Reflection;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
 
-namespace ShunMod.Core;
+namespace ShunMod.Core.Core.Registry;
 
 /// <summary>
 ///     内容自动注册器 — 扫描 [CardPool] / [RelicPool] / [EventPool] 特性并注册。

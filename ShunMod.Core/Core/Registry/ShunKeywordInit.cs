@@ -2,7 +2,7 @@ using System.Reflection;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
 
-namespace ShunMod.Core;
+namespace ShunMod.Core.Core.Registry;
 
 /// <summary>
 ///     自定义词条初始化 — 注册词条定义，由 Core 模块启动时调用。

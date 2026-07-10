@@ -5,7 +5,7 @@ using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Runs;
 
-namespace ShunMod.Core;
+namespace ShunMod.Core.Core.Helpers;
 
 /// <summary>
 ///     ShunMod 工具类 — 资源路径推导、遗物安全访问等通用方法。

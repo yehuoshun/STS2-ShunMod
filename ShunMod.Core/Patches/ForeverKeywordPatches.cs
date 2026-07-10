@@ -4,6 +4,7 @@ using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Models;
 using ShunMod.Core;
+using ShunMod.Core.Core.Registry;
 
 namespace ShunMod.Core.Patches;
 

@@ -1,7 +1,7 @@
 using System.Reflection;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 
-namespace ShunMod.Core;
+namespace ShunMod.Core.Core.Helpers;
 
 /// <summary>
 ///     DynamicVar 反射赋值工具 — 给 StringVar 的字符串属性赋值。

@@ -6,8 +6,10 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.CardPools;
-using MegaCrit.Sts2.Core.ValueProps;
 using ShunMod.Core;
+using ShunMod.Core.Core.Base;
+using ShunMod.Core.Core.Registry;
+using MegaCrit.Sts2.Core.ValueProps;
 
 namespace ShunMod.Shun.Cards;
 

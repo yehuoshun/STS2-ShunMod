@@ -6,6 +6,8 @@ using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using ShunMod.Core;
+using ShunMod.Core.Core.Helpers;
+using ShunMod.Core.Core.Registry;
 using ShunMod.Shun.UI;
 
 namespace ShunMod.Shun.Events;

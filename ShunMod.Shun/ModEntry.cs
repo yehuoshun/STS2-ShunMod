@@ -3,6 +3,7 @@ using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
 using ShunMod.Core;
+using ShunMod.Core.Core.Registry;
 using ShunMod.Shun.Events;
 
 namespace ShunMod.Shun;

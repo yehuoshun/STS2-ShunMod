@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace ShunMod.Core;
+namespace ShunMod.Core.Core.Registry;
 
 /// <summary>
 ///     自定义词条注册表 — 跟踪哪些卡牌拥有关键词。

@@ -1,4 +1,4 @@
-namespace ShunMod.Core;
+namespace ShunMod.Core.Core.Registry;
 
 /// <summary>
 ///     标记卡牌所属的卡池。ContentRegistry 扫描后自动注册。
