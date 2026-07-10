@@ -44,11 +44,6 @@ public class ShunModRelicExchange : ShunEventModel
     //  事件入口
     // ═══════════════════════════════════════════════════════════════
 
-    // 构造函数为空：ShunEventModel 的基类构造函数会处理事件注册，不需要额外初始化。
-    public ShunModRelicExchange() : base()
-    {
-    }
-
     // CanonicalVars 和 CalculateVars 为空：
     // 本事件不使用动态变量（DynamicVar），所有文本在运行时通过 L10NLookup 直接获取。
     // 这两个是 ShunEventModel 的抽象成员，必须实现，所以返回空。
