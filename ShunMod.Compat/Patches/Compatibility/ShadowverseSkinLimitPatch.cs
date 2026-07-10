@@ -140,7 +140,7 @@ public static class ShadowverseSkinLimitPatch
     private static bool IsConstant14(CodeInstruction inst)
     {
         return (inst.opcode == OpCodes.Ldc_I4_S && inst.operand is sbyte sb && sb == 14)
-            || (inst.opcode == OpCodes.Ldc_I4 && inst.operand is int i && (i == 14 || i == 140));
+            || (inst.opcode == OpCodes.Ldc_I4 && inst.operand is int i && (i == 14));
     }
 
     private static Type? FindType() => CompatibilityPatchUtil.FindType(TargetNs, TargetType);
