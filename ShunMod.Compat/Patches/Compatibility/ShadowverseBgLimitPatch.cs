@@ -96,7 +96,6 @@ public static class ShadowverseBgLimitPatch
     /// <remarks>
     /// __result 是 Harmony2 保留参数名，禁止 IDE 重命名。
     /// </remarks>
-    // ReSharper disable once IdentifierTypo
     private static bool SetEnabled_Prefix(string packId, bool enabled, ref bool __result)
     {
         try
