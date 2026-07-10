@@ -57,7 +57,7 @@ public class ShunModRelicExchange : ShunEventModel
                     // 没有可交易的遗物
                     SetEventState(L10NLookup("pages.NO_TRADEABLE.description"),
                     [
-                        new EventOption(this, () => { }, "OPT_LEAVE")
+                        new EventOption(this, static () => System.Threading.Tasks.Task.CompletedTask, "OPT_LEAVE")
                     ]);
                     return;
                 }
@@ -78,10 +78,7 @@ public class ShunModRelicExchange : ShunEventModel
                 }
             }, $"{Id.Entry}.pages.INITIAL.options.OPT_REFRESH.title"),
 
-            new(this, () =>
-            {
-                // 离开
-            }, $"{Id.Entry}.pages.INITIAL.options.OPT_LEAVE.title"),
+            new(this, static () => System.Threading.Tasks.Task.CompletedTask, $"{Id.Entry}.pages.INITIAL.options.OPT_LEAVE.title"),
         };
     }
 

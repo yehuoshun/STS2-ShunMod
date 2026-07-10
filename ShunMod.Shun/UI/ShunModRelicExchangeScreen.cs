@@ -2,7 +2,6 @@ using Godot;
 using MegaCrit.Sts2.Core.Entities.Multiplayer;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
-using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Nodes.Screens.Overlays;
@@ -737,18 +736,8 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
 
     private static void AttachRelicHoverTips(Control holder, RelicModel relic)
     {
-        holder.MouseFilter = MouseFilterEnum.Pass;
-        holder.MouseDefaultCursorShape = CursorShape.Help;
-        holder.MouseEntered += () => ShowRelicHoverTips(holder, relic);
-        holder.MouseExited += () => NHoverTipSet.Remove(holder);
-        holder.TreeExiting += () => NHoverTipSet.Remove(holder);
-    }
-
-    private static void ShowRelicHoverTips(Control holder, RelicModel relic)
-    {
-        NHoverTipSet.Remove(holder);
-        NHoverTipSet? hoverTipSet = NHoverTipSet.CreateAndShow(holder, relic.HoverTips, HoverTip.GetHoverTipAlignment(holder));
-        hoverTipSet?.SetAlignment(holder, HoverTip.GetHoverTipAlignment(holder));
+        // 暂不实现悬浮提示，等后续公共化工具
+        // 参考：NHoverTipSet.CreateAndShow(holder, relic.HoverTips, ...)
     }
 
     // ═══════════════════════════════════════════════════════════
