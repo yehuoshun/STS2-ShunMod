@@ -10,7 +10,7 @@ namespace ShunMod.Compat;
 public static class ModEntry
 {
     private const string HarmonyId = "ShunMod_Compat";
-    private static readonly object Lock = new();
+    private static readonly Lock Lock = new();
     private static bool _initialized;
     private static Harmony? _harmony;
 
