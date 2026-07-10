@@ -1,5 +1,4 @@
 using System.Reflection.Emit;
-using System.Threading;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using ShunMod.Core;
@@ -26,7 +25,7 @@ public static class ShadowverseBgLimitPatch
     private const string TargetNs = "shadowverse.Scripts.UI";
     private const string TargetType = "BgPackManager";
 
-    private static bool _applied;
+    private static volatile bool _applied;
     private static readonly Lock ApplyLock = new();
 
     public static void Apply(Harmony harmony)
@@ -106,7 +105,7 @@ public static class ShadowverseBgLimitPatch
     }
 
     // ═══════════════════════════════════════════════
-    //  Transpilers
+    //  Transpiler
     // ═══════════════════════════════════════════════
 
     private static IEnumerable<CodeInstruction> ScanInstalledPacks_Transpiler(
