@@ -25,8 +25,7 @@ public static class ShadowverseBgLimitPatch
     private const string TargetNs = "shadowverse.Scripts.UI";
     private const string TargetType = "BgPackManager";
 
-    private static volatile bool _applied;
-    private static readonly Lock ApplyLock = new();
+    private static bool _applied;
 
     public static void Apply(Harmony harmony)
     {
@@ -45,7 +44,7 @@ public static class ShadowverseBgLimitPatch
 
         void OnAssemblyLoad(object? sender, AssemblyLoadEventArgs args)
         {
-            if (Volatile.Read(ref _applied)) return;
+            if (_applied) return;
             if (FindType() is { } t)
             {
                 AppDomain.CurrentDomain.AssemblyLoad -= OnAssemblyLoad;
@@ -60,7 +59,9 @@ public static class ShadowverseBgLimitPatch
     /// </summary>
     private static void ApplyPatches(Harmony harmony, Type bgMgrType)
     {
-        if (!TryLock()) return;
+        // 原子交换：仅第一个调用者成功，后续直接跳过
+        if (Interlocked.CompareExchange(ref _applied, true, false)) return;
+
         Log.Info($"[{ModId}] Shadow verse BgLimit: applying patches to {bgMgrType.FullName}");
 
         // ── Patch 1: ScanInstalledPacks — num >= 7 → int.MaxValue ──
@@ -90,17 +91,6 @@ public static class ShadowverseBgLimitPatch
         else
         {
             Log.Warn($"[{ModId}] Shadow verse BgLimit: SetEnabled method not found!");
-        }
-    }
-
-    /// <summary>尝试获取应用锁。返回 false 说明已有其他路径完成补丁。</summary>
-    private static bool TryLock()
-    {
-        lock (ApplyLock)
-        {
-            if (_applied) return false;
-            _applied = true;
-            return true;
         }
     }
 
