@@ -283,7 +283,7 @@ public static class ShadowverseEvolutionPointPatch
             }
             else if (points is IDictionary<Player, ValueTuple<int, int>> dict2)
             {
-                if (dict2.TryGetValue(__0, out var current))
+                if (dict2.TryGetValue(__0, out _))
                 {
                     dict2[__0] = (1, 1);
                     FirePointsChanged();
