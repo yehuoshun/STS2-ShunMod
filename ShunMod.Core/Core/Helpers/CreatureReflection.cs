@@ -13,10 +13,10 @@ public static class CreatureReflection
     public static readonly Type? CreatureType =
         AccessTools.TypeByName("MegaCrit.Sts2.Core.Entities.Creatures.Creature");
 
-    public static readonly PropertyInfo? BlockProperty =
+    private static readonly PropertyInfo? BlockProperty =
         AccessTools.Property(CreatureType, "Block");
 
-    public static readonly PropertyInfo? IsPlayerProperty =
+    private static readonly PropertyInfo? IsPlayerProperty =
         AccessTools.Property(CreatureType, "IsPlayer");
 
     public static int GetBlock(object creature) => BlockProperty?.GetValue(creature) as int? ?? 0;
