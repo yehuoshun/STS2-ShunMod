@@ -63,14 +63,14 @@ public static class ShadowverseSkinLimitPatch
     /// OnAssemblyLoad 快速路径的 if (_applied) 是竞态允许的优化——
     /// 即使多个线程同时读 false，ApplyPatches 的 CompareExchange 保证只执行一次。
     /// </summary>
-    private static bool _applied;
+    private static readonly LimitPatchHelper.AppliedFlag _applied = new();
 
     /// <summary>
     /// 入口。委托给 LimitPatchHelper 处理查找、延迟加载、打补丁流程。
     /// </summary>
     public static void Apply(Harmony harmony) =>
         LimitPatchHelper.Apply(harmony, ModId, TargetNs, TargetType, "Shadow verse SkinLimit",
-            ref _applied, typeof(ShadowverseSkinLimitPatch),
+            _applied, typeof(ShadowverseSkinLimitPatch),
             nameof(ScanInstalledPacks_Transpiler), nameof(SetEnabled_Transpiler));
 
     // ═══════════════════════════════════════════════

@@ -37,9 +37,25 @@ namespace ShunMod.Compat.Patches.Compatibility.Shadowverse;
 ///  sts2 的模组加载顺序按字母排序，"ShunMod" 可能排在 "Shadowverse" 前面，
 ///  导致 Apply() 执行时 Shadowverse 的 DLL 尚未加载到 AppDomain 中。
 ///  AssemblyLoad 事件兜底确保 DLL 加载后自动补打补丁。
+///
+///  为什么用 AppliedFlag 类而不是 ref bool？
+///  ───────────────────────────────────────────
+///  OnAssemblyLoad 是局部函数（闭包），C# 不允许局部函数捕获 ref 参数。
+///  AppliedFlag 是引用类型，可以被闭包安全捕获。Interlocked 操作在
+///  AppliedFlag.Value 上，语义与 ref bool 完全等价。
 /// </summary>
 internal static class LimitPatchHelper
 {
+    /// <summary>
+    /// 可被闭包捕获的 bool 包装，替代 ref 参数。
+    /// 局部函数 OnAssemblyLoad 需要访问 caller 的 _applied 字段，
+    /// 但 C# 不允许局部函数捕获 ref 参数。用引用类型包装解决。
+    /// </summary>
+    internal sealed class AppliedFlag
+    {
+        public bool Value;
+    }
+
     /// <summary>
     /// 标准 Apply 入口：
     /// 1. 优先查找目标类型，找到直接打补丁
@@ -51,7 +67,7 @@ internal static class LimitPatchHelper
         string targetNs,
         string targetType,
         string friendlyName,
-        ref bool applied,
+        AppliedFlag applied,
         Type transpilerSource,
         string scanTranspilerName,
         string setEnabledTranspilerName)
@@ -59,7 +75,7 @@ internal static class LimitPatchHelper
         var managerType = FindType(targetNs, targetType);
         if (managerType != null)
         {
-            ApplyPatches(harmony, managerType, modId, friendlyName, ref applied,
+            ApplyPatches(harmony, managerType, modId, friendlyName, applied,
                 transpilerSource, scanTranspilerName, setEnabledTranspilerName);
             return;
         }
@@ -70,11 +86,11 @@ internal static class LimitPatchHelper
 
         void OnAssemblyLoad(object? sender, AssemblyLoadEventArgs args)
         {
-            if (applied) return;
+            if (applied.Value) return;
             if (FindType(targetNs, targetType) is { } t)
             {
                 AppDomain.CurrentDomain.AssemblyLoad -= OnAssemblyLoad;
-                ApplyPatches(harmony, t, modId, friendlyName, ref applied,
+                ApplyPatches(harmony, t, modId, friendlyName, applied,
                     transpilerSource, scanTranspilerName, setEnabledTranspilerName);
             }
         }
@@ -89,15 +105,17 @@ internal static class LimitPatchHelper
         Type managerType,
         string modId,
         string friendlyName,
-        ref bool applied,
+        AppliedFlag applied,
         Type transpilerSource,
         string scanTranspilerName,
         string setEnabledTranspilerName)
     {
-        if (Interlocked.CompareExchange(ref applied, true, false)) return;
+        // 原子守卫：仅第一个调用者成功，后续直接跳过
+        if (Interlocked.CompareExchange(ref applied.Value, true, false)) return;
 
         Log.Info($"[{modId}] {friendlyName}: applying patches to {managerType.FullName}");
 
+        // ── Patch 1: ScanInstalledPacks（启动加载） ──
         var scanMethod = AccessTools.Method(managerType, "ScanInstalledPacks");
         if (scanMethod != null)
         {
@@ -110,6 +128,7 @@ internal static class LimitPatchHelper
             Log.Warn($"[{modId}] {friendlyName}: ScanInstalledPacks method not found!");
         }
 
+        // ── Patch 2: SetEnabled（运行时 UI 开关） ──
         var setEnabledMethod = AccessTools.Method(managerType, "SetEnabled",
             [typeof(string), typeof(bool)]);
         if (setEnabledMethod != null)
@@ -154,14 +173,20 @@ internal static class LimitPatchHelper
     //  常量检查
     // ═══════════════════════════════════════════════
 
+    /// <summary>判断 IL 指令是否为上限常量 7（背景包限制）。</summary>
     public static bool IsConstant7(CodeInstruction inst) =>
         (inst.opcode == OpCodes.Ldc_I4_S && inst.operand is sbyte and 7)
         || (inst.opcode == OpCodes.Ldc_I4 && inst.operand is int and 7);
 
+    /// <summary>
+    /// 判断 IL 指令是否为皮肤上限常量（14 或 140）。
+    /// ldc.i4.s（短格式 ≤127）→ 14；ldc.i4（长格式 &gt;127）→ 140。
+    /// </summary>
     public static bool IsConstant14(CodeInstruction inst) =>
         (inst.opcode == OpCodes.Ldc_I4_S && inst.operand is sbyte and 14)
         || (inst.opcode == OpCodes.Ldc_I4 && inst.operand is int and 14);
 
+    /// <summary>跨程序集查找类型。</summary>
     private static Type? FindType(string ns, string typeName) =>
         CompatibilityPatchUtil.FindType(ns, typeName);
 }
