@@ -1,0 +1,9 @@
+root = true
+
+[*.cs]
+# Harmony 补丁参数：__result, __instance, __state 等不触发命名警告
+dotnet_naming_rule.harmony_parameters.severity = none
+dotnet_naming_rule.harmony_parameters.symbols = harmony_params
+dotnet_naming_rule.harmony_parameters.style = any_style
+dotnet_naming_symbols.harmony_params.applicable_kinds = parameter
+dotnet_naming_symbols.harmony_params.required_prefix = __
