@@ -26,7 +26,7 @@ public static class ShadowverseEvolutionPointPatch
     private static Type? _evoMgrType;
     private static FieldInfo? _pointsField;
     private static object? _pointsChangedEvent; // EventInfo
-    private static List<FieldInfo> _turnFlagFields = []; // 回合内进化标记字段
+    private static readonly List<FieldInfo> _turnFlagFields = []; // 回合内进化标记字段
 
     public static void Apply(Harmony harmony)
     {
