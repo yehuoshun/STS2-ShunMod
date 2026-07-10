@@ -114,25 +114,26 @@ public static class ShadowverseEvolutionPointPatch
     /// 设 1 而不是 0，因为 UI 可能根据 GetPoints() 返回值决定是否显示进化入口。
     /// 实际进化不消耗点数，1 点够用整局。
     /// </summary>
-    // ReSharper disable once ValueParameterNotUsed
+    // ReSharper disable All
     private static void Initialize_Prefix(ref int evolvePoints, ref int superEvolvePoints)
     {
         evolvePoints = 1;
         superEvolvePoints = 1;
     }
+    // ReSharper restore All
 
     /// <summary>
     /// TryUseEvolvePoint / TryUseSuperEvolvePoint Prefix — 跳过原方法，进化始终成功。
     /// Harmony Prefix 返回 false 时跳过原方法体，__result 设为 true。
     /// 原方法中"检查点数 → 减 1"的逻辑不会执行，实现"不消耗点数"。
     /// </summary>
-    // ReSharper disable once ValueParameterNotUsed
-    // ReSharper disable once IdentifierTypo
+    // ReSharper disable All
     private static bool TryUse_Prefix(ref bool __result)
     {
         __result = true;
         return false; // 跳过原方法 → 进化点不递减
     }
+    // ReSharper restore All
 
     /// <summary>
     /// MarkEvolveUsedThisTurn / MarkSuperEvolveUsedThisTurn Prefix — 跳过标记。
