@@ -1,6 +1,6 @@
 using HarmonyLib;
 
-namespace ShunMod.Compat;
+namespace ShunMod.Compat.Patches.Compatibility;
 
 /// <summary>
 /// 第三方模组兼容补丁统一入口。

@@ -5,7 +5,7 @@ using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using ShunMod.Core;
 
-namespace ShunMod.Compat;
+namespace ShunMod.Compat.Patches.Compatibility;
 
 /// <summary>
 /// 影之诗模组兼容 — 解除背景包启用数量限制（7→无限）。

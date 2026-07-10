@@ -5,7 +5,7 @@ using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using ShunMod.Core;
 
-namespace ShunMod.Compat;
+namespace ShunMod.Compat.Patches.Compatibility;
 
 /// <summary>
 /// 影之诗模组兼容 — 解除皮肤启用数量限制（14 → 无限）。
