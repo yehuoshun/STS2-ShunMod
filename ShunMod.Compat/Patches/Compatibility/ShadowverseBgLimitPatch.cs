@@ -126,8 +126,8 @@ public static class ShadowverseBgLimitPatch
     /// <summary>判断 IL 指令是否为常量 7（短格式或长格式）</summary>
     private static bool IsConstant7(CodeInstruction inst)
     {
-        return (inst.opcode == OpCodes.Ldc_I4_S && inst.operand is sbyte sb && sb == 7)
-            || (inst.opcode == OpCodes.Ldc_I4 && inst.operand is int i && i == 7);
+        return (inst.opcode == OpCodes.Ldc_I4_S && inst.operand is sbyte and 7)
+            || (inst.opcode == OpCodes.Ldc_I4 && inst.operand is int and 7);
     }
 
 
