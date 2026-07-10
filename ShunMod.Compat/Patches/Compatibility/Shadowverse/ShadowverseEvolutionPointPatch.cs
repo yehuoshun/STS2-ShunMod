@@ -10,7 +10,8 @@ namespace ShunMod.Compat.Patches.Compatibility.Shadowverse;
 /// 基于进化点源码重构后的精确 patch：
 ///   进化点数     → Prefix 拦截 Initialize 参数，设为 1（仅用于 UI 展示）
 ///   进化不消耗    → Prefix 跳过 TryUseEvolvePoint / TryUseSuperEvolvePoint
-///   回合限制解除  → Postfix 让 GetEvolveUsedThisTurn / GetSuperEvolveUsedThisTurn 永远返回 false
+///   回合限制解除  → Prefix 跳过 MarkEvolveUsedThisTurn / MarkSuperEvolveUsedThisTurn
+///                   （不 patch GetEvolveUsedThisTurn，保留给其他卡和机制做进化检测）
 /// </summary>
 public static class ShadowverseEvolutionPointPatch
 {
@@ -41,16 +42,18 @@ public static class ShadowverseEvolutionPointPatch
             prefixType: typeof(ShadowverseEvolutionPointPatch),
             prefixName: nameof(TryUse_Prefix));
 
-        // ── Patch 4: GetEvolveUsedThisTurn ──
-        // 永远返回 false，解除"一回合只能进化一次"限制。
-        PatchMethod(harmony, evoType, "GetEvolveUsedThisTurn",
-            postfixType: typeof(ShadowverseEvolutionPointPatch),
-            postfixName: nameof(ReturnFalse_Postfix));
+        // ── Patch 4: MarkEvolveUsedThisTurn ──
+        // 不 patch GetEvolveUsedThisTurn（保留给其他卡和机制做进化检测）。
+        // 改为 patch 标记方法，阻止 player 被加入 HashSet。
+        // 这样 GetEvolveUsedThisTurn 自然返回 false，无需覆写。
+        PatchMethod(harmony, evoType, "MarkEvolveUsedThisTurn",
+            prefixType: typeof(ShadowverseEvolutionPointPatch),
+            prefixName: nameof(Skip_Prefix));
 
-        // ── Patch 5: GetSuperEvolveUsedThisTurn ──
-        PatchMethod(harmony, evoType, "GetSuperEvolveUsedThisTurn",
-            postfixType: typeof(ShadowverseEvolutionPointPatch),
-            postfixName: nameof(ReturnFalse_Postfix));
+        // ── Patch 5: MarkSuperEvolveUsedThisTurn ──
+        PatchMethod(harmony, evoType, "MarkSuperEvolveUsedThisTurn",
+            prefixType: typeof(ShadowverseEvolutionPointPatch),
+            prefixName: nameof(Skip_Prefix));
     }
 
     // ═══════════════════════════════════════════════
@@ -78,12 +81,13 @@ public static class ShadowverseEvolutionPointPatch
     }
 
     /// <summary>
-    /// GetEvolveUsedThisTurn / GetSuperEvolveUsedThisTurn — 永远返回 false。
-    /// 让进化判定认为"本回合未进化过"，解除回合限制。
+    /// MarkEvolveUsedThisTurn / MarkSuperEvolveUsedThisTurn — 跳过，不标记进化状态。
+    /// 阻止 player 被加入 _evolveUsedThisTurn / _superEvolveUsedThisTurn HashSet。
+    /// 这样 GetEvolveUsedThisTurn 自然返回 false，保留给其他卡牌做进化检测。
     /// </summary>
-    private static void ReturnFalse_Postfix(ref bool __result)
+    private static bool Skip_Prefix()
     {
-        __result = false;
+        return false; // 跳过原方法 → 不标记进化状态
     }
 
     // ═══════════════════════════════════════════════
