@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
@@ -120,9 +121,8 @@ internal static class AllSharedEventsInjectPatch
 {
     [HarmonyPostfix]
     // ReSharper disable once UnusedMember.Local
-#pragma warning disable IDE1006
+    // ReSharper disable once InconsistentNaming
     private static IEnumerable<EventModel> Postfix(IEnumerable<EventModel> __result)
-#pragma warning restore IDE1006
     {
         // 兜底：如果 SafeInit 没跑，这里自己创建事件
         if (ShunModEventRegistry.SharedEvents.Count == 0)
@@ -176,10 +176,9 @@ public static class EventPortraitRedirectPatch
     private static readonly Dictionary<Type, Texture2D?> CachedPortraits = new();
 
     [HarmonyPrefix]
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     // ReSharper disable once UnusedMember.Local
-#pragma warning disable IDE1006
     private static bool Prefix(EventModel __instance, ref Texture2D? __result)
-#pragma warning restore IDE1006
     {
         var type = __instance.GetType();
 
