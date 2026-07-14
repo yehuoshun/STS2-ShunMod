@@ -120,6 +120,7 @@ internal static class AllSharedEventsInjectPatch
 {
     [HarmonyPostfix]
     // ReSharper disable once UnusedMember.Local
+    // ReSharper disable once InconsistentNaming
     private static IEnumerable<EventModel> Postfix(IEnumerable<EventModel> __result)
     {
         // 兜底：如果 SafeInit 没跑，这里自己创建事件
@@ -175,6 +176,7 @@ public static class EventPortraitRedirectPatch
 
     [HarmonyPrefix]
     // ReSharper disable once UnusedMember.Local
+    // ReSharper disable once InconsistentNaming
     private static bool Prefix(EventModel __instance, ref Texture2D? __result)
     {
         var type = __instance.GetType();
