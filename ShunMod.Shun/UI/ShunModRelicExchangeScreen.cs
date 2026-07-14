@@ -38,8 +38,8 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
     /// <summary>内容面板尺寸（1180×780），适配 16:9 分辨率下不挡住游戏画面。</summary>
     private static readonly Vector2 ScreenSize = new(1180f, 780f);
 
-    /// <summary>单张卡片尺寸（320×440），刚好容纳图标+名称+描述，且三张并排不溢出。</summary>
-    private static readonly Vector2 CardSize = new(320f, 440f);
+    /// <summary>单张卡片尺寸（200×280），三张以上可横向滚动查看。</summary>
+    private static readonly Vector2 CardSize = new(200f, 280f);
 
     /// <summary>卡片之间的间距，视觉上区分每张卡片。</summary>
     private static readonly int CardSeparation = 20;
@@ -385,13 +385,13 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
             SizeFlagsHorizontal = SizeFlags.ExpandFill,
             CustomMinimumSize = new Vector2(0f, CardSize.Y + 40f)
         };
+        ApplyScrollbarStyle(relicScroll);
         root.AddChild(relicScroll);
 
         _playerRelicsRow = new HBoxContainer()
         {
             Name = "PlayerRelicsRow",
-            MouseFilter = MouseFilterEnum.Ignore,
-            SizeFlagsHorizontal = SizeFlags.ExpandFill
+            MouseFilter = MouseFilterEnum.Ignore
         };
         _playerRelicsRow.AddThemeConstantOverride("separation", CardSeparation);
         relicScroll.AddChild(_playerRelicsRow);
@@ -419,13 +419,13 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
             SizeFlagsHorizontal = SizeFlags.ExpandFill,
             CustomMinimumSize = new Vector2(0f, CardSize.Y + 40f)
         };
+        ApplyScrollbarStyle(rewardScroll);
         root.AddChild(rewardScroll);
 
         _rewardRow = new HBoxContainer()
         {
             Name = "RewardRow",
-            MouseFilter = MouseFilterEnum.Ignore,
-            SizeFlagsHorizontal = SizeFlags.ExpandFill
+            MouseFilter = MouseFilterEnum.Ignore
         };
         _rewardRow.AddThemeConstantOverride("separation", CardSeparation);
         rewardScroll.AddChild(_rewardRow);
@@ -579,10 +579,10 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
         // MarginContainer 提供内边距，VBoxContainer 垂直排列图标→名称→描述。
         MarginContainer margin = new();
         margin.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
-        margin.AddThemeConstantOverride("margin_left", 18);
-        margin.AddThemeConstantOverride("margin_right", 18);
-        margin.AddThemeConstantOverride("margin_top", 16);
-        margin.AddThemeConstantOverride("margin_bottom", 16);
+        margin.AddThemeConstantOverride("margin_left", 12);
+        margin.AddThemeConstantOverride("margin_right", 12);
+        margin.AddThemeConstantOverride("margin_top", 10);
+        margin.AddThemeConstantOverride("margin_bottom", 10);
         button.AddChild(margin);
 
         VBoxContainer content = new()
@@ -591,14 +591,14 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
             SizeFlagsHorizontal = SizeFlags.ExpandFill,
             SizeFlagsVertical = SizeFlags.ExpandFill
         };
-        content.AddThemeConstantOverride("separation", 10);
+        content.AddThemeConstantOverride("separation", 6);
         margin.AddChild(content);
 
-        // 图标区域：固定高度 120px，居中显示。
+        // 图标区域：固定高度 80px，居中显示。
         // 优先使用 BigIcon（大图标），没有则降级到 Icon（小图标）。
         CenterContainer iconBox = new()
         {
-            CustomMinimumSize = new Vector2(0f, 120f),
+            CustomMinimumSize = new Vector2(0f, 80f),
             MouseFilter = MouseFilterEnum.Ignore
         };
         content.AddChild(iconBox);
@@ -610,7 +610,7 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
             {
                 MouseFilter = MouseFilterEnum.Ignore,
                 Texture = icon,
-                CustomMinimumSize = new Vector2(100f, 100f),
+                CustomMinimumSize = new Vector2(64f, 64f),
                 StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
                 ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize
             };
@@ -624,8 +624,8 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
             HorizontalAlignment = HorizontalAlignment.Center,
             AutowrapMode = TextServer.AutowrapMode.WordSmart,
             SizeFlagsHorizontal = SizeFlags.ExpandFill,
-            MaxFontSize = 22,
-            MinFontSize = 15
+            MaxFontSize = 18,
+            MinFontSize = 12
         };
         nameLabel.AddThemeColorOverride("font_color", new Color(0.96f, 0.97f, 0.99f, 0.98f));
         nameLabel.AddThemeColorOverride("font_outline_color", new Color(0f, 0f, 0f, 0.4f));
@@ -642,8 +642,8 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
             SizeFlagsHorizontal = SizeFlags.ExpandFill,
             SizeFlagsVertical = SizeFlags.ExpandFill,
             AutowrapMode = TextServer.AutowrapMode.WordSmart,
-            MaxFontSize = 16,
-            MinFontSize = 12,
+            MaxFontSize = 14,
+            MinFontSize = 10,
             BbcodeEnabled = true,
             MouseFilter = MouseFilterEnum.Ignore
         };
@@ -689,10 +689,10 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
 
         MarginContainer margin = new();
         margin.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
-        margin.AddThemeConstantOverride("margin_left", 18);
-        margin.AddThemeConstantOverride("margin_right", 18);
-        margin.AddThemeConstantOverride("margin_top", 16);
-        margin.AddThemeConstantOverride("margin_bottom", 16);
+        margin.AddThemeConstantOverride("margin_left", 12);
+        margin.AddThemeConstantOverride("margin_right", 12);
+        margin.AddThemeConstantOverride("margin_top", 10);
+        margin.AddThemeConstantOverride("margin_bottom", 10);
         button.AddChild(margin);
 
         VBoxContainer content = new()
@@ -701,13 +701,13 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
             SizeFlagsHorizontal = SizeFlags.ExpandFill,
             SizeFlagsVertical = SizeFlags.ExpandFill
         };
-        content.AddThemeConstantOverride("separation", 10);
+        content.AddThemeConstantOverride("separation", 6);
         margin.AddChild(content);
 
         // 附魔图标（⚡ 符号，绿色调，与遗物金色调区分）
         CenterContainer iconBox = new()
         {
-            CustomMinimumSize = new Vector2(0f, 120f),
+            CustomMinimumSize = new Vector2(0f, 80f),
             MouseFilter = MouseFilterEnum.Ignore
         };
         content.AddChild(iconBox);
@@ -716,8 +716,8 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
         {
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center,
-            MaxFontSize = 36,
-            MinFontSize = 24
+            MaxFontSize = 28,
+            MinFontSize = 18
         };
         enchantLabel.AddThemeColorOverride("font_color", new Color(0.96f, 0.97f, 0.99f, 0.98f));
         enchantLabel.AddThemeColorOverride("font_outline_color", new Color(0f, 0f, 0f, 0.4f));
@@ -732,8 +732,8 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
             HorizontalAlignment = HorizontalAlignment.Center,
             AutowrapMode = TextServer.AutowrapMode.WordSmart,
             SizeFlagsHorizontal = SizeFlags.ExpandFill,
-            MaxFontSize = 22,
-            MinFontSize = 15
+            MaxFontSize = 18,
+            MinFontSize = 12
         };
         nameLabel.AddThemeColorOverride("font_color", new Color(0.96f, 0.97f, 0.99f, 0.98f));
         nameLabel.AddThemeColorOverride("font_outline_color", new Color(0f, 0f, 0f, 0.4f));
@@ -749,8 +749,8 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
             SizeFlagsHorizontal = SizeFlags.ExpandFill,
             SizeFlagsVertical = SizeFlags.ExpandFill,
             AutowrapMode = TextServer.AutowrapMode.WordSmart,
-            MaxFontSize = 16,
-            MinFontSize = 12,
+            MaxFontSize = 14,
+            MinFontSize = 10,
             BbcodeEnabled = true,
             MouseFilter = MouseFilterEnum.Ignore
         };
@@ -839,6 +839,35 @@ internal sealed partial class ShunModRelicExchangeScreen : Control, IOverlayScre
         button.AddThemeStyleboxOverride("pressed", CreateCardStyle(new Color(0.07f, 0.09f, 0.13f, 0.9f), AccentGold.Lightened(0.14f), 4));
         button.AddThemeStyleboxOverride("focus", CreateCardStyle(CardBgHover, AccentGold, 3));
         button.AddThemeStyleboxOverride("disabled", CreateCardStyle(CardBgDisabled, AccentGold.Darkened(0.4f), 2));
+    }
+
+    /// <summary>为 ScrollContainer 添加半透明水平滚动条。</summary>
+    private static void ApplyScrollbarStyle(ScrollContainer container)
+    {
+        container.AddThemeStyleboxOverride("scrollbar", new StyleBoxFlat
+        {
+            BgColor = new Color(0.2f, 0.22f, 0.3f, 0.35f),
+            CornerRadiusTopLeft = 4,
+            CornerRadiusTopRight = 4,
+            CornerRadiusBottomLeft = 4,
+            CornerRadiusBottomRight = 4
+        });
+        container.AddThemeStyleboxOverride("grabber", new StyleBoxFlat
+        {
+            BgColor = new Color(0.5f, 0.6f, 0.7f, 0.65f),
+            CornerRadiusTopLeft = 4,
+            CornerRadiusTopRight = 4,
+            CornerRadiusBottomLeft = 4,
+            CornerRadiusBottomRight = 4
+        });
+        container.AddThemeStyleboxOverride("grabber_highlight", new StyleBoxFlat
+        {
+            BgColor = new Color(0.6f, 0.7f, 0.85f, 0.8f),
+            CornerRadiusTopLeft = 4,
+            CornerRadiusTopRight = 4,
+            CornerRadiusBottomLeft = 4,
+            CornerRadiusBottomRight = 4
+        });
     }
 
     /// <summary>
