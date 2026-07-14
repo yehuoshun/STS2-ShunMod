@@ -47,21 +47,9 @@ public static class ModEntry
         // Phase 3: Content registration
         ContentRegistry.RegisterAll(Assembly.GetExecutingAssembly());
 
-        // Phase 4: Register custom keywords for Shun cards
-        RegisterCustomKeywords();
-
         Log.Info($"[{id}] Initialization complete");
         Log.Info($"[{id}] ============================================================");
     }
 
-    /// <summary>
-    ///     注册 Shun 模块中各卡牌的自定义词条。
-    /// </summary>
-    private static void RegisterCustomKeywords()
-    {
-        CustomKeywordRegistry.RegisterKeyword(
-            typeof(Cards.ShunModForeverStrike), "forever");
 
-        Log.Info("[ShunMod_Shun] Custom keywords registered");
-    }
 }
