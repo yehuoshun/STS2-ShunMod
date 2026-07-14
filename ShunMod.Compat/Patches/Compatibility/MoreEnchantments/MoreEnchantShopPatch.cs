@@ -23,7 +23,7 @@ internal static class MoreEnchantShopPatch
     private const string TargetNs = "MoreEnchantmentsMod";
     private const string TargetType = "MoreEnchantFakeMerchantShop";
 
-    private static readonly AppliedFlag _applied = new();
+    private static readonly AppliedFlag Applied = new();
 
     private sealed class AppliedFlag
     {
@@ -45,7 +45,7 @@ internal static class MoreEnchantShopPatch
 
         void OnAssemblyLoad(object? sender, AssemblyLoadEventArgs args)
         {
-            if (_applied.Value) return;
+            if (Applied.Value) return;
             if (CompatibilityPatchUtil.FindType(TargetNs, TargetType) is { } t)
             {
                 AppDomain.CurrentDomain.AssemblyLoad -= OnAssemblyLoad;
@@ -56,12 +56,12 @@ internal static class MoreEnchantShopPatch
 
     private static void ApplyPatch(Harmony harmony, Type targetType)
     {
-        if (Interlocked.CompareExchange(ref _applied.Value, true, false)) return;
+        if (Interlocked.CompareExchange(ref Applied.Value, true, false)) return;
 
         Log.Info($"[{ModId}] MoreEnchant patch: applying to {targetType.FullName}");
 
         var tierEnum = FindTierEnum(targetType.Assembly);
-        var rngType = FindRngType(targetType.Assembly);
+        var rngType = FindRngType();
 
         if (tierEnum == null || rngType == null)
         {
@@ -69,7 +69,7 @@ internal static class MoreEnchantShopPatch
             return;
         }
 
-        var paramTypes = new Type[]
+        var paramTypes = new[]
         {
             typeof(List<EnchantmentModel>),
             typeof(HashSet<string>),
@@ -102,7 +102,7 @@ internal static class MoreEnchantShopPatch
         return null;
     }
 
-    private static Type? FindRngType(Assembly targetAssembly)
+    private static Type? FindRngType()
     {
         foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
         {
