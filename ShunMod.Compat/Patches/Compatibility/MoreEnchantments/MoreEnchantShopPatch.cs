@@ -5,7 +5,7 @@ using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using ShunMod.Core;
 
-namespace ShunMod.Compat.Patches.Compatibility.MoreEnchant;
+namespace ShunMod.Compat.Patches.Compatibility.MoreEnchantments;
 
 /// <summary>
 /// MoreEnchant 附魔模组兼容补丁 — 解除 AddTier 的附魔限制。
