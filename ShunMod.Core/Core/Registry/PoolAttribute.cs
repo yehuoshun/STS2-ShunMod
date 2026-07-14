@@ -4,28 +4,18 @@ namespace ShunMod.Core.Core.Registry;
 ///     标记卡牌所属的卡池。ContentRegistry 扫描后自动注册。
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-public class CardPoolAttribute : Attribute
+public class CardPoolAttribute(Type poolType) : Attribute
 {
-    public Type PoolType { get; }
-
-    public CardPoolAttribute(Type poolType)
-    {
-        PoolType = poolType;
-    }
+    public Type PoolType { get; } = poolType;
 }
 
 /// <summary>
 ///     标记遗物所属的遗物池。ContentRegistry 扫描后自动注册。
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-public class RelicPoolAttribute : Attribute
+public class RelicPoolAttribute(Type poolType) : Attribute
 {
-    public Type PoolType { get; }
-
-    public RelicPoolAttribute(Type poolType)
-    {
-        PoolType = poolType;
-    }
+    public Type PoolType { get; } = poolType;
 }
 
 /// <summary>
