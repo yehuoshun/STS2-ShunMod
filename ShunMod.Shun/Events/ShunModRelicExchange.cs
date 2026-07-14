@@ -85,14 +85,14 @@ public class ShunModRelicExchange : ShunEventModel
                     // 没有可交易的遗物时，切换到提示页面，只显示离开按钮
                     SetEventState(L10NLookup("pages.NO_TRADEABLE.description"),
                     [
-                        new EventOption(this, static () => System.Threading.Tasks.Task.CompletedTask, "OPT_LEAVE")
+                        new EventOption(this, static () => System.Threading.Tasks.Task.CompletedTask, $"{Id.Entry}.pages.NO_TRADEABLE.options.OPT_LEAVE")
                     ]);
                     return;
                 }
 
                 // 弹出 Overlay 屏幕，await 等待玩家完成选择
                 await ShunModRelicExchangeCoordinator.ShowExchange(player);
-            }, $"{Id.Entry}.pages.INITIAL.options.OPT_ENTER.title",
+            }, $"{Id.Entry}.pages.INITIAL.options.OPT_ENTER",
                 BuildEnterHoverTips().ToArray()),
 
             // ── 选项 2：扣血刷新 ──
@@ -107,10 +107,10 @@ public class ShunModRelicExchange : ShunEventModel
                     player.Creature.LoseHpInternal(5, 0);
                     Log.Info("[ShunMod_Shun] RelicExchange: HP refresh, options will re-roll on next entry");
                 }
-            }, $"{Id.Entry}.pages.INITIAL.options.OPT_REFRESH.title"),
+            }, $"{Id.Entry}.pages.INITIAL.options.OPT_REFRESH"),
 
             // ── 选项 3：离开 ──
-            new(this, static () => System.Threading.Tasks.Task.CompletedTask, $"{Id.Entry}.pages.INITIAL.options.OPT_LEAVE.title"),
+            new(this, static () => System.Threading.Tasks.Task.CompletedTask, $"{Id.Entry}.pages.INITIAL.options.OPT_LEAVE"),
         };
     }
 
