@@ -4,9 +4,7 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.CardPools;
 using MegaCrit.Sts2.Core.Nodes.CommonUi;
-using ShunMod.Core;
 using ShunMod.Shun.Base;
-using ShunMod.Core.Core.Registry;
 
 namespace ShunMod.Shun.Cards;
 
@@ -21,11 +19,11 @@ public class ShunModSuperApotheosis : CardModel
 
     public override string PortraitPath => ShunCard.PortraitPath<ShunModSuperApotheosis>();
 
-    protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    protected override Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         var owner = Owner;
         if (owner.PlayerCombatState == null)
-            return;
+            return Task.CompletedTask;
 
         // 升级战斗中所有卡牌（排除自身）
         foreach (var allCard in owner.PlayerCombatState.AllCards)
@@ -38,6 +36,8 @@ public class ShunModSuperApotheosis : CardModel
             .ToList();
         foreach (var card in deckCards)
             CardCmd.Upgrade(card, CardPreviewStyle.None);
+
+        return Task.CompletedTask;
     }
 
     protected override void OnUpgrade()
