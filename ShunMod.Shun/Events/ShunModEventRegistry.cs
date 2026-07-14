@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
@@ -11,24 +12,25 @@ namespace ShunMod.Shun.Events;
 ///     自定义事件注册 — 从 ModelDb 取正规实例注入 AllSharedEvents。
 ///     事件类型由 Core/ContentRegistry 扫描 [EventPool] 属性收集。
 /// </summary>
+[SuppressMessage("Style", "IDE1006", Justification = "s_ 前缀静态字段，避开属性名冲突")]
 public static class ShunModEventRegistry
 {
-    private static readonly HashSet<Type> _eventTypes = [];
+    private static readonly HashSet<Type> s_eventTypes = [];
     /// <summary>EventModel 子类类型集合（只读，写入通过 AddEventType）。</summary>
-    public static IReadOnlySet<Type> EventTypes => _eventTypes;
+    public static IReadOnlySet<Type> EventTypes => s_eventTypes;
 
-    private static readonly List<EventModel> _sharedEvents = [];
+    private static readonly List<EventModel> s_sharedEvents = [];
     /// <summary>共享事件列表（只读，写入通过 Register）。</summary>
-    public static IReadOnlyList<EventModel> SharedEvents => _sharedEvents;
+    public static IReadOnlyList<EventModel> SharedEvents => s_sharedEvents;
 
     /// <summary>添加事件类型。由 ContentRegistry 扫描 [EventPool] 时调用。</summary>
-    public static void AddEventType(Type type) => _eventTypes.Add(type);
+    public static void AddEventType(Type type) => s_eventTypes.Add(type);
 
     /// <summary>注册事件实例。若非 act 限定事件，加入 SharedEvents。</summary>
     public static void Register(EventModel eventModel)
     {
-        if (!_sharedEvents.Contains(eventModel))
-            _sharedEvents.Add(eventModel);
+        if (!s_sharedEvents.Contains(eventModel))
+            s_sharedEvents.Add(eventModel);
     }
 }
 
@@ -39,13 +41,14 @@ public static class ShunModEventRegistry
 /// </summary>
 [HarmonyPatch(typeof(ModelDb), nameof(ModelDb.Init))]
 [HarmonyPriority(Priority.First)]
-internal static class ModelDbInit_SafePatch
+internal static class ModelDbInitSafePatch
 {
     private static readonly FieldInfo? ContentByIdField =
         typeof(ModelDb).GetField("_contentById",
             BindingFlags.Static | BindingFlags.NonPublic);
 
     [HarmonyPrefix]
+    [SuppressMessage("CodeQuality", "IDE0051", Justification = "Harmony 反射调用")]
     private static bool Prefix()
     {
         // 检查字段是否存在
@@ -111,13 +114,14 @@ internal static class ModelDbInit_SafePatch
 
 /// <summary>
 ///     将 ShunModEventRegistry.SharedEvents 注入 ModelDb.AllSharedEvents。
-///     兜底创建：如果 ModelDbInit_SafePatch 因故未执行（如 _contentById 字段不可用），
+///     兜底创建：如果 ModelDbInitSafePatch 因故未执行（如 _contentById 字段不可用），
 ///     在 AllSharedEvents 首次被访问时自动创建事件实例并注册。
 /// </summary>
 [HarmonyPatch(typeof(ModelDb), nameof(ModelDb.AllSharedEvents), MethodType.Getter)]
 internal static class AllSharedEventsInjectPatch
 {
     [HarmonyPostfix]
+    [SuppressMessage("CodeQuality", "IDE0051", Justification = "Harmony 反射调用")]
     private static IEnumerable<EventModel> Postfix(IEnumerable<EventModel> __result)
     {
         // 兜底：如果 SafeInit 没跑，这里自己创建事件
@@ -172,6 +176,7 @@ public static class EventPortraitRedirectPatch
     private static readonly Dictionary<Type, Texture2D?> CachedPortraits = new();
 
     [HarmonyPrefix]
+    [SuppressMessage("CodeQuality", "IDE0051", Justification = "Harmony 反射调用")]
     private static bool Prefix(EventModel __instance, ref Texture2D? __result)
     {
         var type = __instance.GetType();
