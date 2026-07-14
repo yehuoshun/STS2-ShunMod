@@ -9,7 +9,10 @@ namespace ShunMod.Compat;
 [ModInitializer(nameof(Initialize))]
 public static class ModEntry
 {
-    private const string HarmonyId = "ShunMod_Compat";
+    /// <summary>ShunMod.Compat 日志前缀 / Harmony ID，供各模块统一引用。</summary>
+    public const string ModId = "ShunMod_Compat";
+
+    private const string HarmonyId = ModId;
     private static readonly Lock Lock = new();
     private static bool _initialized;
     private static Harmony? _harmony;
@@ -22,7 +25,7 @@ public static class ModEntry
             _initialized = true;
         }
 
-        var id = "ShunMod_Compat";
+        var id = ModId;
         Log.Info($"[{id}] ============================================================");
         Log.Info($"[{id}] Initializing {id}");
 

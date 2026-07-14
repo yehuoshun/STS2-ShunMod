@@ -19,7 +19,7 @@ namespace ShunMod.Compat.Patches.Compatibility.MoreEnchantments;
 /// </summary>
 internal static class MoreEnchantShopPatch
 {
-    private const string ModId = "STS2ShunMod";
+    private const string ModId = ModEntry.ModId;
     private const string TargetNs = "MoreEnchantmentsMod";
     private const string TargetType = "MoreEnchantFakeMerchantShop";
 
@@ -60,7 +60,6 @@ internal static class MoreEnchantShopPatch
 
         Log.Info($"[{ModId}] MoreEnchant patch: applying to {targetType.FullName}");
 
-        // ── Patch: AddTier(List<EnchantmentModel>, HashSet<string>, Player, Rng, EnchantmentTier, int) ──
         var tierEnum = FindTierEnum(targetType.Assembly);
         var rngType = FindRngType(targetType.Assembly);
 
@@ -105,8 +104,6 @@ internal static class MoreEnchantShopPatch
 
     private static Type? FindRngType(Assembly targetAssembly)
     {
-        // Rng 类型在 MegaCrit.Sts2.Core.Random 命名空间，不依赖 MoreEnchant
-        // 但为了精准匹配参数类型签名，直接从目标程序集或全局查找
         foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
         {
             var t = asm.GetType("MegaCrit.Sts2.Core.Random.Rng");
@@ -115,10 +112,6 @@ internal static class MoreEnchantShopPatch
         return null;
     }
 
-    /// <summary>
-    /// Prefix：跳过原 AddTier，将 ModelDb 中所有注册的 EnchantmentModel 加入 inventory。
-    /// 移除 count 限制和 inventory 上限，保留 used 去重。
-    /// </summary>
     private static bool AddTier_Prefix(
         List<EnchantmentModel> inventory,
         HashSet<string> used)
@@ -137,6 +130,6 @@ internal static class MoreEnchantShopPatch
         {
             Log.Warn($"[{ModId}] MoreEnchant patch: AddTier failed: {ex.Message}");
         }
-        return false; // 跳过原方法
+        return false;
     }
 }

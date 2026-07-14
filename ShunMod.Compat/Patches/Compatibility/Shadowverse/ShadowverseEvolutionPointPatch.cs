@@ -24,7 +24,7 @@ namespace ShunMod.Compat.Patches.Compatibility.Shadowverse;
 /// </summary>
 public static class ShadowverseEvolutionPointPatch
 {
-    private const string ModId = "STS2ShunMod";
+    private const string ModId = ModEntry.ModId;
     private const string TargetNs = "shadowverse.Scripts";
     private const string TargetType = "EvolutionPointManager";
 
