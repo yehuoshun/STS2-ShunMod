@@ -16,7 +16,12 @@ namespace ShunMod.Shun.Cards;
 ///     与原版 Stoke 的区别：原版消耗所有手牌，本卡让玩家自由选择。
 /// </summary>
 [CardPool(typeof(ColorlessCardPool))]
-public class ShunModStokeModified() : CardModel(1, CardType.Skill, CardRarity.Rare, TargetType.Self)
+public class ShunModStokeModified : CardModel
+{
+    public ShunModStokeModified()
+        : base(1, CardType.Skill, CardRarity.Rare, TargetType.Self)
+    {
+    }
 
     public override string PortraitPath => ShunCard.PortraitPath<ShunModStokeModified>();
 
