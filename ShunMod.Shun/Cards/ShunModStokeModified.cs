@@ -6,9 +6,7 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.CardPools;
 using MegaCrit.Sts2.Core.Nodes.CommonUi;
-using ShunMod.Core;
 using ShunMod.Shun.Base;
-using ShunMod.Core.Core.Registry;
 
 namespace ShunMod.Shun.Cards;
 
@@ -18,12 +16,7 @@ namespace ShunMod.Shun.Cards;
 ///     与原版 Stoke 的区别：原版消耗所有手牌，本卡让玩家自由选择。
 /// </summary>
 [CardPool(typeof(ColorlessCardPool))]
-public class ShunModStokeModified : CardModel
-{
-    public ShunModStokeModified()
-        : base(1, CardType.Skill, CardRarity.Rare, TargetType.Self)
-    {
-    }
+public class ShunModStokeModified() : CardModel(1, CardType.Skill, CardRarity.Rare, TargetType.Self)
 
     public override string PortraitPath => ShunCard.PortraitPath<ShunModStokeModified>();
 
