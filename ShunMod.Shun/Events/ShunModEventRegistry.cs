@@ -46,7 +46,6 @@ internal static class ModelDbInitSafePatch
             BindingFlags.Static | BindingFlags.NonPublic);
 
     [HarmonyPrefix]
-    [SuppressMessage("CodeQuality", "IDE0051", Justification = "Harmony 反射调用")]
     private static bool Prefix()
     {
         // 检查字段是否存在
@@ -119,7 +118,6 @@ internal static class ModelDbInitSafePatch
 internal static class AllSharedEventsInjectPatch
 {
     [HarmonyPostfix]
-    [SuppressMessage("CodeQuality", "IDE0051", Justification = "Harmony 反射调用")]
     private static IEnumerable<EventModel> Postfix(IEnumerable<EventModel> __result)
     {
         // 兜底：如果 SafeInit 没跑，这里自己创建事件
@@ -174,7 +172,6 @@ public static class EventPortraitRedirectPatch
     private static readonly Dictionary<Type, Texture2D?> CachedPortraits = new();
 
     [HarmonyPrefix]
-    [SuppressMessage("CodeQuality", "IDE0051", Justification = "Harmony 反射调用")]
     private static bool Prefix(EventModel __instance, ref Texture2D? __result)
     {
         var type = __instance.GetType();
