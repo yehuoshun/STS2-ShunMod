@@ -3,6 +3,7 @@ using HarmonyLib;
 namespace ShunMod.Compat.Patches.Compatibility;
 
 using Shadowverse;
+using MoreEnchant;
 
 /// <summary>
 /// 第三方模组兼容补丁统一入口。
@@ -18,6 +19,9 @@ internal static class CompatibilityPatches
         ShadowverseSkinLimitPatch.Apply(harmony);
         ShadowverseBgLimitPatch.Apply(harmony);
         ShadowverseEvolutionPointPatch.Apply(harmony);
+
+        // MoreEnchant 附魔模组：解除 GetShopCandidates 限制
+        MoreEnchantShopPatch.Apply(harmony);
         // ──────────────────────────
     }
 }
