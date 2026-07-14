@@ -3,7 +3,6 @@ using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using Godot;
-using ShunMod.Core;
 using ShunMod.Shun.Helpers;
 
 namespace ShunMod.Shun.Events;
@@ -116,7 +115,7 @@ internal static class ModelDbInit_SafePatch
 ///     在 AllSharedEvents 首次被访问时自动创建事件实例并注册。
 /// </summary>
 [HarmonyPatch(typeof(ModelDb), nameof(ModelDb.AllSharedEvents), MethodType.Getter)]
-internal static class AllSharedEvents_InjectPatch
+internal static class AllSharedEventsInjectPatch
 {
     [HarmonyPostfix]
     private static IEnumerable<EventModel> Postfix(IEnumerable<EventModel> __result)
@@ -181,7 +180,7 @@ public static class EventPortraitRedirectPatch
         if (CachedPortraits.TryGetValue(type, out var cached))
         {
             __result = cached;
-            return cached != null ? false : true;
+            return cached == null;
         }
 
         var modPath = ShunModHelper.EventImagePath(type);
