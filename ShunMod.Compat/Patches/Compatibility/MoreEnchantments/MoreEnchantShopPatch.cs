@@ -3,7 +3,7 @@ using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
-using ShunMod.Core;
+using ShunMod.Core.Core;
 
 namespace ShunMod.Compat.Patches.Compatibility.MoreEnchantments;
 

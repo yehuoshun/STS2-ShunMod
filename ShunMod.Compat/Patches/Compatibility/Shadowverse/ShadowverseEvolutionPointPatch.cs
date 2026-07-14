@@ -1,6 +1,6 @@
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
-using ShunMod.Core;
+using ShunMod.Core.Core;
 
 namespace ShunMod.Compat.Patches.Compatibility.Shadowverse;
 

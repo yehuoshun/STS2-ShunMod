@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using MegaCrit.Sts2.Core.Logging;
 
-namespace ShunMod.Core;
+namespace ShunMod.Core.Core;
 
 /// <summary>
 ///     第三方模组兼容补丁共享工具 — 类型查找、单例发现。
