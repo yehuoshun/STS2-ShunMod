@@ -120,8 +120,9 @@ internal static class AllSharedEventsInjectPatch
 {
     [HarmonyPostfix]
     // ReSharper disable once UnusedMember.Local
-    // ReSharper disable once InconsistentNaming
+#pragma warning disable IDE1006
     private static IEnumerable<EventModel> Postfix(IEnumerable<EventModel> __result)
+#pragma warning restore IDE1006
     {
         // 兜底：如果 SafeInit 没跑，这里自己创建事件
         if (ShunModEventRegistry.SharedEvents.Count == 0)
@@ -176,8 +177,9 @@ public static class EventPortraitRedirectPatch
 
     [HarmonyPrefix]
     // ReSharper disable once UnusedMember.Local
-    // ReSharper disable once InconsistentNaming
+#pragma warning disable IDE1006
     private static bool Prefix(EventModel __instance, ref Texture2D? __result)
+#pragma warning restore IDE1006
     {
         var type = __instance.GetType();
 
