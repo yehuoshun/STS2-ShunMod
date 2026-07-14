@@ -1,9 +1,9 @@
 using HarmonyLib;
+using ShunMod.Compat.Patches.Compatibility.MoreEnchantments;
 
 namespace ShunMod.Compat.Patches.Compatibility;
 
 using Shadowverse;
-using MoreEnchant;
 
 /// <summary>
 /// 第三方模组兼容补丁统一入口。
