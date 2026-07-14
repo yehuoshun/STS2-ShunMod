@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
@@ -12,25 +11,24 @@ namespace ShunMod.Shun.Events;
 ///     自定义事件注册 — 从 ModelDb 取正规实例注入 AllSharedEvents。
 ///     事件类型由 Core/ContentRegistry 扫描 [EventPool] 属性收集。
 /// </summary>
-[SuppressMessage("Style", "IDE1006", Justification = "s_ 前缀静态字段，避开属性名冲突")]
 public static class ShunModEventRegistry
 {
-    private static readonly HashSet<Type> s_eventTypes = [];
+    private static readonly HashSet<Type> EventTypesField = [];
     /// <summary>EventModel 子类类型集合（只读，写入通过 AddEventType）。</summary>
-    public static IReadOnlySet<Type> EventTypes => s_eventTypes;
+    public static IReadOnlySet<Type> EventTypes => EventTypesField;
 
-    private static readonly List<EventModel> s_sharedEvents = [];
+    private static readonly List<EventModel> SharedEventsField = [];
     /// <summary>共享事件列表（只读，写入通过 Register）。</summary>
-    public static IReadOnlyList<EventModel> SharedEvents => s_sharedEvents;
+    public static IReadOnlyList<EventModel> SharedEvents => SharedEventsField;
 
     /// <summary>添加事件类型。由 ContentRegistry 扫描 [EventPool] 时调用。</summary>
-    public static void AddEventType(Type type) => s_eventTypes.Add(type);
+    public static void AddEventType(Type type) => EventTypesField.Add(type);
 
     /// <summary>注册事件实例。若非 act 限定事件，加入 SharedEvents。</summary>
     public static void Register(EventModel eventModel)
     {
-        if (!s_sharedEvents.Contains(eventModel))
-            s_sharedEvents.Add(eventModel);
+        if (!SharedEventsField.Contains(eventModel))
+            SharedEventsField.Add(eventModel);
     }
 }
 
