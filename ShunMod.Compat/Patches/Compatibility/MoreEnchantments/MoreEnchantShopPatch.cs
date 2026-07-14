@@ -19,7 +19,7 @@ namespace ShunMod.Compat.Patches.Compatibility.MoreEnchantments;
 /// </summary>
 internal static class MoreEnchantShopPatch
 {
-    private const string ModId = "ShunMod_Compat";
+    private const string ModId = "STS2ShunMod";
     private const string TargetNs = "MoreEnchantmentsMod";
     private const string TargetType = "MoreEnchantFakeMerchantShop";
 
