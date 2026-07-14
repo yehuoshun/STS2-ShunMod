@@ -1,7 +1,7 @@
+using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
-using ShunMod.Core.Core.Registry;
 
 namespace ShunMod.Core;
 
@@ -9,7 +9,7 @@ namespace ShunMod.Core;
 public static class ModEntry
 {
     private const string HarmonyId = "ShunMod_Core";
-    private static readonly System.Threading.Lock Lock = new();
+    private static readonly Lock Lock = new();
     private static bool _initialized;
     private static Harmony? _harmony;
 
