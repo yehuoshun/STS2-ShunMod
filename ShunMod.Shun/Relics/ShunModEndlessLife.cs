@@ -77,8 +77,8 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
         // 逐张处理：消耗手牌 → 生成升级卡 → 加入手牌 → 首次免费
         for (var i = 0; i < count; i++)
         {
-            // 消耗手牌
-            await CardPileCmd.RemoveFromCombat(selected[i]!);
+            // 消耗手牌（进消耗牌堆）
+            await CardCmd.Exhaust(choiceContext, selected[i]!);
 
             // 生成随机卡牌
             var canonical = Owner.PlayerRng.Transformations.NextItem(allCards);
