@@ -4,5 +4,7 @@
   "SHUN_MOD_BOUNTIFUL_FROND.title": "丰饶叶",
   "SHUN_MOD_BOUNTIFUL_FROND.description": "每个回合开始时，用随机药水填满你的空药水栏位。",
   "SHUN_MOD_INFINITE_GIRYA.title": "无限壶铃",
-  "SHUN_MOD_INFINITE_GIRYA.description": "在休息处可以锻炼。每次锻炼后，战斗开始时多获得 1 点力量。无次数限制。"
+  "SHUN_MOD_INFINITE_GIRYA.description": "在休息处可以锻炼。每次锻炼后，战斗开始时多获得 1 点力量。无次数限制。",
+  "SHUN_MOD_ENDLESS_LIFE.title": "生生不息",
+  "SHUN_MOD_ENDLESS_LIFE.description": "右键点击激活。消耗任意张手牌，每消耗一张，生成一张随机已升级的卡牌（全职业）加入手牌。 NL 首次打出消耗 0。 NL 获得等量 [E]。"
 }
