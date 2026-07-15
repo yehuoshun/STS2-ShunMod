@@ -21,6 +21,7 @@ namespace ShunMod.Shun.Relics;
 ///     无限壶铃 — 基于原版 Girya，去掉 maxLifts=3 限制，休息处无限举重获得力量。
 /// </summary>
 [RelicPool(typeof(SharedRelicPool))]
+// ReSharper disable once UnusedType.Global — instantiated via ContentRegistry reflection
 public sealed class ShunModInfiniteGirya : ShunRelicModel<ShunModInfiniteGirya>
 {
     private int _timesLifted;
@@ -53,7 +54,6 @@ public sealed class ShunModInfiniteGirya : ShunRelicModel<ShunModInfiniteGirya>
         if (TimesLifted > 0 && room is CombatRoom)
         {
             Flash();
-            var power = ModelDb.Power<StrengthPower>().ToMutable();
             await PowerCmd.Apply<StrengthPower>(new ThrowingPlayerChoiceContext(), Owner.Creature, TimesLifted,
                 Owner.Creature, null);
         }
@@ -71,12 +71,8 @@ public sealed class ShunModInfiniteGirya : ShunRelicModel<ShunModInfiniteGirya>
 /// <summary>
 ///     无限壶铃的休息处举重选项。基于原版 LiftRestSiteOption，但绑定 ShunModInfiniteGirya。
 /// </summary>
-public class ShunModLiftRestSiteOption : RestSiteOption
+public class ShunModLiftRestSiteOption(Player owner) : RestSiteOption(owner)
 {
-    public ShunModLiftRestSiteOption(Player owner) : base(owner)
-    {
-    }
-
     public override string OptionId => "LIFT";
 
     public override LocString Description
