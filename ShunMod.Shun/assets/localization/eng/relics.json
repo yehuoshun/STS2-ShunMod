@@ -4,5 +4,7 @@
   "SHUN_MOD_BOUNTIFUL_FROND.title": "Bountiful Frond",
   "SHUN_MOD_BOUNTIFUL_FROND.description": "At the start of each turn, fill your empty potion slots with random potions.",
   "SHUN_MOD_INFINITE_GIRYA.title": "Infinite Girya",
-  "SHUN_MOD_INFINITE_GIRYA.description": "You may train at Rest Sites. Each training gives +1 Strength at the start of combat. No limit."
+  "SHUN_MOD_INFINITE_GIRYA.description": "You may train at Rest Sites. Each training gives +1 Strength at the start of combat. No limit.",
+  "SHUN_MOD_ENDLESS_LIFE.title": "Endless Life",
+  "SHUN_MOD_ENDLESS_LIFE.description": "Right-click to activate. Consume any number of cards from your hand. For each card consumed, add a random upgraded card (any class) to your hand. NL It costs 0 the first time it is played. NL Gain [E] equal to the number of cards consumed."
 }
