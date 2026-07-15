@@ -1,12 +1,8 @@
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Entities.RestSite;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -16,7 +12,6 @@ using MegaCrit.Sts2.Core.Nodes.Vfx.Utilities;
 using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.Runs;
 using MegaCrit.Sts2.Core.Saves.Runs;
-using ShunMod.Core;
 using ShunMod.Core.Core.Registry;
 using ShunMod.Shun.Base;
 
@@ -50,7 +45,7 @@ public sealed class ShunModInfiniteGirya : ShunRelicModel<ShunModInfiniteGirya>
 
     public override bool IsAllowed(IRunState runState)
     {
-        return RelicModel.IsBeforeAct3TreasureChest(runState);
+        return IsBeforeAct3TreasureChest(runState);
     }
 
     public override async Task AfterRoomEntered(AbstractRoom room)
@@ -59,7 +54,8 @@ public sealed class ShunModInfiniteGirya : ShunRelicModel<ShunModInfiniteGirya>
         {
             Flash();
             var power = ModelDb.Power<StrengthPower>().ToMutable();
-            await PowerCmd.Apply<StrengthPower>(new ThrowingPlayerChoiceContext(), Owner.Creature, TimesLifted, Owner.Creature, null);
+            await PowerCmd.Apply<StrengthPower>(new ThrowingPlayerChoiceContext(), Owner.Creature, TimesLifted,
+                Owner.Creature, null);
         }
     }
 
@@ -77,6 +73,10 @@ public sealed class ShunModInfiniteGirya : ShunRelicModel<ShunModInfiniteGirya>
 /// </summary>
 public class ShunModLiftRestSiteOption : RestSiteOption
 {
+    public ShunModLiftRestSiteOption(Player owner) : base(owner)
+    {
+    }
+
     public override string OptionId => "LIFT";
 
     public override LocString Description
@@ -89,8 +89,6 @@ public class ShunModLiftRestSiteOption : RestSiteOption
             return desc;
         }
     }
-
-    public ShunModLiftRestSiteOption(Player owner) : base(owner) { }
 
     public override Task<bool> OnSelect()
     {
