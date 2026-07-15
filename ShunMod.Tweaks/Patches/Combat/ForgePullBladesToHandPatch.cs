@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
@@ -5,15 +6,16 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Models.Cards;
 using MegaCrit.Sts2.Core.Logging;
-namespace ShunMod.Tweaks.Combat;
 
-/// <summary>
-///     所有 Forge 行为自动将非手牌的君王之剑拉回手牌。
-/// </summary>
+namespace ShunMod.Tweaks.Patches.Combat;
+
+// 所有 Forge 行为自动将非手牌的君王之剑拉回手牌
 [HarmonyPatch(typeof(ForgeCmd), nameof(ForgeCmd.Forge))]
 public static class ForgePullBladesToHandPatch
 {
     [HarmonyPostfix]
+    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony __result 约定")]
+    [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Harmony 反射调用")]
     private static async void Postfix(Task<IEnumerable<SovereignBlade>> __result, Player player)
     {
         try
@@ -21,7 +23,7 @@ public static class ForgePullBladesToHandPatch
             await __result;
 
             if (player.PlayerCombatState == null) return;
-            if (CombatManager.Instance?.IsOverOrEnding != false) return;
+            if (CombatManager.Instance.IsOverOrEnding) return;
 
             var blades = player.PlayerCombatState.AllCards
                 .OfType<SovereignBlade>()
