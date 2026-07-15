@@ -102,7 +102,10 @@ internal static class InfiniteUpgradeSafety
     private static readonly ConcurrentDictionary<Type, bool> DrawSensitiveCache = new();
 
     public static bool CanUseUnlimitedGrowth(CardModel card, int originalMaxUpgradeLevel)
-        => originalMaxUpgradeLevel > 0 && !IsDrawSensitive(card.GetType());
+    {
+        if (originalMaxUpgradeLevel <= 0) return false;
+        return !IsDrawSensitive(card.GetType());
+    }
 
     public static bool ShouldAllowUpgrade(CardModel card, int originalMax, int level)
         => level > originalMax && CanUseUnlimitedGrowth(card, originalMax);
