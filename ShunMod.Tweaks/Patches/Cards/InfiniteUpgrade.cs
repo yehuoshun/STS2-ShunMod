@@ -60,7 +60,6 @@ public static class InfiniteUpgradeMaxUpgrade
             __result = UpgradeCap;
 
         var serializedLevel = InfiniteUpgradeSerializationContext.Peek();
-        var serializedLevel = InfiniteUpgradeSerializationContext.Peek();
         if (serializedLevel > __result &&
             InfiniteUpgradeSafety.ShouldAllowUpgrade(__instance, __result, serializedLevel))
         {
