@@ -23,6 +23,7 @@ namespace ShunMod.Shun.Relics;
 ///     并且首次打出免费，获得消耗数量的能量。
 /// </summary>
 [RelicPool(typeof(SharedRelicPool))]
+// ReSharper disable once UnusedType.Global — instantiated via ContentRegistry reflection
 public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
 {
     private static readonly LocString SelectionPrompt = new("card_selection", "TO_EXHAUST");
@@ -77,12 +78,12 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
         for (var i = 0; i < count; i++)
         {
             // 消耗手牌
-            await CardPileCmd.RemoveFromCombat(selected[i]);
+            await CardPileCmd.RemoveFromCombat(selected[i]!);
 
             // 生成随机卡牌
             var canonical = Owner.PlayerRng.Transformations.NextItem(allCards);
             if (canonical == null) continue;
-            var newCard = Owner.Creature.CombatState.CreateCard(canonical, Owner);
+            var newCard = Owner.Creature.CombatState!.CreateCard(canonical, Owner);
 
             // 升级
             if (newCard.IsUpgradable)
