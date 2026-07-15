@@ -76,6 +76,7 @@ internal static class MoreEnchantStackPatch
     /// Prefix：移除叠加上限检查，只保留基础 CanEnchant 兼容性。
     /// 原方法返回 false 当叠加数 >= 上限时，我们改为返回 true 让原方法通过。
     /// </summary>
+    // ReSharper disable All
     private static bool CanApply_Prefix(
         CardModel card,
         EnchantmentModel canonical,
