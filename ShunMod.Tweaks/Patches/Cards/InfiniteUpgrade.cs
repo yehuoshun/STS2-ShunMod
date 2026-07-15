@@ -3,10 +3,14 @@ using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Saves.Runs;
-namespace ShunMod.Tweaks.Cards;
+
+namespace ShunMod.Tweaks.Patches.Cards;
 
 // ════════════════════════════════ 主 Patch：MaxUpgradeLevel getter ════════════════════════════════
 
+// ReSharper disable UnusedType.Global — Harmony 反射调用
+// ReSharper disable UnusedMember.Local — Harmony 反射调用
+// ReSharper disable InconsistentNaming — Harmony __instance/__result/__exception 约定
 [HarmonyPatch]
 public static class InfiniteUpgradeMaxUpgrade
 {
@@ -52,12 +56,12 @@ public static class InfiniteUpgradeMaxUpgrade
     [HarmonyPostfix]
     private static void Postfix(CardModel __instance, ref int __result)
     {
-        if (InfiniteUpgrade_Safety.CanUseUnlimitedGrowth(__instance, __result) && __result < UpgradeCap)
+        if (InfiniteUpgradeSafety.CanUseUnlimitedGrowth(__instance, __result) && __result < UpgradeCap)
             __result = UpgradeCap;
 
-        var serializedLevel = InfiniteUpgrade_SerializationContext.Peek();
+        var serializedLevel = InfiniteUpgradeSerializationContext.Peek();
         if (serializedLevel > __result &&
-            InfiniteUpgrade_Safety.ShouldAllowSerializedUpgrade(__instance, __result, serializedLevel))
+            InfiniteUpgradeSafety.ShouldAllowSerializedUpgrade(__instance, __result, serializedLevel))
         {
             __result = serializedLevel;
             return;
@@ -65,32 +69,35 @@ public static class InfiniteUpgradeMaxUpgrade
 
         var currentLevel = __instance.CurrentUpgradeLevel;
         if (currentLevel > __result &&
-            InfiniteUpgrade_Safety.ShouldAllowObservedUpgrade(__instance, __result, currentLevel))
+            InfiniteUpgradeSafety.ShouldAllowObservedUpgrade(__instance, __result, currentLevel))
             __result = currentLevel;
     }
 }
 
 // ════════════════════════════════ 反序列化 Patch ════════════════════════════════
 
+// ReSharper disable UnusedType.Global — Harmony 反射调用
+// ReSharper disable UnusedMember.Local — Harmony 反射调用
+// ReSharper disable InconsistentNaming — Harmony __exception 约定
 [HarmonyPatch(typeof(CardModel), "FromSerializable")]
-public static class InfiniteUpgrade_Deserialize
+public static class InfiniteUpgradeDeserialize
 {
     private static void Prefix(SerializableCard save)
     {
-        var level = InfiniteUpgrade_Safety.PrepareSerializableUpgradeLevel(save);
-        InfiniteUpgrade_SerializationContext.Push(level);
+        var level = InfiniteUpgradeSafety.PrepareSerializableUpgradeLevel(save);
+        InfiniteUpgradeSerializationContext.Push(level);
     }
 
     private static Exception? Finalizer(Exception? __exception)
     {
-        InfiniteUpgrade_SerializationContext.Pop();
+        InfiniteUpgradeSerializationContext.Pop();
         return __exception;
     }
 }
 
 // ════════════════════════════════ 线程安全序列化上下文 ════════════════════════════════
 
-internal static class InfiniteUpgrade_SerializationContext
+internal static class InfiniteUpgradeSerializationContext
 {
     [ThreadStatic] private static Stack<int>? _stack;
 
@@ -101,7 +108,7 @@ internal static class InfiniteUpgrade_SerializationContext
 
 // ════════════════════════════════ 安全检测 ════════════════════════════════════
 
-internal static class InfiniteUpgrade_Safety
+internal static class InfiniteUpgradeSafety
 {
     private static readonly HashSet<string> DrawSensitiveMethods =
         ["BeforeHandDraw", "AfterCardDrawn", "ModifyHandDraw"];
