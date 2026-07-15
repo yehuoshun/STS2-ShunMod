@@ -10,7 +10,6 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.RelicPools;
-using MegaCrit.Sts2.Core.Runs;
 using MegaCrit.Sts2.Core.Rooms;
 using ShunMod.Core.Core.Registry;
 using ShunMod.Shun.Base;
@@ -80,7 +79,7 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
             await CardPileCmd.RemoveFromCombat(selected[i]);
 
             // 生成随机卡牌
-            var canonical = Owner.RunState.PlayerRng.Combat.NextItem(allCards);
+            var canonical = Owner.PlayerRng.Combat.NextItem(allCards);
             var newCard = Owner.Creature.CombatState.CreateCard(canonical, Owner);
 
             // 升级

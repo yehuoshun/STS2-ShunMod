@@ -1,8 +1,11 @@
 using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Combat;
+using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.ControllerInput;
+using MegaCrit.Sts2.Core.Entities.Multiplayer;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Nodes.Relics;
 using ShunMod.Shun.Relics;
 
@@ -35,7 +38,7 @@ internal static class RelicRightClickPatch
         if (viewport.IsInputHandled())
             return;
 
-        if (!TryGetTrigger(inputEvent, relicNode, out _))
+        if (!TryGetTrigger(relicNode, inputEvent, out _))
             return;
 
         // 只处理我们自己的遗物
@@ -51,15 +54,15 @@ internal static class RelicRightClickPatch
             || CombatManager.Instance.PlayerActionsDisabled)
             return;
 
-        // 获取本地玩家
-        var player = LocalContext.GetMe(endlessLife.Owner.RunState);
-        if (player == null)
-            return;
-
         viewport.SetInputAsHandled();
 
-        // 创建 PlayerChoiceContext 并执行
-        var choiceContext = new PlayerChoiceContext(player);
+        // 使用 HookPlayerChoiceContext 创建选择上下文
+        var choiceContext = new HookPlayerChoiceContext(
+            endlessLife,
+            LocalContext.NetId,
+            CombatManager.Instance.CombatState,
+            GameActionType.Combat);
+
         TaskHelper.RunSafely(endlessLife.ExecuteRightClick(choiceContext));
     }
 
