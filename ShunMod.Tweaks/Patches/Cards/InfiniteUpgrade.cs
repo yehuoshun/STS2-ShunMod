@@ -88,8 +88,8 @@ internal static class InfiniteUpgradeSerializationContext
     [ThreadStatic] private static Stack<int>? _stack;
 
     public static void Push(int upgradeLevel) => (_stack ??= new Stack<int>()).Push(upgradeLevel);
-    public static void Pop() { if (_stack != null && _stack.Count > 0) _stack.Pop(); }
-    public static int Peek() => _stack != null && _stack.Count > 0 ? _stack.Peek() : 0;
+    public static void Pop() { if (_stack is { Count: > 0 }) _stack.Pop(); }
+    public static int Peek() => _stack is { Count: > 0 } ? _stack.Peek() : 0;
 }
 
 // ════════════════════════════════ 安全检测 ════════════════════════════════════
