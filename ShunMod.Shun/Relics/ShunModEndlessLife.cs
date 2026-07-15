@@ -1,17 +1,12 @@
-using System.Linq;
 using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
-using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Entities.Cards;
-using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
-using MegaCrit.Sts2.Core.Factories;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.RelicPools;
 using MegaCrit.Sts2.Core.Runs;
-using MegaCrit.Sts2.Core.Rooms;
 using ShunMod.Core.Core.Registry;
 using ShunMod.Shun.Base;
 
@@ -34,9 +29,6 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
     /// </summary>
     public async Task ExecuteRightClick(PlayerChoiceContext choiceContext)
     {
-        if (Owner == null)
-            return;
-
         // 从手牌选任意张（0 到手牌上限）
         var hand = PileType.Hand.GetPile(Owner).Cards.ToList();
         if (hand.Count == 0)
