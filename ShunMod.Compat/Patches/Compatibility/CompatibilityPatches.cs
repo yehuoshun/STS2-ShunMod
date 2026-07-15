@@ -20,8 +20,8 @@ internal static class CompatibilityPatches
         ShadowverseBgLimitPatch.Apply(harmony);
         ShadowverseEvolutionPointPatch.Apply(harmony);
 
-        // MoreEnchant 附魔模组：解除 GetShopCandidates 限制
-        MoreEnchantShopPatch.Apply(harmony);
+        // MoreEnchant 附魔模组：解除单卡附魔叠加上限
+        MoreEnchantStackPatch.Apply(harmony);
         // ──────────────────────────
     }
 }
