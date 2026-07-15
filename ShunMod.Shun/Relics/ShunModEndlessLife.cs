@@ -81,6 +81,7 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
 
             // 生成随机卡牌
             var canonical = Owner.PlayerRng.Transformations.NextItem(allCards);
+            if (canonical == null) continue;
             var newCard = Owner.Creature.CombatState.CreateCard(canonical, Owner);
 
             // 升级
@@ -91,7 +92,7 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
             newCard.EnergyCost.SetUntilPlayed(0);
 
             // 加入手牌
-            await CardPileCmd.AddGeneratedCardToCombat(newCard, PileType.Hand, true);
+            await CardPileCmd.AddGeneratedCardToCombat(newCard, PileType.Hand, Owner);
         }
 
         // 获得消耗数量的能量
