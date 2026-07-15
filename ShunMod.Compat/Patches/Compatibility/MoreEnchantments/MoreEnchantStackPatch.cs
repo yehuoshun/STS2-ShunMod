@@ -7,12 +7,12 @@ using ShunMod.Core.Core;
 namespace ShunMod.Compat.Patches.Compatibility.MoreEnchantments;
 
 /// <summary>
-/// MoreEnchant 附魔模组兼容补丁 — 解除单卡附魔叠加上限。
+/// MoreEnchant 附魔模组兼容补丁 - 解除单卡附魔叠加上限。
 ///
 /// 原版 MoreEnchantStack.CanApply 有两层检查：
-///   1. canonical.CanEnchant(card) — 基础附魔兼容性（保留）
-///   2. AllEnchantments(card).Count + MoreEnchantSacrifice.Count(card) < GetMaxEnchantments(card)
-///      — 按稀有度限制叠加上限（基础/普通=3，罕见=4，稀有=5，远古=6）
+///   1. canonical.CanEnchant(card) - 基础附魔兼容性（保留）
+///   2. AllEnchantments(card).Count + MoreEnchantSacrifice.Count(card) &lt; GetMaxEnchantments(card)
+///      - 按稀有度限制叠加上限（基础/普通=3，罕见=4，稀有=5，远古=6）
 ///
 /// 本补丁移除第二层限制，允许任意数量附魔叠加到同一张牌。
 /// </summary>
