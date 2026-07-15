@@ -60,8 +60,9 @@ public static class InfiniteUpgradeMaxUpgrade
             __result = UpgradeCap;
 
         var serializedLevel = InfiniteUpgradeSerializationContext.Peek();
+        var serializedLevel = InfiniteUpgradeSerializationContext.Peek();
         if (serializedLevel > __result &&
-            InfiniteUpgradeSafety.ShouldAllowSerializedUpgrade(__instance, __result, serializedLevel))
+            InfiniteUpgradeSafety.ShouldAllowUpgrade(__instance, __result, serializedLevel))
         {
             __result = serializedLevel;
             return;
@@ -69,7 +70,7 @@ public static class InfiniteUpgradeMaxUpgrade
 
         var currentLevel = __instance.CurrentUpgradeLevel;
         if (currentLevel > __result &&
-            InfiniteUpgradeSafety.ShouldAllowObservedUpgrade(__instance, __result, currentLevel))
+            InfiniteUpgradeSafety.ShouldAllowUpgrade(__instance, __result, currentLevel))
             __result = currentLevel;
     }
 }
@@ -121,11 +122,8 @@ internal static class InfiniteUpgradeSafety
         return !IsDrawSensitive(card.GetType());
     }
 
-    public static bool ShouldAllowSerializedUpgrade(CardModel card, int originalMax, int savedLevel)
-        => savedLevel > originalMax && CanUseUnlimitedGrowth(card, originalMax);
-
-    public static bool ShouldAllowObservedUpgrade(CardModel card, int originalMax, int currentLevel)
-        => currentLevel > originalMax && CanUseUnlimitedGrowth(card, originalMax);
+    public static bool ShouldAllowUpgrade(CardModel card, int originalMax, int level)
+        => level > originalMax && CanUseUnlimitedGrowth(card, originalMax);
 
     public static int PrepareSerializableUpgradeLevel(SerializableCard save)
     {
