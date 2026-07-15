@@ -22,6 +22,9 @@ internal static class CompatibilityPatches
 
         // MoreEnchant 附魔模组：解除单卡附魔叠加上限
         MoreEnchantStackPatch.Apply(harmony);
+
+        // MoreEnchant 附魔模组：解除 UI 层附魔上限检查（附魔已满拦截）
+        MoreEnchantPayCheckPatch.Apply(harmony);
         // ──────────────────────────
     }
 }
