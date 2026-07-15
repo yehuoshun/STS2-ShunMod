@@ -1,8 +1,8 @@
 using System.Reflection;
+using System.Threading;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
-using ShunMod.Core;
 using ShunMod.Core.Core.Registry;
 using ShunMod.Shun.Events;
 
@@ -12,7 +12,7 @@ namespace ShunMod.Shun;
 public static class ModEntry
 {
     private const string HarmonyId = "ShunMod_Shun";
-    private static readonly object Lock = new();
+    private static readonly Lock Lock = new();
     private static bool _initialized;
     private static Harmony? _harmony;
 
@@ -42,7 +42,7 @@ public static class ModEntry
         }
 
         // Phase 2: Set up ContentRegistry callback for event registration
-        ContentRegistry.OnEventTypeFound = type => ShunModEventRegistry.AddEventType(type);
+        ContentRegistry.OnEventTypeFound = ShunModEventRegistry.AddEventType;
 
         // Phase 3: Content registration
         ContentRegistry.RegisterAll(Assembly.GetExecutingAssembly());
