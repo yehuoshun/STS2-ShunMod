@@ -60,11 +60,7 @@ internal static class MoreEnchantStackPatch
         Log.Info($"[{ModId}] MoreEnchant patch: applying to {targetType.FullName}");
 
         // CanApply(CardModel, EnchantmentModel) -> bool
-        var method = AccessTools.Method(targetType, "CanApply", new[]
-        {
-            typeof(CardModel),
-            typeof(EnchantmentModel)
-        });
+        var method = AccessTools.Method(targetType, "CanApply", [typeof(CardModel), typeof(EnchantmentModel)]);
 
         if (method == null)
         {
