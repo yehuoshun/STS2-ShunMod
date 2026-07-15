@@ -19,7 +19,7 @@ public static class ShunModHelper
     private static readonly Regex PascalToSnake = new("([a-z])([A-Z])", RegexOptions.Compiled);
 
     /// <summary>类名 → snake_case（如 ShunModSuperApotheosis → shun_mod_super_apotheosis）</summary>
-    public static string ClassToSnakeCase(Type type)
+    private static string ClassToSnakeCase(Type type)
     {
         return ClassNameToSnakeCase(type.Name);
     }

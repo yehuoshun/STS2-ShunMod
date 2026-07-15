@@ -2,11 +2,9 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Helpers;
-using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.RelicPools;
 using MegaCrit.Sts2.Core.Rewards;
 using MegaCrit.Sts2.Core.Rooms;
-using ShunMod.Core;
 using ShunMod.Core.Core.Registry;
 using ShunMod.Shun.Base;
 
@@ -27,7 +25,7 @@ public sealed class ShunModBossTrophy : ShunRelicModel<ShunModBossTrophy>
 
         Flash();
 
-        var gain = (int)(Owner!.Creature.MaxHp * 0.25m);
+        var gain = (int)(Owner.Creature.MaxHp * 0.25m);
         if (gain > 0)
             TaskHelper.RunSafely(CreatureCmd.GainMaxHp(Owner.Creature, gain));
 
