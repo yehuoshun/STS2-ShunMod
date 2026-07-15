@@ -1,35 +1,20 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Saves;
-namespace ShunMod.Tweaks.Combat;
 
-/// <summary>
-///     显示总伤害 — 多段卡/X卡在卡牌描述末尾追加总伤害 = 单段伤害 × 段数。
-///     中英双语显示。
-/// </summary>
+namespace ShunMod.Tweaks.Patches.Combat;
+
+// 显示总伤害：多段卡/X卡在描述末尾追加 "单段伤害 × 段数 = 总伤害"
+// 缓存 private method GetDescriptionForPile，只反射一次
 [HarmonyPatch]
 public static class ShowTotalDamage
 {
-    // ═══════════════════════════════════════════════════════════
-    //  目标方法缓存
-    // ═══════════════════════════════════════════════════════════
-    //
-    //  缓存设计原因：
-    //  1. CardModel.GetDescriptionForPile 是游戏内建私有方法，
-    //     程序集加载后不会变化。Harmony 的 TargetMethod() 在
-    //     Prepare 阶段会被调用，每次调用都全量反射扫描 CardModel
-    //     的所有方法（GetMethods + FirstOrDefault）是纯浪费。
-    //  2. C# static readonly 字段由 CLR 在类型加载时保证只初始化一次，
-    //     隐式线程安全，不需要额外同步。
-    //  3. 如果游戏移除了这个方法（BuildTargetMethod 返回 null），
-    //     TargetMethodCache 就是 null，Prepare 检测跳过补丁，
-    //     行为与原版本完全一致。
-    //
-    // ═══════════════════════════════════════════════════════════
     private static readonly MethodBase? TargetMethodCache = BuildTargetMethod();
 
+    [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Harmony 反射调用")]
     private static MethodBase? TargetMethod() => TargetMethodCache;
 
     private static MethodBase? BuildTargetMethod()
@@ -38,6 +23,7 @@ public static class ShowTotalDamage
             .FirstOrDefault(m => m.Name == "GetDescriptionForPile" && m.GetParameters().Length == 3);
     }
 
+    [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Harmony 反射调用")]
     private static bool Prepare()
     {
         if (TargetMethodCache == null)
@@ -49,6 +35,8 @@ public static class ShowTotalDamage
     }
 
     [HarmonyPostfix]
+    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony __instance/__result 约定")]
+    [SuppressMessage("ReSharper", "Spelling", Justification = "ffcc 是 16 进制颜色码")]
     private static void Postfix(CardModel __instance, ref string __result)
     {
         try

@@ -3,7 +3,7 @@
   "name": "ShunMod Tweaks",
   "author": "yehuoshun",
   "description": "Gameplay tweaks and balance adjustments",
-  "version": "v0.0.12",
+  "version": "v0.0.13",
   "has_pck": false,
   "has_dll": true,
   "dependencies": [
