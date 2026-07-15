@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Hooks;
 namespace ShunMod.Tweaks.Patches.Combat;
@@ -8,6 +9,7 @@ namespace ShunMod.Tweaks.Patches.Combat;
 public static class EnergyRetentionPatch
 {
     [HarmonyPrefix]
+    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony __result 约定")]
     private static bool Prefix(out bool __result)
     {
         __result = false;
