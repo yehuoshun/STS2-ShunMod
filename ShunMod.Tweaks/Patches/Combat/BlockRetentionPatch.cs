@@ -1,9 +1,9 @@
 using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
-using ShunMod.Core;
 using ShunMod.Core.Core.Helpers;
-namespace ShunMod.Tweaks.Combat;
+
+namespace ShunMod.Tweaks.Patches.Combat;
 
 // ════════════════════════════════════════════════════════
 // 格挡保留系统
@@ -12,6 +12,9 @@ namespace ShunMod.Tweaks.Combat;
 // 仅对玩家生物生效，不影响怪物
 // ════════════════════════════════════════════════════════
 
+// ReSharper disable UnusedType.Global — Harmony 反射调用
+// ReSharper disable UnusedMember.Local — Harmony 反射调用
+// ReSharper disable InconsistentNaming — Harmony __instance/__result/__state 约定
 /// <summary>
 ///     Patch 1: 拦截 ClearBlock()，玩家生物不执行清格挡，直接跳过。
 /// </summary>
@@ -29,6 +32,9 @@ public static class BlockRetentionClearBlockPatch
     }
 }
 
+// ReSharper disable UnusedType.Global — Harmony 反射调用
+// ReSharper disable UnusedMember.Local — Harmony 反射调用
+// ReSharper disable InconsistentNaming — Harmony __instance/__state 约定
 /// <summary>
 ///     Patch 2: 拦截 PrepareForNextTurn()，回合结束保留格挡。
 ///     Prefix 记下格挡值 → 游戏内部清理 → Postfix 原样恢复。
