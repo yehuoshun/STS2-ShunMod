@@ -1,17 +1,14 @@
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Hooks;
-namespace ShunMod.Tweaks.Combat;
+namespace ShunMod.Tweaks.Patches.Combat;
 
-/// <summary>
-///     能量保留（冰激凌逻辑）
-///     回合开始时能量不清零，剩余能量累积到下一回合。
-///     直接拦截 Hook.ShouldPlayerResetEnergy，始终返回 false。
-/// </summary>
+// ReSharper disable UnusedMember.Local — Harmony 反射调用
+// 能量保留：回合开始能量不清零，始终返回 false
 [HarmonyPatch(typeof(Hook), nameof(Hook.ShouldPlayerResetEnergy))]
 public static class EnergyRetentionPatch
 {
     [HarmonyPrefix]
-    private static bool Prefix(ref bool __result)
+    private static bool Prefix(out bool __result)
     {
         __result = false;
         return false;
