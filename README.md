@@ -57,6 +57,8 @@
 | 🔮 影之诗进化不消耗+回合解除 | Compat | 进化不消耗进化点（TryUseEvolutionPoint 跳过原方法），初始 1 点启动。回合限制一并解除，每回合可多次进化。纯反射，无依赖。 |
 | 🎨 影之诗皮肤限制解除 | Compat | 影之诗模组皮肤启用数从 14→无限，Patch SkinPackManager.SetEnabled。纯反射，无依赖。 |
 | 🖼️ 影之诗背景包限制解除 | Compat | 影之诗模组背景包启用数从 7→无限，Patch BgPackManager。纯反射，无依赖。 |
+| 📚 附魔叠加上限解除 | Compat | 解除 MoreEnchantmentsMod 单卡附魔叠加上限（CanApply 跳过上限检查）。 |
+| 📚 附魔已满拦截解除 | Compat | 解除 MoreEnchantmentsMod 附魔界面 UI 层上限检查，上限后仍可继续附魔。 |
 
 ---
 
