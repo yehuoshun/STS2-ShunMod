@@ -10,7 +10,6 @@ public static class HardenedShellPatch
 {
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony __result 约定")]
     [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Harmony 反射调用")]
-    [SuppressMessage("ReSharper", "Spelling", Justification = "Osty 是游戏内部命名")]
     private static void Postfix(decimal amount, out decimal __result)
     {
         __result = amount;
