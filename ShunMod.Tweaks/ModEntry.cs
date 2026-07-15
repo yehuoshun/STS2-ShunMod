@@ -9,7 +9,7 @@ namespace ShunMod.Tweaks;
 public static class ModEntry
 {
     private const string HarmonyId = "ShunMod_Tweaks";
-    private static readonly object Lock = new();
+    private static readonly Lock Lock = new();
     private static bool _initialized;
     private static Harmony? _harmony;
 
