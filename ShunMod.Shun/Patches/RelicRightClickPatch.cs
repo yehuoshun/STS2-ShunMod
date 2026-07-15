@@ -1,9 +1,7 @@
 using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Combat;
-using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.ControllerInput;
-using MegaCrit.Sts2.Core.Entities.Multiplayer;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Nodes.Relics;
@@ -56,12 +54,8 @@ internal static class RelicRightClickPatch
 
         viewport.SetInputAsHandled();
 
-        // 使用 HookPlayerChoiceContext 创建选择上下文
-        var choiceContext = new HookPlayerChoiceContext(
-            endlessLife.Owner,
-            LocalContext.NetId!.Value,
-            GameActionType.Combat);
-
+        // 使用 BlockingPlayerChoiceContext（不涉及游戏动作同步，纯 UI 选择）
+        var choiceContext = new BlockingPlayerChoiceContext();
         TaskHelper.RunSafely(endlessLife.ExecuteRightClick(choiceContext));
     }
 
