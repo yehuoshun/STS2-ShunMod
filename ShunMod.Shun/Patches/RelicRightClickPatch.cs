@@ -58,9 +58,8 @@ internal static class RelicRightClickPatch
 
         // 使用 HookPlayerChoiceContext 创建选择上下文
         var choiceContext = new HookPlayerChoiceContext(
-            endlessLife,
-            LocalContext.NetId,
-            CombatManager.Instance.CombatState,
+            endlessLife.Owner,
+            LocalContext.NetId!.Value,
             GameActionType.Combat);
 
         TaskHelper.RunSafely(endlessLife.ExecuteRightClick(choiceContext));

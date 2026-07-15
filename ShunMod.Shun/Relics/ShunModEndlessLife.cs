@@ -80,7 +80,7 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
             await CardPileCmd.RemoveFromCombat(selected[i]);
 
             // 生成随机卡牌
-            var canonical = Owner.PlayerRng.Combat.NextItem(allCards);
+            var canonical = Owner.PlayerRng.Transformations.NextItem(allCards);
             var newCard = Owner.Creature.CombatState.CreateCard(canonical, Owner);
 
             // 升级
