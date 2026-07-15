@@ -5,19 +5,11 @@ using ShunMod.Core.Core.Helpers;
 
 namespace ShunMod.Tweaks.Patches.Combat;
 
-// ════════════════════════════════════════════════════════
-// 格挡保留系统
-// ClearBlock：玩家生物直接跳过，格挡纹丝不动
-// PrepareForNextTurn：回合结束前记下格挡 → 结束后原样恢复
-// 仅对玩家生物生效，不影响怪物
-// ════════════════════════════════════════════════════════
-
 // ReSharper disable UnusedType.Global — Harmony 反射调用
 // ReSharper disable UnusedMember.Local — Harmony 反射调用
 // ReSharper disable InconsistentNaming — Harmony __instance/__result/__state 约定
-/// <summary>
-///     Patch 1: 拦截 ClearBlock()，玩家生物不执行清格挡，直接跳过。
-/// </summary>
+
+// ClearBlock 跳过：玩家生物不清格挡
 [HarmonyPatch]
 public static class BlockRetentionClearBlockPatch
 {
@@ -32,13 +24,7 @@ public static class BlockRetentionClearBlockPatch
     }
 }
 
-// ReSharper disable UnusedType.Global — Harmony 反射调用
-// ReSharper disable UnusedMember.Local — Harmony 反射调用
-// ReSharper disable InconsistentNaming — Harmony __instance/__state 约定
-/// <summary>
-///     Patch 2: 拦截 PrepareForNextTurn()，回合结束保留格挡。
-///     Prefix 记下格挡值 → 游戏内部清理 → Postfix 原样恢复。
-/// </summary>
+// PrepareForNextTurn 拦截：Prefix 记格挡 → Postfix 恢复
 [HarmonyPatch]
 public static class BlockRetentionPrepareForNextTurnPatch
 {
