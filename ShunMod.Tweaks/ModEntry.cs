@@ -21,24 +21,23 @@ public static class ModEntry
             _initialized = true;
         }
 
-        var id = "ShunMod_Tweaks";
-        Log.Info($"[{id}] ============================================================");
-        Log.Info($"[{id}] Initializing {id}");
+        Log.Info($"[{HarmonyId}] ============================================================");
+        Log.Info($"[{HarmonyId}] Initializing {HarmonyId}");
 
         _harmony = new Harmony(HarmonyId);
         try
         {
             _harmony.PatchAll(Assembly.GetExecutingAssembly());
-            Log.Info($"[{id}] Harmony patches installed successfully");
+            Log.Info($"[{HarmonyId}] Harmony patches installed successfully");
         }
         catch (Exception e)
         {
-            Log.Error($"[{id}] Harmony patching failed: {e.GetType().Name}: {e.Message}");
+            Log.Error($"[{HarmonyId}] Harmony patching failed: {e.GetType().Name}: {e.Message}");
             if (e.InnerException != null)
-                Log.Error($"[{id}]   \u2192 inner: {e.InnerException.GetType().Name}: {e.InnerException.Message}");
+                Log.Error($"[{HarmonyId}]   \u2192 inner: {e.InnerException.GetType().Name}: {e.InnerException.Message}");
         }
 
-        Log.Info($"[{id}] Initialization complete");
-        Log.Info($"[{id}] ============================================================");
+        Log.Info($"[{HarmonyId}] Initialization complete");
+        Log.Info($"[{HarmonyId}] ============================================================");
     }
 }
