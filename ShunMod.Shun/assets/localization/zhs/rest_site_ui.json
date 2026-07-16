@@ -1,1 +1,5 @@
-{}
+{
+    "OPTION_ENCHANT.name": "附魔",
+    "OPTION_ENCHANT.description": "为[gold]牌组[/gold]中的一张牌随机施加一个[gold]附魔[/gold]。",
+    "OPTION_ENCHANT.prompt": "选择一张要附魔的牌"
+}

@@ -83,8 +83,9 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
             if (newCard.IsUpgradable)
                 CardCmd.Upgrade(newCard);
 
-            // 首次打出免费
+            // 首次打出免费（能量+星辉）
             newCard.EnergyCost.SetUntilPlayed(0);
+            newCard.SetStarCostUntilPlayed(0);
 
             // 加入手牌
             await CardPileCmd.AddGeneratedCardToCombat(newCard, PileType.Hand, Owner);
