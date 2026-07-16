@@ -43,7 +43,7 @@ public class EnchantRestSiteOption : RestSiteOption
 
         var card = selected.First();
 
-        // 找所有可用于此牌的附魔（忽略已有附魔，用于替换场景）
+        // 找所有可用于此牌的附魔
         var enchantments = ModelDb.DebugEnchantments
             .Where(e => e is not DeprecatedEnchantment
                         && e.CanEnchantCardType(card.Type)
@@ -52,10 +52,6 @@ public class EnchantRestSiteOption : RestSiteOption
 
         if (enchantments.Count == 0)
             return false;
-
-        // 已有附魔 → 先清除再附新魔（替换逻辑）
-        if (card.Enchantment != null)
-            CardCmd.ClearEnchantment(card);
 
         var canonical = Owner.PlayerRng.Transformations.NextItem(enchantments);
         CardCmd.Enchant(canonical.ToMutable(), card, 1);
