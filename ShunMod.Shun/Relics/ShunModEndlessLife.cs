@@ -59,7 +59,9 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
                         && c.Rarity != CardRarity.Basic
                         && c.Rarity != CardRarity.Ancient
                         && c.Rarity != CardRarity.Event
-                        && c.Rarity != CardRarity.Token)
+                        && c.Rarity != CardRarity.Token
+                        && c.Rarity != CardRarity.Status
+                        && c.Rarity != CardRarity.Curse)
             .Distinct()
             .ToList();
 
