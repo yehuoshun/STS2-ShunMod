@@ -23,7 +23,6 @@ internal static class RelicRightClickPatch
 
     [HarmonyPostfix]
     [SuppressMessage("ReSharper", "UnusedMember.Local")]
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static void Postfix(NRelic __instance)
     {
         if (__instance.HasMeta(MetaKey))
