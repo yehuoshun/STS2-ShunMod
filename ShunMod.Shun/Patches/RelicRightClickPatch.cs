@@ -39,7 +39,7 @@ internal static class RelicRightClickPatch
         if (viewport.IsInputHandled())
             return;
 
-        if (!TryGetTrigger(relicNode, inputEvent, out _))
+        if (!TryGetTrigger(relicNode, inputEvent))
             return;
 
         // 只处理我们自己的遗物
@@ -59,20 +59,14 @@ internal static class RelicRightClickPatch
         TaskHelper.RunSafely(endlessLife.ExecuteRightClick(choiceContext));
     }
 
-    private static bool TryGetTrigger(Control node, InputEvent inputEvent, out bool isController)
+    private static bool TryGetTrigger(Control node, InputEvent inputEvent)
     {
-        switch (inputEvent)
+        return inputEvent switch
         {
-            case InputEventMouseButton { ButtonIndex: MouseButton.Right } mouseButton when mouseButton.IsReleased():
-                isController = false;
-                return true;
-            case InputEventAction { Action: var action } actionEvent
-                when action == MegaInput.cancel && actionEvent.IsPressed() && node.HasFocus():
-                isController = true;
-                return true;
-            default:
-                isController = false;
-                return false;
-        }
+            InputEventMouseButton { ButtonIndex: MouseButton.Right } mouseButton when mouseButton.IsReleased() => true,
+            InputEventAction { Action: var action } actionEvent
+                when action == MegaInput.cancel && actionEvent.IsPressed() && node.HasFocus() => true,
+            _ => false
+        };
     }
 }
