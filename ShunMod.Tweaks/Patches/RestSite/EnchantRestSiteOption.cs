@@ -12,7 +12,7 @@ using MegaCrit.Sts2.Core.Models.Enchantments;
 namespace ShunMod.Tweaks.Patches.RestSite;
 
 /// <summary>
-///     休息处附魔：选一张无附魔的牌，随机施加一个可用的附魔。
+///     休息处附魔：选一张牌，随机施加一个可用的附魔。已有附魔的牌会被替换。
 /// </summary>
 public class EnchantRestSiteOption : RestSiteOption
 {
@@ -24,7 +24,7 @@ public class EnchantRestSiteOption : RestSiteOption
 
     public override async Task<bool> OnSelect()
     {
-        // 从牌组选一张无附魔的牌（排除状态/诅咒）
+        // 从牌组选一张牌（排除状态/诅咒），已有附魔也能选
         var prefs = new CardSelectorPrefs(
             new LocString("rest_site_ui", "OPTION_ENCHANT.prompt"),
             1, 1)
@@ -35,8 +35,7 @@ public class EnchantRestSiteOption : RestSiteOption
         var selected = await CardSelectCmd.FromDeckGeneric(
             Owner,
             prefs,
-            card => card.Enchantment == null
-                    && card.Type != CardType.Curse
+            card => card.Type != CardType.Curse
                     && card.Type != CardType.Status);
 
         if (!selected.Any())
@@ -44,13 +43,19 @@ public class EnchantRestSiteOption : RestSiteOption
 
         var card = selected.First();
 
-        // 找所有可用于此牌的附魔
+        // 找所有可用于此牌的附魔（忽略已有附魔，用于替换场景）
         var enchantments = ModelDb.DebugEnchantments
-            .Where(e => e is not DeprecatedEnchantment && e.CanEnchant(card))
+            .Where(e => e is not DeprecatedEnchantment
+                        && e.CanEnchantCardType(card.Type)
+                        && !card.Keywords.Contains(CardKeyword.Unplayable))
             .ToList();
 
         if (enchantments.Count == 0)
             return false;
+
+        // 已有附魔 → 先清除再附新魔（替换逻辑）
+        if (card.Enchantment != null)
+            CardCmd.ClearEnchantment(card);
 
         var canonical = Owner.PlayerRng.Transformations.NextItem(enchantments);
         CardCmd.Enchant(canonical.ToMutable(), card, 1);
