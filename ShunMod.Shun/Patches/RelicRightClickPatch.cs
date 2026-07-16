@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Combat;
@@ -21,6 +22,8 @@ internal static class RelicRightClickPatch
     private const string MetaKey = "shunmod_relic_right_click_bound";
 
     [HarmonyPostfix]
+    [SuppressMessage("ReSharper", "UnusedMember.Local")]
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static void Postfix(NRelic __instance)
     {
         if (__instance.HasMeta(MetaKey))
@@ -68,7 +71,7 @@ internal static class RelicRightClickPatch
                 isController = true;
                 return true;
             default:
-                isController = default;
+                isController = false;
                 return false;
         }
     }
