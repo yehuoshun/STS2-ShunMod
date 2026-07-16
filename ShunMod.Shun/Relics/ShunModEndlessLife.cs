@@ -18,7 +18,6 @@ namespace ShunMod.Shun.Relics;
 ///     并且首次打出免费，获得消耗数量的能量。
 /// </summary>
 [RelicPool(typeof(SharedRelicPool))]
-// ReSharper disable once UnusedType.Global — instantiated via ContentRegistry reflection
 public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
 {
     private static readonly LocString SelectionPrompt = new("card_selection", "TO_EXHAUST");
