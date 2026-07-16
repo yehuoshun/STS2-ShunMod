@@ -1,0 +1,104 @@
+name: Update NexusMods Description
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update mod description
+        env:
+          NXM_API_KEY: ${{ secrets.NEXUSMODS_API_KEY }}
+        run: |
+          python3 << 'PYEOF'
+          import json, urllib.request, time, os, sys
+
+          api_key = os.environ['NXM_API_KEY']
+          summary = "纯原生 STS2 体验增强模组：4 遗物 1 卡牌 1 事件 + 无限升级/格挡保留/能量保留/总伤害显示/锻造拉回/附魔解除/影之诗兼容。即装即用。Pure native STS2 QoL: 4 relics, 1 card, 1 event + infinite upgrades, block/energy retention, damage preview, forge pull, enchant unlock, Shadowverse compatibility."
+
+          description = r"""纯原生 STS2 体验增强模组，不改平衡，只加便利。
+          A pure native STS2 QoL mod — no balance changes, just convenience.
+
+          [line]
+
+          [center][size=6][b]📦 内容 Contents[/b][/size][/center]
+
+          [size=4][b]🃏 卡牌 Cards[/b][/size]
+          [list]
+          [*][b]超级神化 Super Apotheosis[/b] (2→1, Rare·Colorless, Skill) — 升级战斗中所有卡牌，同时升级牌组中所有可升级卡牌。
+          [/list]
+
+          [size=4][b]💎 遗物 Relics[/b][/size]
+          [list]
+          [*][b]🏆 首领奖杯 Boss Trophy[/b] (Rare) — 击杀 Boss 后最大生命值 +25%。
+          [*][b]🌿 丰饶叶 Bountiful Frond[/b] (Rare) — 每个回合开始时，用随机药水填满所有空药水栏位。
+          [*][b]💪 无限壶铃 Infinite Girya[/b] (Rare) — 在休息处可无限次锻炼，每次锻炼后战斗开始时多获得 1 点力量。
+          [*][b]♾️ 生生不息 Endless Life[/b] (Rare) — 右键点击触发，消耗任意张手牌，每张生成随机升级卡（全职业）加入手牌且首次免费，回等量能量。
+          [/list]
+
+          [size=4][b]📜 事件 Events[/b][/size]
+          [list]
+          [*][b]🏪 遗物交易所 Relic Exchange[/b] — ①随机遗物换随机遗物 ②随机遗物换卡牌附魔 ③扣5HP刷新 ④退出。可反复交易直到退出。
+          [/list]
+
+          [size=4][b]🔧 补丁 Tweaks[/b][/size]
+          [list]
+          [*][b]♾️ 无限升级[/b] — 卡牌可无限次升级。
+          [*][b]🛡️ 格挡保留[/b] — 格挡永不归零。
+          [*][b]⚡ 能量保留[/b] — 能量不清零，剩余能量累积（冰激凌逻辑）。
+          [*][b]💥 显示总伤害[/b] — 多段卡/X卡在卡牌描述末尾显示总伤害。
+          [*][b]⚔️ 锻造拉回[/b] — 锻造行为自动将君王之剑拉回手牌。
+          [*][b]🛠️ 硬化外壳修复[/b] — 修正硬化外壳能力的减伤数值。
+          [/list]
+
+          [size=4][b]🔗 兼容补丁 Compat[/b][/size]
+          [list]
+          [*][b]🔮 影之诗进化点解除[/b] — 进化不消耗进化点，回合限制解除，每回合可多次进化。
+          [*][b]🎨 影之诗皮肤限制解除[/b] — 皮肤启用数 14→无限。
+          [*][b]🖼️ 影之诗背景包限制解除[/b] — 背景包启用数 7→无限。
+          [*][b]📚 附魔上限解除[/b] — 解除 MoreEnchantments 单卡附魔叠加上限 + UI 层拦截。
+          [/list]
+
+          [line]
+
+          [center][size=6][b]📥 安装 Installation[/b][/size][/center]
+
+          下载 STS2_ShunMod.zip，解压到 Slay the Spire 2 的 Mods/ 目录：
+
+          [list]
+          [*][b]ShunMod_Core[/b] — 共享基础框架（必需）
+          [*][b]ShunMod_Shun[/b] — 卡牌/遗物/事件内容
+          [*][b]ShunMod_Tweaks[/b] — 数值/机制修改（可选）
+          [*][b]ShunMod_Compat[/b] — 第三方兼容补丁（可选，无对应模组不生效）
+          [/list]
+
+          也可单独下载各模块 zip 按需部署。
+
+          [line]
+
+          [center][size=4][b]🔗 GitHub: [url]https://github.com/yehuoshun/STS2-ShunMod[/url][/b][/size][/center]
+          [center][size=4][b]📋 许可 License: MIT[/b][/size][/center]"""
+
+          payload = json.dumps({"summary": summary, "description": description}).encode()
+          url = "https://api.nexusmods.com/v1/games/slaythespire2/mods/820.json"
+
+          for i in range(1, 11):
+              req = urllib.request.Request(url, data=payload, method="PUT")
+              req.add_header("apikey", api_key)
+              req.add_header("Content-Type", "application/json")
+              try:
+                  resp = urllib.request.urlopen(req, timeout=15)
+                  print(f"[{i}] HTTP {resp.status}")
+                  print("✅ Description updated!")
+                  sys.exit(0)
+              except urllib.error.HTTPError as e:
+                  print(f"[{i}] HTTP {e.code}")
+                  if e.code not in (404,):
+                      print(e.read().decode()[:300])
+                      break
+              except Exception as e:
+                  print(f"[{i}] Error: {e}")
+              time.sleep(5)
+          print("❌ All attempts failed")
+          PYEOF

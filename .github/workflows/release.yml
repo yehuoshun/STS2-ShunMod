@@ -8,6 +8,11 @@ on:
         required: false
         default: false
         type: boolean
+      tag_override:
+        description: '手动指定 tag（留空则自动取最高模块版本）'
+        required: false
+        default: ''
+        type: string
 
 jobs:
   build-and-release:
@@ -97,6 +102,13 @@ jobs:
       - name: Get release tag
         id: ver
         run: |
+          TAG_OVERRIDE="${{ github.event.inputs.tag_override }}"
+          if [ -n "$TAG_OVERRIDE" ]; then
+            echo "module versions: (skipped, using override)"
+            echo "release tag: ${TAG_OVERRIDE}"
+            echo "TAG=${TAG_OVERRIDE}" >> $GITHUB_OUTPUT
+            exit 0
+          fi
           python3 << 'PYEOF'
           import json, os
 
