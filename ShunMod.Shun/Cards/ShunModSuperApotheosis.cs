@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
@@ -14,6 +15,7 @@ namespace ShunMod.Shun.Cards;
 ///     2费→1费（升级后），技能，稀有，无色。
 /// </summary>
 [CardPool(typeof(ColorlessCardPool))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
 public class ShunModSuperApotheosis() : CardModel(2, CardType.Skill, CardRarity.Rare, TargetType.Self)
 {
     public override string PortraitPath => ShunCard.PortraitPath<ShunModSuperApotheosis>();
