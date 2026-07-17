@@ -79,6 +79,22 @@ ShunMod.Core          ← 基础框架，无依赖
 - **资源路径**：用 `ShunCard.PortraitPath<T>()` / `ShunRelic.IconPath<T>()` / `ShunModHelper.EventImagePath(type)` 生成，不要硬编码路径字符串
 - **ModEntry 单例**：每个模块的 `Initialize()` 有 `lock` 防重入
 - **事件图片**：`EventPortraitRedirectPatch` 有 Texture2D 缓存，改事件图片路径逻辑要看这里
+- **守卫优先，减少嵌套**：能提前 return 就别用 if 包。以下模式禁止：
+  ```csharp
+  // ❌ 不要
+  if (FindType(ns, type) is { } t)
+  {
+      DoSomething(t);
+  }
+  ```
+  ```csharp
+  // ✅ 要
+  if (FindType(ns, type) is not { } t) return;
+  DoSomething(t);
+  ```
+  同理：`if (x != null) { ... }` → `if (x == null) return; ...`，
+  `if (!condition) { ... }` → `if (condition) return; ...`。
+  嵌套控制在 2 层以内。
 
 ---
 
