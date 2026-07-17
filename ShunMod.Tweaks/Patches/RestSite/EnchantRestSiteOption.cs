@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MegaCrit.Sts2.Core.CardSelection;
@@ -33,10 +34,41 @@ public class EnchantRestSiteOption : RestSiteOption
         _cachedEnchantment = RollRandomEnchantment(owner);
     }
 
+    private const string CustomDescKey = "shunmod_enchant_custom_desc";
+    private static bool _customEntryAdded;
+
     /// <summary>
-    ///     选项描述显示预选附魔效果（含层数），不再使用原占位符模板。
+    ///     在本地化表中注入自定义描述模板（仅一次）。
     /// </summary>
-    public override LocString Description => _cachedEnchantment.DynamicDescription;
+    private static void EnsureCustomDescriptionEntry()
+    {
+        if (_customEntryAdded) return;
+        _customEntryAdded = true;
+
+        var table = LocManager.Instance.GetTable("rest_site_ui");
+        if (!table.HasEntry(CustomDescKey))
+        {
+            table.MergeWith(new Dictionary<string, string>
+            {
+                [CustomDescKey] = "为牌组中的一张牌施加 {enchantment}：{enchant_desc}"
+            });
+        }
+    }
+
+    /// <summary>
+    ///     选项描述：原动作文本 + 附魔名 + 附魔描述。
+    /// </summary>
+    public override LocString Description
+    {
+        get
+        {
+            EnsureCustomDescriptionEntry();
+            var desc = new LocString("rest_site_ui", CustomDescKey);
+            desc.Add("enchantment", _cachedEnchantment.Title.GetFormattedText());
+            desc.Add("enchant_desc", _cachedEnchantment.DynamicDescription.GetFormattedText());
+            return desc;
+        }
+    }
 
     public override async Task<bool> OnSelect()
     {
