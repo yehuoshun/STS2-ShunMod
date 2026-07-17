@@ -84,7 +84,7 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
             Owner.RunState.Rng.CombatCardGeneration).ToList();
 
         // 批量升级（无动画）
-        CardCmd.Upgrade(newCards, CardUpgradePreviewType.None);
+        CardCmd.Upgrade(newCards, CardPreviewStyle.None);
 
         // 首次打出免费
         foreach (var card in newCards)

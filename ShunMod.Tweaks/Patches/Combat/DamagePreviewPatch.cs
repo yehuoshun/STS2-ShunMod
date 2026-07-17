@@ -167,8 +167,8 @@ public static class DamagePreviewPatch
         if (intent == null)
         {
             var dmg = GetIntProperty(type, enemy, "Damage", "IntentDamage", "AttackDamage");
-            var repeat = GetIntProperty(type, enemy, "Repeat", "HitCount", "Attacks");
-            return (dmg, Math.Max(1, repeat));
+            var repeatCount = GetIntProperty(type, enemy, "Repeat", "HitCount", "Attacks");
+            return (dmg, Math.Max(1, repeatCount));
         }
 
         var intentType = intent.GetType();
@@ -361,8 +361,13 @@ public static class DamagePreviewPatch
 
     private static float GetHeadHeight(Node3D node)
     {
-        var aabb = node.GetAabb();
-        return aabb.Size.Y > 0.01f ? aabb.Size.Y : 2.0f;
+        // Node3D 没有 GetAabb，用 VisualInstance3D 或直接返回默认值
+        if (node is VisualInstance3D vi)
+        {
+            var aabb = vi.GetAabb();
+            return aabb.Size.Y > 0.01f ? aabb.Size.Y : 2.0f;
+        }
+        return 2.0f;
     }
 
     private static Node3D? GetCreatureNode(object creature)
