@@ -44,11 +44,9 @@ internal static class MoreEnchantStackPatch
         void OnAssemblyLoad(object? sender, AssemblyLoadEventArgs args)
         {
             if (Applied.Value) return;
-            if (CompatibilityPatchUtil.FindType(TargetNs, TargetType) is { } t)
-            {
-                AppDomain.CurrentDomain.AssemblyLoad -= OnAssemblyLoad;
-                ApplyPatch(harmony, t);
-            }
+            if (CompatibilityPatchUtil.FindType(TargetNs, TargetType) is not { } t) return;
+            AppDomain.CurrentDomain.AssemblyLoad -= OnAssemblyLoad;
+            ApplyPatch(harmony, t);
         }
     }
 
