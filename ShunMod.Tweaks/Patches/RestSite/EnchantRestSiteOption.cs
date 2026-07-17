@@ -35,24 +35,23 @@ public class EnchantRestSiteOption : RestSiteOption
     }
 
     private const string CustomDescKey = "shunmod_enchant_custom_desc";
-    private static bool _customEntryAdded;
+    private static bool _localizationAdded;
 
     /// <summary>
-    ///     在本地化表中注入自定义描述模板（仅一次）。
+    ///     在本地化表中注入缺失的 ENCHANT 选项条目（仅一次）。
     /// </summary>
-    private static void EnsureCustomDescriptionEntry()
+    private static void EnsureLocalizationEntries()
     {
-        if (_customEntryAdded) return;
-        _customEntryAdded = true;
+        if (_localizationAdded) return;
+        _localizationAdded = true;
 
         var table = LocManager.Instance.GetTable("rest_site_ui");
-        if (!table.HasEntry(CustomDescKey))
+        table.MergeWith(new Dictionary<string, string>
         {
-            table.MergeWith(new Dictionary<string, string>
-            {
-                [CustomDescKey] = "为牌组中的一张牌施加 {enchantment}：{enchant_desc}"
-            });
-        }
+            ["OPTION_ENCHANT.name"] = "附魔",
+            ["OPTION_ENCHANT.prompt"] = "选择要附魔的牌",
+            [CustomDescKey] = "为牌组中的一张牌施加 [gold]{enchantment}：{enchant_desc}[/gold]"
+        });
     }
 
     /// <summary>
@@ -62,7 +61,7 @@ public class EnchantRestSiteOption : RestSiteOption
     {
         get
         {
-            EnsureCustomDescriptionEntry();
+            EnsureLocalizationEntries();
             var desc = new LocString("rest_site_ui", CustomDescKey);
             desc.Add("enchantment", _cachedEnchantment.Title.GetFormattedText());
             desc.Add("enchant_desc", _cachedEnchantment.DynamicDescription.GetFormattedText());
