@@ -3,7 +3,7 @@
   "name": "ShunMod Compatibility",
   "author": "yehuoshun",
   "description": "Third-party mod compatibility patches",
-  "version": "v0.0.46",
+  "version": "v0.0.47",
   "has_pck": false,
   "has_dll": true,
   "dependencies": [

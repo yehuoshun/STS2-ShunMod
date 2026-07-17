@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
@@ -77,6 +78,7 @@ internal static class MoreEnchantPayCheckPatch
     /// 使 MoreEnchantPayCheckPatch.OnCardClicked Prefix 中的
     /// <c>num &gt;= maxEnchantments</c> 检查永远无法触发。
     /// </summary>
+    [SuppressMessage("ReSharper", "RedundantAssignment", Justification = "Harmony Postfix 覆盖 __result 是正常用法")]
     private static void GetMaxEnchantments_Postfix(ref int __result)
     {
         __result = int.MaxValue;

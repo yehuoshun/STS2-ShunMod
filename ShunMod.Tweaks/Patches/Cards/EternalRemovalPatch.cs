@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Models;
 
@@ -16,6 +17,7 @@ namespace ShunMod.Tweaks.Patches.Cards;
 public static class EternalRemovablePatch
 {
     [HarmonyPostfix]
+    [SuppressMessage("ReSharper", "RedundantAssignment", Justification = "Harmony Postfix 覆盖 __result 是正常用法")]
     private static void Postfix(ref bool __result)
     {
         __result = true;
@@ -26,6 +28,7 @@ public static class EternalRemovablePatch
 public static class EternalTransformablePatch
 {
     [HarmonyPostfix]
+    [SuppressMessage("ReSharper", "RedundantAssignment", Justification = "Harmony Postfix 覆盖 __result 是正常用法")]
     private static void Postfix(ref bool __result)
     {
         __result = true;
