@@ -34,7 +34,7 @@ public class EnchantRestSiteOption : RestSiteOption
     }
 
     /// <summary>
-    ///     选项描述 + 预选附魔名称。
+    ///     选项描述 + 预选附魔名称 + 附魔描述。
     /// </summary>
     public override LocString Description
     {
@@ -42,6 +42,7 @@ public class EnchantRestSiteOption : RestSiteOption
         {
             var desc = new LocString("rest_site_ui", "OPTION_ENCHANT.description");
             desc.Add("enchantment", _cachedEnchantment.Title.GetFormattedText());
+            desc.Add("enchant_desc", _cachedEnchantment.DynamicDescription.GetFormattedText());
             return desc;
         }
     }
