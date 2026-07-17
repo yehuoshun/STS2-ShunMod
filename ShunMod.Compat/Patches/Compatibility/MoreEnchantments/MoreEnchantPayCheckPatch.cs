@@ -70,11 +70,6 @@ internal static class MoreEnchantPayCheckPatch
         Log.Info($"[{ModId}] MoreEnchant pay-check patch: GetMaxEnchantments (Postfix, always return int.MaxValue)");
     }
 
-    /// <summary>
-    /// Postfix：将 GetMaxEnchantments 的返回值改为 int.MaxValue，
-    /// 使 MoreEnchantPayCheckPatch.OnCardClicked Prefix 中的
-    /// <c>num &gt;= maxEnchantments</c> 检查永远无法触发。
-    /// </summary>
     [SuppressMessage("ReSharper", "RedundantAssignment")]
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static void GetMaxEnchantments_Postfix(ref int __result)
