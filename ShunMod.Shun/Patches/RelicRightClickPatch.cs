@@ -78,7 +78,7 @@ internal static class RelicRightClickPatch
             || CombatManager.Instance.PlayerActionsDisabled)
             return;
 
-        var state = CombatManager.Instance.State;
+        var state = CombatManager.Instance.DebugOnlyGetState();
         if (state == null)
             return;
 
