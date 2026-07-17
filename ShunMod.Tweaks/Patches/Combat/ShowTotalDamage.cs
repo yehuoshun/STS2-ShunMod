@@ -27,12 +27,9 @@ public static class ShowTotalDamage
     [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Harmony 反射调用")]
     private static bool Prepare()
     {
-        if (TargetMethodCache == null)
-        {
-            Log.Error("[总伤害] 未找到 CardModel.GetDescriptionForPile 私有方法，补丁跳过！");
-            return false;
-        }
-        return true;
+        if (TargetMethodCache != null) return true;
+        Log.Error("[总伤害] 未找到 CardModel.GetDescriptionForPile 私有方法，补丁跳过！");
+        return false;
     }
 
     [HarmonyPostfix]
