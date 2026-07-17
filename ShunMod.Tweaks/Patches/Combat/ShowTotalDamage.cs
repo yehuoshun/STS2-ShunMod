@@ -2,8 +2,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
 using HarmonyLib;
-using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Logging;
+using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Saves;
 
 namespace ShunMod.Tweaks.Patches.Combat;
@@ -16,8 +16,15 @@ public static class ShowTotalDamage
 {
     private static readonly MethodInfo? TargetMethodCache = BuildTargetMethod();
 
+    private static readonly string[] DamageKeys = ["CalculatedDamage", "Damage"];
+
+    private static readonly string[] HitCountKeys = ["Repeat", "CalculatedHits"];
+
     [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Harmony 反射调用")]
-    private static MethodInfo? TargetMethod() => TargetMethodCache;
+    private static MethodInfo? TargetMethod()
+    {
+        return TargetMethodCache;
+    }
 
     private static MethodInfo? BuildTargetMethod()
     {
@@ -65,8 +72,6 @@ public static class ShowTotalDamage
         }
     }
 
-    private static readonly string[] DamageKeys = ["CalculatedDamage", "Damage"];
-
     private static decimal GetDamageValue(CardModel card)
     {
         foreach (var key in DamageKeys)
@@ -74,8 +79,6 @@ public static class ShowTotalDamage
                 return dv.PreviewValue;
         return 0;
     }
-
-    private static readonly string[] HitCountKeys = ["Repeat", "CalculatedHits"];
 
     private static int GetNativeHitCount(CardModel card)
     {

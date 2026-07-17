@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Models;
@@ -21,7 +20,10 @@ public static class InfiniteUpgradeMaxUpgrade
     // Harmony 对 TargetMethods() 只迭代一次，List<MethodInfo> 无影响
     private static readonly List<MethodInfo> TargetGetterCache = BuildTargetGetters();
 
-    private static List<MethodInfo> TargetMethods() => TargetGetterCache;
+    private static List<MethodInfo> TargetMethods()
+    {
+        return TargetGetterCache;
+    }
 
     private static List<MethodInfo> BuildTargetGetters()
     {
@@ -88,9 +90,20 @@ internal static class InfiniteUpgradeSerializationContext
 {
     [ThreadStatic] private static Stack<int>? _stack;
 
-    public static void Push(int upgradeLevel) => (_stack ??= new Stack<int>()).Push(upgradeLevel);
-    public static void Pop() { if (_stack is { Count: > 0 }) _stack.Pop(); }
-    public static int Peek() => _stack is { Count: > 0 } ? _stack.Peek() : 0;
+    public static void Push(int upgradeLevel)
+    {
+        (_stack ??= new Stack<int>()).Push(upgradeLevel);
+    }
+
+    public static void Pop()
+    {
+        if (_stack is { Count: > 0 }) _stack.Pop();
+    }
+
+    public static int Peek()
+    {
+        return _stack is { Count: > 0 } ? _stack.Peek() : 0;
+    }
 }
 
 // ════════════════════════════════ 安全检测 ════════════════════════════════════
@@ -109,7 +122,9 @@ internal static class InfiniteUpgradeSafety
     }
 
     public static bool ShouldAllowUpgrade(CardModel card, int originalMax, int level)
-        => level > originalMax && CanUseUnlimitedGrowth(card, originalMax);
+    {
+        return level > originalMax && CanUseUnlimitedGrowth(card, originalMax);
+    }
 
     public static int PrepareSerializableUpgradeLevel(SerializableCard save)
     {
@@ -126,7 +141,10 @@ internal static class InfiniteUpgradeSafety
         return originalMax;
     }
 
-    private static CardModel? ResolveCanonicalCard(ModelId id) => ModelDb.GetByIdOrNull<CardModel>(id);
+    private static CardModel? ResolveCanonicalCard(ModelId id)
+    {
+        return ModelDb.GetByIdOrNull<CardModel>(id);
+    }
 
     private static bool IsDrawSensitive(Type cardType)
     {

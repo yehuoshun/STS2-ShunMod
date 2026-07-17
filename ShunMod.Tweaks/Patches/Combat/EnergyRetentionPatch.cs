@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Hooks;
+
 namespace ShunMod.Tweaks.Patches.Combat;
 
 // ReSharper disable UnusedMember.Local — Harmony 反射调用

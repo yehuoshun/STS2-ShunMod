@@ -1,7 +1,7 @@
 using System.Reflection;
 using MegaCrit.Sts2.Core.Logging;
-using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Modding;
+using MegaCrit.Sts2.Core.Models;
 
 namespace ShunMod.Core.Core.Registry;
 

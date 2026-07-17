@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Godot;
 using HarmonyLib;
@@ -27,7 +26,6 @@ namespace ShunMod.Tweaks.Patches.Combat;
 // ReSharper disable UnusedType.Global
 // ReSharper disable UnusedMember.Local
 // ReSharper disable InconsistentNaming
-
 public static class DamagePreview
 {
     // 玩家头顶 label
@@ -82,13 +80,12 @@ public static class DamagePreview
         if (enemy.Monster?.NextMove == null) return 0;
         var total = 0;
         foreach (var intent in enemy.Monster.NextMove.Intents)
-        {
             if (intent is AttackIntent atk)
             {
                 var targets = enemy.CombatState?.Enemies ?? [];
                 total += atk.GetTotalDamage(targets, enemy);
             }
-        }
+
         return total;
     }
 
@@ -96,13 +93,12 @@ public static class DamagePreview
     {
         if (enemy.Monster?.NextMove == null) return (0, 0);
         foreach (var intent in enemy.Monster.NextMove.Intents)
-        {
             if (intent is AttackIntent atk)
             {
                 var targets = enemy.CombatState?.Enemies ?? [];
                 return (atk.GetSingleDamage(targets, enemy), atk.Repeats);
             }
-        }
+
         return (0, 0);
     }
 
@@ -117,7 +113,7 @@ public static class DamagePreview
         }
 
         if (netDamage == _lastNetDamage && _playerLabel != null
-                                         && GodotObject.IsInstanceIdValid(_playerLabel.GetInstanceId()))
+                                        && GodotObject.IsInstanceIdValid(_playerLabel.GetInstanceId()))
             return;
 
         _lastNetDamage = netDamage;
@@ -139,7 +135,7 @@ public static class DamagePreview
 
         _playerTween = _playerLabel.CreateTween();
         _playerTween.SetLoops();
-        _playerTween.SetParallel(true);
+        _playerTween.SetParallel();
         _playerTween.TweenProperty(_playerLabel, "position:y", -55, 1.0f)
             .SetTrans(Tween.TransitionType.Sine);
         _playerTween.TweenProperty(_playerLabel, "position:y", -65, 1.0f)
@@ -211,10 +207,8 @@ public static class DamagePreview
     {
         var alive = state.Enemies.Select(e => e.CombatId).ToHashSet();
         foreach (var key in EnemyLabels.Keys.ToList())
-        {
             if (!alive.Contains(key))
                 RemoveEnemyLabelByCid(key);
-        }
     }
 
     private static void RemoveEnemyLabelByCid(uint cid)
@@ -236,16 +230,27 @@ public static class DamagePreviewTurnStart
     private static readonly MethodInfo? Target =
         AccessTools.DeclaredMethod(typeof(CombatManager), "StartTurn", [typeof(Func<Task>)]);
 
-    private static MethodInfo? TargetMethod() => Target;
+    private static MethodInfo? TargetMethod()
+    {
+        return Target;
+    }
 
     private static bool Prepare()
     {
-        if (Target != null) { Log.Info("[伤害预测] Hook: CombatManager.StartTurn"); return true; }
+        if (Target != null)
+        {
+            Log.Info("[伤害预测] Hook: CombatManager.StartTurn");
+            return true;
+        }
+
         Log.Error("[伤害预测] 未找到 CombatManager.StartTurn");
         return false;
     }
 
-    private static void Postfix() => DamagePreview.Refresh();
+    private static void Postfix()
+    {
+        DamagePreview.Refresh();
+    }
 }
 
 [HarmonyPatch]
@@ -253,17 +258,30 @@ public static class DamagePreviewCardPlayed
 {
     private static readonly MethodInfo? Target =
         AccessTools.DeclaredMethod(typeof(CreatureCmd), "Damage",
-            [typeof(PlayerChoiceContext), typeof(Creature), typeof(decimal), typeof(ValueProp),
-             typeof(Creature), typeof(CardModel)]);
+        [
+            typeof(PlayerChoiceContext), typeof(Creature), typeof(decimal), typeof(ValueProp),
+            typeof(Creature), typeof(CardModel)
+        ]);
 
-    private static MethodInfo? TargetMethod() => Target;
+    private static MethodInfo? TargetMethod()
+    {
+        return Target;
+    }
 
     private static bool Prepare()
     {
-        if (Target != null) { Log.Info("[伤害预测] Hook: CreatureCmd.Damage"); return true; }
+        if (Target != null)
+        {
+            Log.Info("[伤害预测] Hook: CreatureCmd.Damage");
+            return true;
+        }
+
         Log.Error("[伤害预测] 未找到 CreatureCmd.Damage 重载");
         return false;
     }
 
-    private static void Postfix() => DamagePreview.Refresh();
+    private static void Postfix()
+    {
+        DamagePreview.Refresh();
+    }
 }

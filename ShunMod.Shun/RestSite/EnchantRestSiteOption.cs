@@ -14,13 +14,6 @@ namespace ShunMod.Shun.RestSite;
 /// </summary>
 public class EnchantRestSiteOption(Player owner) : RestSiteOption(owner)
 {
-    public override string OptionId => "ENCHANT";
-
-    /// <summary>
-    ///     预选的附魔，在构造时随机决定，显示在选项描述中。
-    /// </summary>
-    private readonly EnchantmentModel _cachedEnchantment = RollRandomEnchantment(owner);
-
     /// <summary>
     ///     附魔层数，默认 5 层。
     /// </summary>
@@ -30,19 +23,11 @@ public class EnchantRestSiteOption(Player owner) : RestSiteOption(owner)
     private static bool _localizationAdded;
 
     /// <summary>
-    ///     在本地化表中注入缺失的 ENCHANT 选项条目（仅一次）。
+    ///     预选的附魔，在构造时随机决定，显示在选项描述中。
     /// </summary>
-    private static void EnsureLocalizationEntries()
-    {
-        if (_localizationAdded) return;
-        _localizationAdded = true;
+    private readonly EnchantmentModel _cachedEnchantment = RollRandomEnchantment(owner);
 
-        var table = LocManager.Instance.GetTable("rest_site_ui");
-        table.MergeWith(new Dictionary<string, string>
-        {
-            [CustomDescKey] = "为牌组中的一张牌施加 [gold]{enchantment}：{enchant_desc}[/gold]"
-        });
-    }
+    public override string OptionId => "ENCHANT";
 
     /// <summary>
     ///     选项描述：原动作文本 + 附魔名 + 附魔描述。
@@ -57,6 +42,21 @@ public class EnchantRestSiteOption(Player owner) : RestSiteOption(owner)
             desc.Add("enchant_desc", _cachedEnchantment.DynamicDescription.GetFormattedText());
             return desc;
         }
+    }
+
+    /// <summary>
+    ///     在本地化表中注入缺失的 ENCHANT 选项条目（仅一次）。
+    /// </summary>
+    private static void EnsureLocalizationEntries()
+    {
+        if (_localizationAdded) return;
+        _localizationAdded = true;
+
+        var table = LocManager.Instance.GetTable("rest_site_ui");
+        table.MergeWith(new Dictionary<string, string>
+        {
+            [CustomDescKey] = "为牌组中的一张牌施加 [gold]{enchantment}：{enchant_desc}[/gold]"
+        });
     }
 
     public override async Task<bool> OnSelect()
