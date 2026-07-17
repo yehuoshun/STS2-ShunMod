@@ -103,8 +103,7 @@ STS2-ShunMod/
 │       ├── ShunCard.cs                 # 卡牌肖像工具（静态泛型 helper）
 │       ├── ShunEvent.cs                # 事件基类
 │       ├── CompatibilityPatchUtil.cs   # 兼容补丁共享工具（类型查找/单例发现）
-│       ├── CreatureReflection.cs       # Creature 反射工具（Block/IsPlayer）
-│       └── DynamicVarHelper.cs         # DynamicVar 反射赋值工具
+│       └── CreatureReflection.cs       # Creature 反射工具（Block/IsPlayer）
 │
 ├── ShunMod.Shun/                       # 舜角色内容
 │   ├── ShunMod.Shun.csproj             # AssemblyName: ShunMod_Shun → 引用 Core
