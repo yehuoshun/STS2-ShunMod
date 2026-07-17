@@ -50,7 +50,7 @@ public class EnchantRestSiteOption : RestSiteOption
         {
             table.MergeWith(new Dictionary<string, string>
             {
-                [CustomDescKey] = "为牌组中的一张牌施加 {enchantment}：{enchant_desc}"
+                [CustomDescKey] = "为牌组中的一张牌施加 [gold]{enchantment}：{enchant_desc}[/gold]"
             });
         }
     }
