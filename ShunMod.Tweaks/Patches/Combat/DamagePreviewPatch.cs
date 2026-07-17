@@ -41,19 +41,16 @@ public static class DamagePreview
     public static void Refresh()
     {
         var combat = CombatManager.Instance;
-        if (combat == null || !combat.IsInProgress) return;
+        if (!combat.IsInProgress) return;
         var state = CombatManager.Instance.DebugOnlyGetState();
         if (state == null) return;
 
         // 玩家
         foreach (var pc in state.PlayerCreatures)
         {
-            var total = 0;
-            foreach (var enemy in state.Enemies)
-            {
-                if (enemy.IsDead || !enemy.IsPrimaryEnemy) continue;
-                total += GetEnemyTotalDamage(enemy);
-            }
+            var total = state.Enemies
+                .Where(e => !e.IsDead && e.IsPrimaryEnemy)
+                .Sum(GetEnemyTotalDamage);
 
             // 穿透所有加成（易伤、力量等）
             var actual = Hook.ModifyDamage(state.RunState, state, pc, null, total,
@@ -170,8 +167,7 @@ public static class DamagePreview
         if (enemy.CombatId == null) return;
         var cid = enemy.CombatId.Value;
 
-        if (EnemyLabels.TryGetValue(cid, out var existing) && existing != null
-                                                           && GodotObject.IsInstanceIdValid(existing.GetInstanceId())
+        if (EnemyLabels.TryGetValue(cid, out var existing) && GodotObject.IsInstanceIdValid(existing.GetInstanceId())
                                                            && existing.Text == text)
             return;
 
@@ -197,9 +193,7 @@ public static class DamagePreview
     {
         if (enemy.CombatId == null) return;
         var cid = enemy.CombatId.Value;
-        if (!EnemyLabels.TryGetValue(cid, out var label)) return;
-        EnemyLabels.Remove(cid);
-        if (label != null && GodotObject.IsInstanceIdValid(label.GetInstanceId()))
+        if (EnemyLabels.Remove(cid, out var label) && GodotObject.IsInstanceIdValid(label.GetInstanceId()))
             label.QueueFree();
     }
 
@@ -213,9 +207,7 @@ public static class DamagePreview
 
     private static void RemoveEnemyLabelByCid(uint cid)
     {
-        if (!EnemyLabels.TryGetValue(cid, out var label)) return;
-        EnemyLabels.Remove(cid);
-        if (label != null && GodotObject.IsInstanceIdValid(label.GetInstanceId()))
+        if (EnemyLabels.Remove(cid, out var label) && GodotObject.IsInstanceIdValid(label.GetInstanceId()))
             label.QueueFree();
     }
 }
