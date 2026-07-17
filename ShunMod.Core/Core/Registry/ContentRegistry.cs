@@ -31,11 +31,9 @@ public static class ContentRegistry
             }
 
             var relicAttr = type.GetCustomAttribute<RelicPoolAttribute>();
-            if (relicAttr != null)
-            {
-                ModHelper.AddModelToPool(relicAttr.PoolType, type);
-                relicCount++;
-            }
+            if (relicAttr == null) continue;
+            ModHelper.AddModelToPool(relicAttr.PoolType, type);
+            relicCount++;
         }
 
         Log.Info($"[ShunMod_Core] ContentRegistry: {cardCount} cards, {relicCount} relics");
