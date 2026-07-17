@@ -34,9 +34,17 @@ public class EnchantRestSiteOption : RestSiteOption
     }
 
     /// <summary>
-    ///     选项描述显示预选的附魔名称。
+    ///     选项描述 + 预选附魔名称。
     /// </summary>
-    public override LocString Description => _cachedEnchantment.Title;
+    public override LocString Description
+    {
+        get
+        {
+            var desc = new LocString("rest_site_ui", "OPTION_ENCHANT.description");
+            desc.Add("enchantment", _cachedEnchantment.Title.GetFormattedText());
+            return desc;
+        }
+    }
 
     public override async Task<bool> OnSelect()
     {
