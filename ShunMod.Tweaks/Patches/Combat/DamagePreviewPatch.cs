@@ -85,7 +85,7 @@ public static class DamagePreview
         {
             if (intent is AttackIntent atk)
             {
-                var targets = (IEnumerable<Creature>)enemy.CombatState?.Enemies ?? [];
+                var targets = enemy.CombatState?.Enemies ?? [];
                 total += atk.GetTotalDamage(targets, enemy);
             }
         }
@@ -99,7 +99,7 @@ public static class DamagePreview
         {
             if (intent is AttackIntent atk)
             {
-                var targets = (IEnumerable<Creature>)enemy.CombatState?.Enemies ?? [];
+                var targets = enemy.CombatState?.Enemies ?? [];
                 return (atk.GetSingleDamage(targets, enemy), atk.Repeats);
             }
         }
