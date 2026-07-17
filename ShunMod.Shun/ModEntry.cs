@@ -4,7 +4,6 @@ using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
 using ShunMod.Core.Core.Registry;
-using ShunMod.Shun.Events;
 
 namespace ShunMod.Shun;
 
@@ -41,10 +40,7 @@ public static class ModEntry
                 Log.Error($"[{ModId}]   \u2192 inner: {e.InnerException.GetType().Name}: {e.InnerException.Message}");
         }
 
-        // Phase 2: Set up ContentRegistry callback for event registration
-        ContentRegistry.OnEventTypeFound = ShunModEventRegistry.AddEventType;
-
-        // Phase 3: Content registration
+        // Content registration: 卡牌/遗物/事件
         ContentRegistry.RegisterAll(Assembly.GetExecutingAssembly());
 
         Log.Info($"[{ModId}] Initialization complete");

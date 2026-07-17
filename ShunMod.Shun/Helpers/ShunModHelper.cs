@@ -1,18 +1,15 @@
 using System.Text.RegularExpressions;
-using MegaCrit.Sts2.Core.Helpers;
 
 namespace ShunMod.Shun.Helpers;
 
 /// <summary>
-///     ShunMod 工具类 — 资源路径推导、遗物安全访问等通用方法。
+///     ShunMod 工具类 — 资源路径推导。
 /// </summary>
 public static class ShunModHelper
 {
     private const string ResourceRoot = "res://ShunMod_Shun/images";
     private const string ShunModCardsPath = "cards/shunCards";
     private const string ShunModRelicsPath = "relics/shunRelics";
-    private const string ShunModEventsPath = "events/shunEvents";
-
     // PascalCase → snake_case 编译正则（static readonly 实例化一次，RegexOptions.Compiled 加速匹配）
     private static readonly Regex PascalToSnake = new("([a-z])([A-Z])", RegexOptions.Compiled);
 
@@ -48,23 +45,5 @@ public static class ShunModHelper
         return $"{ResourceRoot}/{ShunModRelicsPath}/{name}/{name}_outline.png";
     }
 
-    /// <summary>事件图片路径：events/shunEvents/{snake}.png</summary>
-    public static string EventImagePath(Type type)
-    {
-        return $"{ResourceRoot}/{ShunModEventsPath}/{ClassToSnakeCase(type)}.png";
-    }
 
-    // 自定义事件 GetAssetPaths() 样板提取，替换默认路径为 mod 图片路径
-    /// <summary>替换事件默认图片路径为 mod 自定义图片路径。</summary>
-    public static IEnumerable<string> ReplaceEventImage(
-        IEnumerable<string> paths, Type eventType, string entry)
-    {
-        var list = paths.ToList();
-        var defaultPath = ImageHelper.GetImagePath($"events/{entry.ToLowerInvariant()}.png");
-        var modPath = EventImagePath(eventType);
-        var i = list.IndexOf(defaultPath);
-        if (i >= 0) list[i] = modPath;
-        else list.Add(modPath);
-        return list;
-    }
 }

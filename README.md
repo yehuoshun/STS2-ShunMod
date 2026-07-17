@@ -65,7 +65,7 @@
 
 ## 事件
 
-> 当前无自定义事件。`ShunModEventRegistry` 保留事件框架，后续添加事件只需继承 `EventModel` + 标记 `[EventPool]`，用 `ShunModHelper.ReplaceEventImage` 替换图片路径。
+> 当前无自定义事件。后续添加事件只需继承 `EventModel` + 标记 `[EventPool]`。
 
 ---
 
@@ -97,7 +97,7 @@ STS2-ShunMod/
 │   ├── ModEntry.cs                     # Harmony.PatchAll（保留入口）
 │   └── Core/
 │       ├── ContentRegistry.cs          # 扫描 + 注册（回调解耦）
-│       ├── PoolAttribute.cs            # [CardPool]/[RelicPool]/[EventPool] 特性
+│       ├── PoolAttribute.cs            # [CardPool]/[RelicPool] 特性
 │       ├── ShunModHelper.cs            # 资源路径工具
 │       ├── ShunRelic.cs                # 遗物路径工具（静态泛型 helper）
 │       ├── ShunCard.cs                 # 卡牌肖像工具（静态泛型 helper）
@@ -117,7 +117,7 @@ STS2-ShunMod/
 │   ├── ShunModEndlessLife.cs       # 生生不息
 │   └── ShunModInfiniteGirya.cs     # 无限壶铃
 │   └── Events/
-│       └── ShunModEventRegistry.cs     # 事件注册 + 注入补丁
+│       └── （框架预留）
 │
 ├── ShunMod.Tweaks/                     # 数值/机制修改
 │   ├── ShunMod.Tweaks.csproj           # AssemblyName: ShunMod_Tweaks → 引用 Core
@@ -177,9 +177,9 @@ public class MyCard : CardModel
 }
 ```
 
-`ShunMod.Shun/ModEntry.cs` 中的 `ContentRegistry.RegisterAll()` 在启动时扫描所有 `[CardPool]` / `[RelicPool]` / `[EventPool]` 类并注册到对应池。
+`ShunMod.Shun/ModEntry.cs` 中的 `ContentRegistry.RegisterAll()` 在启动时扫描所有 `[CardPool]` / `[RelicPool]` 类并注册到对应池。
 
-> 卡牌、遗物、事件分别对应 `[CardPool]`、`[RelicPool]`、`[EventPool]` 特性，路径工具类 `ShunCard` / `ShunRelic` 自动生成资源路径，`ShunModHelper.ReplaceEventImage` 替换事件图片路径。
+> 卡牌、遗物分别对应 `[CardPool]`、`[RelicPool]` 特性，路径工具类 `ShunCard` / `ShunRelic` 自动生成资源路径。
 
 ### 添加新补丁
 
