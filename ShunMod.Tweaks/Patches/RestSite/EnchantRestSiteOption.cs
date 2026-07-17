@@ -90,8 +90,16 @@ public class EnchantRestSiteOption : RestSiteOption
 
         var card = selected.First();
 
-        // 直接使用预选附魔，不检查兼容性
-        CardCmd.Enchant(_cachedEnchantment.ToMutable(), card, EnchantStacks);
+        // 手动处理：已有同类型附魔则叠加，否则直接附魔
+        var enchantment = _cachedEnchantment.ToMutable();
+        if (card.Enchantment?.GetType() == enchantment.GetType())
+        {
+            card.Enchantment.Amount += EnchantStacks;
+        }
+        else
+        {
+            CardCmd.Enchant(enchantment, card, EnchantStacks);
+        }
 
         return true;
     }
