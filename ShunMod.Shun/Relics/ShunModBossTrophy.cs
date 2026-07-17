@@ -8,7 +8,8 @@ using MegaCrit.Sts2.Core.Rooms;
 using ShunMod.Core.Core.Registry;
 using ShunMod.Shun.Base;
 
-// ReSharper disable UnusedType.Global — 游戏框架通过反射/泛型基类实例化
+// ReSharper disable UnusedType.Global — 游戏框架反射使用
+// ReSharper disable UnusedType.Instantiation — 游戏框架反射实例化
 namespace ShunMod.Shun.Relics;
 
 /// <summary>
