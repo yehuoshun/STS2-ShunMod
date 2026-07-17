@@ -28,4 +28,5 @@ public class RelicPoolAttribute(Type poolType) : Attribute
 [SuppressMessage("ReSharper", "UnusedType.Global", Justification = "框架预留: 未来事件类标记[EventPool]时使用, ContentRegistry反射扫描")]
 public class EventPoolAttribute : Attribute
 {
+    // todo
 }

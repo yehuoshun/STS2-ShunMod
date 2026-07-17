@@ -26,3 +26,4 @@ public static class CompatibilityPatchUtil
             .Select(asm => asm.GetType(fullName))
             .FirstOrDefault(t => t != null);
     }
+}
