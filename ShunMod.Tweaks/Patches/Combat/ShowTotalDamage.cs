@@ -10,6 +10,7 @@ namespace ShunMod.Tweaks.Patches.Combat;
 // 显示总伤害：多段卡/X卡在描述末尾追加 "单段伤害 × 段数 = 总伤害"
 // 缓存 private method GetDescriptionForPile，只反射一次
 [HarmonyPatch]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
 public static class ShowTotalDamage
 {
     private static readonly MethodBase? TargetMethodCache = BuildTargetMethod();
