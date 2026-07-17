@@ -59,22 +59,8 @@ public class EnchantRestSiteOption : RestSiteOption
 
         var card = selected.First();
 
-        // 找所有可用于此牌的附魔（排除已废弃）
-        var enchantments = ModelDb.DebugEnchantments
-            .Where(e => e is not DeprecatedEnchantment
-                        && e.CanEnchantCardType(card.Type)
-                        && !card.Keywords.Contains(CardKeyword.Unplayable))
-            .ToList();
-
-        if (enchantments.Count == 0)
-            return false;
-
-        // 优先使用预选附魔，若不可用则重新随机
-        var toApply = enchantments.Any(e => e.Id == _cachedEnchantment.Id)
-            ? _cachedEnchantment
-            : Owner.PlayerRng.Transformations.NextItem(enchantments);
-
-        CardCmd.Enchant(toApply.ToMutable(), card, EnchantStacks);
+        // 直接使用预选附魔，不检查兼容性
+        CardCmd.Enchant(_cachedEnchantment.ToMutable(), card, EnchantStacks);
 
         return true;
     }
