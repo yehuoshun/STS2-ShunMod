@@ -63,21 +63,23 @@ public static class ShowTotalDamage
         }
     }
 
+    private static readonly string[] DamageKeys = { "CalculatedDamage", "Damage" };
+
     private static decimal GetDamageValue(CardModel card)
     {
-        if (card.DynamicVars.TryGetValue("CalculatedDamage", out var dv) && dv.PreviewValue > 0)
-            return dv.PreviewValue;
-        if (card.DynamicVars.TryGetValue("Damage", out dv) && dv.PreviewValue > 0)
-            return dv.PreviewValue;
+        foreach (var key in DamageKeys)
+            if (card.DynamicVars.TryGetValue(key, out var dv) && dv.PreviewValue > 0)
+                return dv.PreviewValue;
         return 0;
     }
 
+    private static readonly string[] HitCountKeys = { "Repeat", "CalculatedHits" };
+
     private static int GetNativeHitCount(CardModel card)
     {
-        if (card.DynamicVars.TryGetValue("Repeat", out var dv) && dv.PreviewValue > 0)
-            return (int)dv.PreviewValue;
-        if (card.DynamicVars.TryGetValue("CalculatedHits", out dv) && dv.PreviewValue > 0)
-            return (int)dv.PreviewValue;
+        foreach (var key in HitCountKeys)
+            if (card.DynamicVars.TryGetValue(key, out var dv) && dv.PreviewValue > 0)
+                return (int)dv.PreviewValue;
         return 1;
     }
 }
