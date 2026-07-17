@@ -21,7 +21,7 @@ public static class InfiniteUpgradeMaxUpgrade
     // Harmony 对 TargetMethods() 只迭代一次，List<MethodInfo> 无影响
     private static readonly List<MethodInfo> TargetGetterCache = BuildTargetGetters();
 
-    private static IEnumerable<MethodInfo> TargetMethods() => TargetGetterCache;
+    private static List<MethodInfo> TargetMethods() => TargetGetterCache;
 
     private static List<MethodInfo> BuildTargetGetters()
     {
