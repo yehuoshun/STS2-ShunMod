@@ -9,7 +9,7 @@ on:
 jobs:
   # ── 先构建 Core（其他模块依赖 Core） ────────────────────────────────────
   build-core:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -54,7 +54,7 @@ jobs:
   # ── 剩余模块并行构建 ────────────────────────────────────────────────────
   build-modules:
     needs: build-core
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         module:
@@ -142,7 +142,7 @@ jobs:
   # ── 汇总打包 ────────────────────────────────────────────────────────────
   package:
     needs: [build-core, build-modules]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
