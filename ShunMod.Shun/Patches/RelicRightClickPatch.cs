@@ -58,7 +58,7 @@ internal static class RelicRightClickPatch
             return;
 
         var combat = CombatManager.Instance;
-        if (combat == null || !combat.IsInProgress || combat.IsEnding)
+        if (!combat.IsInProgress || combat.IsEnding)
             return;
 
         viewport.SetInputAsHandled();
