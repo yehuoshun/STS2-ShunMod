@@ -35,6 +35,7 @@ ShunMod.Core          ← 基础框架，无依赖
 | 加新事件 | `ShunMod.Shun/Events/` 新建类，继承 `EventModel`，加 `[EventPool]` 特性 |
 | 加休息处选项 | `ShunMod.Shun/RestSite/` 新建类，继承 `RestSiteOption` + Patch `RestSiteOption.Generate` |
 | 加游戏机制修改 | `ShunMod.Tweaks/Patches/` 新建 Harmony Patch 类 |
+| 加伤害预览/预测 | `ShunMod.Tweaks/Patches/Combat/DamagePreviewPatch.cs` 已有 `DamagePreview` 静态类 + `DamagePreviewTurnStart` / `DamagePreviewCardPlayed` 两个 Hook |
 | 加第三方兼容 | `ShunMod.Compat/Patches/Compatibility/` 新建类，在 `CompatibilityPatches.ApplyAll()` 中注册 |
 | 改 Core 框架工具 | `ShunMod.Core/Core/` 下对应工具类 |
 | 改本地化文本 | `ShunMod.Shun/assets/localization/` 下对应 JSON |
