@@ -11,6 +11,7 @@ namespace ShunMod.Tweaks.Patches.Combat;
 
 // 所有 Forge 行为自动将非手牌的君王之剑拉回手牌
 [HarmonyPatch(typeof(ForgeCmd), nameof(ForgeCmd.Forge))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
 public static class ForgePullBladesToHandPatch
 {
     [HarmonyPostfix]

@@ -6,6 +6,7 @@ namespace ShunMod.Tweaks.Patches.Combat;
 // ReSharper disable UnusedMember.Local — Harmony 反射调用
 // 能量保留：回合开始能量不清零，始终返回 false
 [HarmonyPatch(typeof(Hook), nameof(Hook.ShouldPlayerResetEnergy))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
 public static class EnergyRetentionPatch
 {
     [HarmonyPrefix]
