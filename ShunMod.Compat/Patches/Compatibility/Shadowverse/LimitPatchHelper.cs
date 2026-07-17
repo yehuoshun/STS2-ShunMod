@@ -49,12 +49,10 @@ internal static class LimitPatchHelper
         void OnAssemblyLoad(object? sender, AssemblyLoadEventArgs args)
         {
             if (applied.Value) return;
-            if (FindType(targetNs, targetType) is { } t)
-            {
-                AppDomain.CurrentDomain.AssemblyLoad -= OnAssemblyLoad;
-                ApplyPatches(harmony, t, modId, friendlyName, applied,
-                    transpilerSource, scanTranspilerName, setEnabledTranspilerName);
-            }
+            if (FindType(targetNs, targetType) is not { } t) return;
+            AppDomain.CurrentDomain.AssemblyLoad -= OnAssemblyLoad;
+            ApplyPatches(harmony, t, modId, friendlyName, applied,
+                transpilerSource, scanTranspilerName, setEnabledTranspilerName);
         }
     }
 
@@ -114,12 +112,12 @@ internal static class LimitPatchHelper
     }
 
     public static bool IsConstant7(CodeInstruction inst) =>
-        (inst.opcode == OpCodes.Ldc_I4_S && inst.operand is sbyte and 7)
-        || (inst.opcode == OpCodes.Ldc_I4 && inst.operand is int and 7);
+        (inst.opcode == OpCodes.Ldc_I4_S || inst.opcode == OpCodes.Ldc_I4)
+        && inst.operand is 7;
 
     public static bool IsConstant14(CodeInstruction inst) =>
-        (inst.opcode == OpCodes.Ldc_I4_S && inst.operand is sbyte and 14)
-        || (inst.opcode == OpCodes.Ldc_I4 && inst.operand is int and 14);
+        (inst.opcode == OpCodes.Ldc_I4_S || inst.opcode == OpCodes.Ldc_I4)
+        && inst.operand is 14;
 
     private static Type? FindType(string ns, string typeName) =>
         CompatibilityPatchUtil.FindType(ns, typeName);
