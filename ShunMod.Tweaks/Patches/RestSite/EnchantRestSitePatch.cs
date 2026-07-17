@@ -14,7 +14,7 @@ public static class EnchantRestSitePatch
 {
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     [SuppressMessage("ReSharper", "UnusedMember.Local")]
-    static void Postfix(Player player, ref List<RestSiteOption> __result)
+    private static void Postfix(Player player, ref List<RestSiteOption> __result)
     {
         __result.Add(new EnchantRestSiteOption(player));
     }
