@@ -36,6 +36,7 @@ public static class ShowTotalDamage
     [HarmonyPostfix]
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony __instance/__result 约定")]
     [SuppressMessage("ReSharper", "UnusedMember.Local")]
+    [SuppressMessage("ReSharper", "SpellingInStringLiteral", Justification = "#ffcc00 是有效的十六进制颜色代码")]
     private static void Postfix(CardModel __instance, ref string __result)
     {
         try
@@ -64,7 +65,7 @@ public static class ShowTotalDamage
         }
     }
 
-    private static readonly string[] DamageKeys = { "CalculatedDamage", "Damage" };
+    private static readonly string[] DamageKeys = ["CalculatedDamage", "Damage"];
 
     private static decimal GetDamageValue(CardModel card)
     {
@@ -74,7 +75,7 @@ public static class ShowTotalDamage
         return 0;
     }
 
-    private static readonly string[] HitCountKeys = { "Repeat", "CalculatedHits" };
+    private static readonly string[] HitCountKeys = ["Repeat", "CalculatedHits"];
 
     private static int GetNativeHitCount(CardModel card)
     {
