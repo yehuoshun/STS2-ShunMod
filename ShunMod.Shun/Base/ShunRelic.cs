@@ -8,9 +8,20 @@ namespace ShunMod.Shun.Base;
 /// </summary>
 public static class ShunRelic
 {
-    public static string PackedIconPath<T>() where T : class => ShunModHelper.RelicIconPath(typeof(T));
-    public static string PackedIconOutlinePath<T>() where T : class => ShunModHelper.RelicOutlinePath(typeof(T));
-    public static string BigIconPath<T>() where T : class => ShunModHelper.RelicIconPath(typeof(T));
+    public static string PackedIconPath<T>() where T : class
+    {
+        return ShunModHelper.RelicIconPath(typeof(T));
+    }
+
+    public static string PackedIconOutlinePath<T>() where T : class
+    {
+        return ShunModHelper.RelicOutlinePath(typeof(T));
+    }
+
+    public static string BigIconPath<T>() where T : class
+    {
+        return ShunModHelper.RelicIconPath(typeof(T));
+    }
 }
 
 /// <summary>

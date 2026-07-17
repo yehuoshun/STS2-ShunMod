@@ -10,5 +10,7 @@ namespace ShunMod.Shun.Base;
 public static class ShunCard
 {
     public static string PortraitPath<T>(string color = "colorless") where T : class
-        => ShunModHelper.CardPortraitPath(typeof(T), color);
+    {
+        return ShunModHelper.CardPortraitPath(typeof(T), color);
+    }
 }

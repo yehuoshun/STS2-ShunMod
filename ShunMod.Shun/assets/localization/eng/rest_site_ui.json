@@ -1,5 +1,5 @@
 {
-    "OPTION_ENCHANT.name": "Enchant",
-    "OPTION_ENCHANT.description": "Apply a random [gold]Enchantment[/gold] to a card in your [gold]deck[/gold].",
-    "OPTION_ENCHANT.prompt": "Choose a card to Enchant"
+  "OPTION_ENCHANT.name": "Enchant",
+  "OPTION_ENCHANT.description": "Apply a random [gold]Enchantment[/gold] to a card in your [gold]deck[/gold].",
+  "OPTION_ENCHANT.prompt": "Choose a card to Enchant"
 }

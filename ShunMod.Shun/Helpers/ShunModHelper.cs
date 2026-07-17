@@ -9,7 +9,9 @@ public static class ShunModHelper
 {
     private const string ResourceRoot = "res://ShunMod_Shun/images";
     private const string ShunModCardsPath = "cards/shunCards";
+
     private const string ShunModRelicsPath = "relics/shunRelics";
+
     // PascalCase → snake_case 编译正则（static readonly 实例化一次，RegexOptions.Compiled 加速匹配）
     private static readonly Regex PascalToSnake = new("([a-z])([A-Z])", RegexOptions.Compiled);
 
@@ -44,6 +46,4 @@ public static class ShunModHelper
         var name = ClassToSnakeCase(type);
         return $"{ResourceRoot}/{ShunModRelicsPath}/{name}/{name}_outline.png";
     }
-
-
 }

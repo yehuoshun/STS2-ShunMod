@@ -16,7 +16,9 @@ namespace ShunMod.Shun.Cards;
 [CardPool(typeof(ColorlessCardPool))]
 public class ShunModSuperApotheosis : CardModel
 {
-    public ShunModSuperApotheosis() : base(2, CardType.Skill, CardRarity.Rare, TargetType.Self) { }
+    public ShunModSuperApotheosis() : base(2, CardType.Skill, CardRarity.Rare, TargetType.Self)
+    {
+    }
 
     public override string PortraitPath => ShunCard.PortraitPath<ShunModSuperApotheosis>();
 

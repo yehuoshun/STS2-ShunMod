@@ -15,9 +15,8 @@ namespace ShunMod.Shun.Relics;
 [RelicPool(typeof(SharedRelicPool))]
 public sealed class ShunModBountifulFrond : ShunRelicModel<ShunModBountifulFrond>
 {
-    public override RelicRarity Rarity => RelicRarity.Rare;
-
     private const int MaxPotionFillAttempts = 20;
+    public override RelicRarity Rarity => RelicRarity.Rare;
 
     public override async Task AfterPlayerTurnStart(PlayerChoiceContext choiceContext, Player player)
     {

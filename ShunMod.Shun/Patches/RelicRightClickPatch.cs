@@ -11,7 +11,6 @@ namespace ShunMod.Shun.Patches;
 
 /// <summary>
 ///     NRelic 右键点击补丁 — 为 ShunMod 遗物添加右键交互。
-///
 ///     在 NRelic._Ready 后连接 GuiInput 信号，检测右键点击 / 控制器取消键，
 ///     若目标遗物是 ShunModEndlessLife，触发其右键动作。
 /// </summary>
@@ -27,7 +26,8 @@ internal static class RelicRightClickPatch
             return;
 
         instance.SetMeta(MetaKey, true);
-        instance.Connect(Control.SignalName.GuiInput, Callable.From((InputEvent inputEvent) => OnGuiInput(instance, inputEvent)));
+        instance.Connect(Control.SignalName.GuiInput,
+            Callable.From((InputEvent inputEvent) => OnGuiInput(instance, inputEvent)));
     }
 
     private static void OnGuiInput(NRelic relicNode, InputEvent inputEvent)
