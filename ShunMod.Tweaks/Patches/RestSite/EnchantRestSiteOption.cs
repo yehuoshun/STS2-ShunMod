@@ -12,15 +12,31 @@ using MegaCrit.Sts2.Core.Models.Enchantments;
 namespace ShunMod.Tweaks.Patches.RestSite;
 
 /// <summary>
-///     休息处附魔：选一张牌，随机施加一个可用的附魔。已有附魔的牌会被替换。
+///     休息处附魔：选一张牌，施加预选附魔（层数5）。已附魔的牌会被替换或叠加。
 /// </summary>
 public class EnchantRestSiteOption : RestSiteOption
 {
     public override string OptionId => "ENCHANT";
 
+    /// <summary>
+    ///     预选的附魔，在构造时随机决定，显示在选项描述中。
+    /// </summary>
+    private readonly EnchantmentModel _cachedEnchantment;
+
+    /// <summary>
+    ///     附魔层数，默认 5 层。
+    /// </summary>
+    private const int EnchantStacks = 5;
+
     public EnchantRestSiteOption(Player owner) : base(owner)
     {
+        _cachedEnchantment = RollRandomEnchantment(owner);
     }
+
+    /// <summary>
+    ///     选项描述显示预选的附魔名称。
+    /// </summary>
+    public override LocString Description => _cachedEnchantment.Title;
 
     public override async Task<bool> OnSelect()
     {
@@ -43,7 +59,7 @@ public class EnchantRestSiteOption : RestSiteOption
 
         var card = selected.First();
 
-        // 找所有可用于此牌的附魔
+        // 找所有可用于此牌的附魔（排除已废弃）
         var enchantments = ModelDb.DebugEnchantments
             .Where(e => e is not DeprecatedEnchantment
                         && e.CanEnchantCardType(card.Type)
@@ -53,9 +69,27 @@ public class EnchantRestSiteOption : RestSiteOption
         if (enchantments.Count == 0)
             return false;
 
-        var canonical = Owner.PlayerRng.Transformations.NextItem(enchantments);
-        CardCmd.Enchant(canonical.ToMutable(), card, 1);
+        // 优先使用预选附魔，若不可用则重新随机
+        var toApply = enchantments.Any(e => e.Id == _cachedEnchantment.Id)
+            ? _cachedEnchantment
+            : Owner.PlayerRng.Transformations.NextItem(enchantments);
+
+        CardCmd.Enchant(toApply.ToMutable(), card, EnchantStacks);
 
         return true;
+    }
+
+    /// <summary>
+    ///     从所有可用附魔中随机预选一个（不依赖卡牌类型）。
+    /// </summary>
+    private static EnchantmentModel RollRandomEnchantment(Player owner)
+    {
+        var pool = ModelDb.DebugEnchantments
+            .Where(e => e is not DeprecatedEnchantment)
+            .ToList();
+
+        return pool.Count > 0
+            ? owner.PlayerRng.Transformations.NextItem(pool)!
+            : null!;
     }
 }
