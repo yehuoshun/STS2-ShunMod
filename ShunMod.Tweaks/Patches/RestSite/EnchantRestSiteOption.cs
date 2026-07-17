@@ -34,18 +34,9 @@ public class EnchantRestSiteOption : RestSiteOption
     }
 
     /// <summary>
-    ///     选项描述 + 预选附魔名称 + 附魔描述。
+    ///     选项描述显示预选附魔效果（含层数），不再使用原占位符模板。
     /// </summary>
-    public override LocString Description
-    {
-        get
-        {
-            var desc = new LocString("rest_site_ui", "OPTION_ENCHANT.description");
-            desc.Add("enchantment", _cachedEnchantment.Title.GetFormattedText());
-            desc.Add("enchant_desc", _cachedEnchantment.DynamicDescription.GetFormattedText());
-            return desc;
-        }
-    }
+    public override LocString Description => _cachedEnchantment.DynamicDescription;
 
     public override async Task<bool> OnSelect()
     {
