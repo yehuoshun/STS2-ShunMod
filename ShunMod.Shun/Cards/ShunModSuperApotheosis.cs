@@ -14,12 +14,8 @@ namespace ShunMod.Shun.Cards;
 ///     2费→1费（升级后），技能，稀有，无色。
 /// </summary>
 [CardPool(typeof(ColorlessCardPool))]
-public class ShunModSuperApotheosis : CardModel
+public class ShunModSuperApotheosis() : CardModel(2, CardType.Skill, CardRarity.Rare, TargetType.Self)
 {
-    public ShunModSuperApotheosis() : base(2, CardType.Skill, CardRarity.Rare, TargetType.Self)
-    {
-    }
-
     public override string PortraitPath => ShunCard.PortraitPath<ShunModSuperApotheosis>();
 
     protected override Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
