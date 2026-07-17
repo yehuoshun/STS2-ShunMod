@@ -62,7 +62,8 @@ internal static class RelicRightClickPatch
         {
             Log.Error($"[EndlessLife] 右键执行失败: {e.GetType().Name}: {e.Message}");
             if (e.InnerException != null)
-                Log.Error($"[EndlessLife]   \u2192 inner: {e.InnerException.GetType().Name}: {e.InnerException.Message}");
+                Log.Error(
+                    $"[EndlessLife]   \u2192 inner: {e.InnerException.GetType().Name}: {e.InnerException.Message}");
         }
     }
 
