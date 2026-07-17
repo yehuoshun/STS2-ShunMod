@@ -1,5 +1,3 @@
-using System.Linq;
-using System.Reflection;
 using MegaCrit.Sts2.Core.Logging;
 
 namespace ShunMod.Core.Core;
