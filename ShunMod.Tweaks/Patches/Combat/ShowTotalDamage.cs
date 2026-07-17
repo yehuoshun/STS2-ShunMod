@@ -13,12 +13,12 @@ namespace ShunMod.Tweaks.Patches.Combat;
 [SuppressMessage("ReSharper", "UnusedType.Global")]
 public static class ShowTotalDamage
 {
-    private static readonly MethodBase? TargetMethodCache = BuildTargetMethod();
+    private static readonly MethodInfo? TargetMethodCache = BuildTargetMethod();
 
     [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Harmony 反射调用")]
-    private static MethodBase? TargetMethod() => TargetMethodCache;
+    private static MethodInfo? TargetMethod() => TargetMethodCache;
 
-    private static MethodBase? BuildTargetMethod()
+    private static MethodInfo? BuildTargetMethod()
     {
         return typeof(CardModel).GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
             .FirstOrDefault(m => m.Name == "GetDescriptionForPile" && m.GetParameters().Length == 3);
