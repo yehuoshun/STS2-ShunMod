@@ -3,7 +3,7 @@ using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.RestSite;
 
-namespace ShunMod.Tweaks.Patches.RestSite;
+namespace ShunMod.Shun.RestSite;
 
 /// <summary>
 ///     休息处附魔选项 — Postfix 注入 RestSiteOption.Generate，永远多一个「附魔」选项。

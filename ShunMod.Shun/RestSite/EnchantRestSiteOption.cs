@@ -7,7 +7,7 @@ using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Enchantments;
 
-namespace ShunMod.Tweaks.Patches.RestSite;
+namespace ShunMod.Shun.RestSite;
 
 /// <summary>
 ///     休息处附魔：选一张牌，施加预选附魔（层数5）。已附魔的牌会被替换或叠加。
