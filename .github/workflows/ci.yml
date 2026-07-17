@@ -7,9 +7,10 @@ on:
     branches: [main]
 
 jobs:
-  # ── 先构建 Core（其他模块依赖 Core） ────────────────────────────────────
-  build-core:
+  build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,127 +32,56 @@ jobs:
       - name: Check deps
         run: |
           if [ ! -f deps/sts2.dll ]; then
-            echo "st s2.dll not found! Upload with: gh release upload 0.107.1 sts2.dll 0Harmony.dll"
+            echo ""
+            echo "=============================================="
+            echo "  sts2.dll not found in 0.107.1 release!"
+            echo "  Upload with: gh release upload 0.107.1 sts2.dll 0Harmony.dll"
+            echo "=============================================="
             exit 1
           fi
 
       - name: Restore
         run: dotnet restore STS2_ShunMod.sln
 
-      - name: Build Core
+      - name: Build all projects
+        run: dotnet build STS2_ShunMod.sln -c Release -p:Sts2DataDir="$(realpath deps)" --no-restore
+
+      - name: Export .pck (Shun only)
         run: |
-          dotnet build ShunMod.Core/ShunMod.Core.csproj -c Release -p:Sts2DataDir="$(realpath deps)" --no-restore
-
-      - name: Upload Core artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-core
-          path: |
-            ShunMod.Core/.godot/mono/temp/bin/Release/ShunMod_Core.dll
-            ShunMod.Core/ShunMod_Core.json
-          retention-days: 1
-
-  # ── 剩余模块并行构建 ────────────────────────────────────────────────────
-  build-modules:
-    needs: build-core
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        module:
-          - name: Shun
-            proj: ShunMod.Shun/ShunMod.Shun.csproj
-            dir: ShunMod.Shun
-            asm: ShunMod_Shun
-            has_pck: true
-          - name: Tweaks
-            proj: ShunMod.Tweaks/ShunMod.Tweaks.csproj
-            dir: ShunMod.Tweaks
-            asm: ShunMod_Tweaks
-            has_pck: false
-          - name: Compat
-            proj: ShunMod.Compat/ShunMod.Compat.csproj
-            dir: ShunMod.Compat
-            asm: ShunMod_Compat
-            has_pck: false
-      fail-fast: false
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup .NET 9.0
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 9.0.x
-
-      - name: Download game references
-        run: |
-          mkdir -p deps
-          DEPS_URL="https://github.com/${{ github.repository }}/releases/download/0.107.1"
-          curl -sL "${DEPS_URL}/sts2.dll" -o deps/sts2.dll
-          curl -sL "${DEPS_URL}/0Harmony.dll" -o deps/0Harmony.dll
-
-      - name: Download Core artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: build-core
-          path: ${{ matrix.module.dir }}/.godot/mono/temp/bin/Release/
-
-      - name: Restore
-        run: dotnet restore STS2_ShunMod.sln
-
-      - name: Build ${{ matrix.module.name }}
-        run: |
-          dotnet build ${{ matrix.module.proj }} -c Release -p:Sts2DataDir="$(realpath deps)" --no-restore
-
-      - name: Export .pck (${{ matrix.module.name }})
-        if: ${{ matrix.module.has_pck }}
-        run: |
+          echo "=== Downloading Godot 4.5.1 Mono ==="
           GODOT_URL="https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_mono_linux_x86_64.zip"
-          curl -sL "$GODOT_URL" -o godot.zip
+          curl -sL "$GODOT_URL" -o godot.zip || { echo "Download failed"; exit 0; }
           unzip -q godot.zip -d godot 2>/dev/null
           GODOT=$(find godot -name "Godot*" -type f -executable | head -1)
           [ -z "$GODOT" ] && { echo "Godot not found"; exit 0; }
           chmod +x "$GODOT"
-          "$GODOT" --headless --export-pack "BasicExport" ${{ matrix.module.asm }}.pck
-          ls -la ${{ matrix.module.asm }}.pck 2>/dev/null || echo "Export failed"
+          echo "=== Exporting .pck ==="
+          "$GODOT" --headless --export-pack "BasicExport" ShunMod_Shun.pck
+          ls -la ShunMod_Shun.pck 2>/dev/null || echo "Export failed"
 
-      - name: Package ${{ matrix.module.name }} zip
+      - name: Package individual zips
         run: |
-          ASM=${{ matrix.module.asm }}
-          DIR=${{ matrix.module.dir }}
-          mkdir -p "publish/${ASM}"
-          cp "${DIR}/.godot/mono/temp/bin/Release/${ASM}.dll" "publish/${ASM}/"
-          cp "${DIR}/${ASM}.json" "publish/${ASM}/"
-          PCK=$(find . -maxdepth 1 -name "${ASM}.pck" -type f 2>/dev/null | head -1)
-          if [ -n "$PCK" ]; then
-            cp "$PCK" "publish/${ASM}/"
-          fi
-          cd publish && zip -r "../${ASM}.zip" "${ASM}/" && cd ..
-          echo "  Packaged: $(ls -lh ${ASM}.zip | awk '{print $5}')"
-
-      - name: Upload ${{ matrix.module.name }} artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-${{ matrix.module.name | lower }}
-          path: |
-            ${{ matrix.module.asm }}.zip
-          retention-days: 1
-
-  # ── 汇总打包 ────────────────────────────────────────────────────────────
-  package:
-    needs: [build-core, build-modules]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download all build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-          pattern: build-*
-          merge-multiple: true
+          for entry in "Core|ShunMod.Core" "Shun|ShunMod.Shun" "Tweaks|ShunMod.Tweaks" "Compat|ShunMod.Compat"; do
+            PROJ="${entry%%|*}"
+            DIR="${entry##*|}"
+            ASM="ShunMod_${PROJ}"
+            PROJ_BUILD="${DIR}/.godot/mono/temp/bin/Release"
+            echo "=== Packaging ${ASM} ==="
+            mkdir -p "publish/${ASM}"
+            cp "$PROJ_BUILD/${ASM}.dll" "publish/${ASM}/"
+            cp "${DIR}/${ASM}.json" "publish/${ASM}/"
+            # Shun 项目有 pck
+            PCK=$(find "$PROJ_BUILD" -name "${ASM}.pck" -type f 2>/dev/null | head -1)
+            if [ -z "$PCK" ]; then
+              PCK=$(find . -maxdepth 1 -name "${ASM}.pck" -type f 2>/dev/null | head -1)
+            fi
+            if [ -n "$PCK" ]; then
+              cp "$PCK" "publish/${ASM}/"
+            fi
+            ls -la "publish/${ASM}/"
+            cd publish && zip -r "../${ASM}.zip" "${ASM}/" && cd ..
+            echo "  Packaged: $(ls -lh ${ASM}.zip | awk '{print $5}')"
+          done
 
       - name: Package full zip
         run: |
@@ -161,17 +91,22 @@ jobs:
             DIR="${entry##*|}"
             ASM="ShunMod_${PROJ}"
             mkdir -p "publish/${ASM}"
-            cp "artifacts/${ASM}.dll" "publish/${ASM}/" 2>/dev/null || true
-            cp "artifacts/${ASM}.json" "publish/${ASM}/" 2>/dev/null || true
-            PCK=$(find artifacts -name "${ASM}.pck" -type f 2>/dev/null | head -1)
-            if [ -n "$PCK" ]; then
-              cp "$PCK" "publish/${ASM}/"
-            fi
+            cp "${DIR}/.godot/mono/temp/bin/Release/${ASM}.dll" "publish/${ASM}/"
+            cp "${DIR}/${ASM}.json" "publish/${ASM}/"
           done
+          # Shun 的 pck
+          PCK=$(find "ShunMod.Shun/.godot/mono/temp/bin/Release" -name "ShunMod_Shun.pck" -type f 2>/dev/null | head -1)
+          if [ -z "$PCK" ]; then
+            PCK=$(find . -maxdepth 1 -name "ShunMod_Shun.pck" -type f 2>/dev/null | head -1)
+          fi
+          if [ -n "$PCK" ]; then
+            cp "$PCK" "publish/ShunMod_Shun/"
+          fi
+          ls -la publish/
           cd publish && zip -r "../STS2_ShunMod.zip" . && cd ..
           echo "  Packaged: $(ls -lh STS2_ShunMod.zip | awk '{print $5}')"
 
-      - name: Upload all artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ShunMod-Build
