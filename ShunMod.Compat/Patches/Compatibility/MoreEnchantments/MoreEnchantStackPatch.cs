@@ -7,8 +7,8 @@ using ShunMod.Core.Core;
 namespace ShunMod.Compat.Patches.Compatibility.MoreEnchantments;
 
 /// <summary>
-/// MoreEnchant 附魔模组兼容补丁 - 解除单卡附魔叠加上限。
-/// 原版 CanApply 有两层检查：CanEnchant（保留）+ 稀有度上限（移除）。
+///     MoreEnchant 附魔模组兼容补丁 - 解除单卡附魔叠加上限。
+///     原版 CanApply 有两层检查：CanEnchant（保留）+ 稀有度上限（移除）。
 /// </summary>
 internal static class MoreEnchantStackPatch
 {
@@ -17,11 +17,6 @@ internal static class MoreEnchantStackPatch
     private const string TargetType = "MoreEnchantStack";
 
     private static readonly AppliedFlag Applied = new();
-
-    private sealed class AppliedFlag
-    {
-        public bool Value;
-    }
 
     public static void Apply(Harmony harmony)
     {
@@ -58,7 +53,7 @@ internal static class MoreEnchantStackPatch
             return;
         }
 
-        harmony.Patch(method, prefix: new HarmonyMethod(typeof(MoreEnchantStackPatch), nameof(CanApply_Prefix)));
+        harmony.Patch(method, new HarmonyMethod(typeof(MoreEnchantStackPatch), nameof(CanApply_Prefix)));
         Log.Info($"[{ModId}] MoreEnchant patch: CanApply (Prefix, unrestricted)");
     }
 
@@ -77,5 +72,10 @@ internal static class MoreEnchantStackPatch
 
         __result = true;
         return false;
+    }
+
+    private sealed class AppliedFlag
+    {
+        public bool Value;
     }
 }

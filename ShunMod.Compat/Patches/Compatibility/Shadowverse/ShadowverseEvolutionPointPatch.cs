@@ -6,10 +6,10 @@ using ShunMod.Core.Core;
 namespace ShunMod.Compat.Patches.Compatibility.Shadowverse;
 
 /// <summary>
-/// 影之诗模组兼容 — 进化点系统全解除。
-/// 进化流程：Initialize → TryUseEvolvePoint → MarkEvolveUsedThisTurn → GetEvolveUsedThisTurn
-/// Patch 策略：Initialize 改初始值 1（UI 展示用），TryUse 跳过（不消耗），Mark 跳过（解回合限制）。
-/// 不 patch GetEvolveUsedThisTurn，保留给其他卡牌做进化检测。
+///     影之诗模组兼容 — 进化点系统全解除。
+///     进化流程：Initialize → TryUseEvolvePoint → MarkEvolveUsedThisTurn → GetEvolveUsedThisTurn
+///     Patch 策略：Initialize 改初始值 1（UI 展示用），TryUse 跳过（不消耗），Mark 跳过（解回合限制）。
+///     不 patch GetEvolveUsedThisTurn，保留给其他卡牌做进化检测。
 /// </summary>
 public static class ShadowverseEvolutionPointPatch
 {
@@ -23,23 +23,23 @@ public static class ShadowverseEvolutionPointPatch
         if (evoType == null) return;
 
         PatchMethod(harmony, evoType, "Initialize",
-            prefixType: typeof(ShadowverseEvolutionPointPatch),
-            prefixName: nameof(Initialize_Prefix));
+            typeof(ShadowverseEvolutionPointPatch),
+            nameof(Initialize_Prefix));
 
         PatchMethod(harmony, evoType, "TryUseEvolvePoint",
-            prefixType: typeof(ShadowverseEvolutionPointPatch),
-            prefixName: nameof(TryUse_Prefix));
+            typeof(ShadowverseEvolutionPointPatch),
+            nameof(TryUse_Prefix));
         PatchMethod(harmony, evoType, "TryUseSuperEvolvePoint",
-            prefixType: typeof(ShadowverseEvolutionPointPatch),
-            prefixName: nameof(TryUse_Prefix));
+            typeof(ShadowverseEvolutionPointPatch),
+            nameof(TryUse_Prefix));
 
         // 解回合限制，不 patch GetEvolveUsedThisTurn
         PatchMethod(harmony, evoType, "MarkEvolveUsedThisTurn",
-            prefixType: typeof(ShadowverseEvolutionPointPatch),
-            prefixName: nameof(Skip_Prefix));
+            typeof(ShadowverseEvolutionPointPatch),
+            nameof(Skip_Prefix));
         PatchMethod(harmony, evoType, "MarkSuperEvolveUsedThisTurn",
-            prefixType: typeof(ShadowverseEvolutionPointPatch),
-            prefixName: nameof(Skip_Prefix));
+            typeof(ShadowverseEvolutionPointPatch),
+            nameof(Skip_Prefix));
     }
 
     [SuppressMessage("ReSharper", "RedundantAssignment")]
@@ -57,7 +57,10 @@ public static class ShadowverseEvolutionPointPatch
         return false;
     }
 
-    private static bool Skip_Prefix() => false;
+    private static bool Skip_Prefix()
+    {
+        return false;
+    }
 
     private static void PatchMethod(Harmony harmony, Type type, string methodName,
         Type? prefixType = null, string? prefixName = null,
@@ -71,8 +74,8 @@ public static class ShadowverseEvolutionPointPatch
         }
 
         harmony.Patch(method,
-            prefix: prefixType != null ? new HarmonyMethod(prefixType, prefixName!) : null,
-            postfix: postfixType != null ? new HarmonyMethod(postfixType, postfixName!) : null);
+            prefixType != null ? new HarmonyMethod(prefixType, prefixName!) : null,
+            postfixType != null ? new HarmonyMethod(postfixType, postfixName!) : null);
 
         Log.Info($"[{ModId}] EvolutionPoint: {methodName} patched");
     }

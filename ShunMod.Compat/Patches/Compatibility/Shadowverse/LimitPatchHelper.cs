@@ -6,23 +6,17 @@ using ShunMod.Core.Core;
 namespace ShunMod.Compat.Patches.Compatibility.Shadowverse;
 
 /// <summary>
-/// 限制解除补丁的共享实现，合并 SkinLimit(14) 和 BgLimit(7) 的重复代码。
-///
-/// 设计选择：
-/// - Transpiler 而非 Prefix：SetEnabled 内部涉及 _preferences 字典修改和 LoadPack，
-///   Prefix 跳过需要手动反射操作_ preferences，耦合内部实现。Transpiler 只替换上限常量，
-///   原方法逻辑完整保留。
-/// - AssemblyLoad 延迟加载：ShunMod 可能排在 Shadowverse 前面，Apply 时目标 DLL 可能
-///   尚未加载，订阅事件兜底。
-/// - AppliedFlag 而非 ref bool：局部函数捕获 ref 参数不被 C# 允许，引用类型包装解决。
+///     限制解除补丁的共享实现，合并 SkinLimit(14) 和 BgLimit(7) 的重复代码。
+///     设计选择：
+///     - Transpiler 而非 Prefix：SetEnabled 内部涉及 _preferences 字典修改和 LoadPack，
+///     Prefix 跳过需要手动反射操作_ preferences，耦合内部实现。Transpiler 只替换上限常量，
+///     原方法逻辑完整保留。
+///     - AssemblyLoad 延迟加载：ShunMod 可能排在 Shadowverse 前面，Apply 时目标 DLL 可能
+///     尚未加载，订阅事件兜底。
+///     - AppliedFlag 而非 ref bool：局部函数捕获 ref 参数不被 C# 允许，引用类型包装解决。
 /// </summary>
 internal static class LimitPatchHelper
 {
-    internal sealed class AppliedFlag
-    {
-        public bool Value;
-    }
-
     public static void Apply(
         Harmony harmony,
         string modId,
@@ -107,18 +101,30 @@ internal static class LimitPatchHelper
                 inst.opcode = OpCodes.Ldc_I4;
                 inst.operand = int.MaxValue;
             }
+
             yield return inst;
         }
     }
 
-    public static bool IsConstant7(CodeInstruction inst) =>
-        (inst.opcode == OpCodes.Ldc_I4_S || inst.opcode == OpCodes.Ldc_I4)
-        && inst.operand is 7;
+    public static bool IsConstant7(CodeInstruction inst)
+    {
+        return (inst.opcode == OpCodes.Ldc_I4_S || inst.opcode == OpCodes.Ldc_I4)
+               && inst.operand is 7;
+    }
 
-    public static bool IsConstant14(CodeInstruction inst) =>
-        (inst.opcode == OpCodes.Ldc_I4_S || inst.opcode == OpCodes.Ldc_I4)
-        && inst.operand is 14;
+    public static bool IsConstant14(CodeInstruction inst)
+    {
+        return (inst.opcode == OpCodes.Ldc_I4_S || inst.opcode == OpCodes.Ldc_I4)
+               && inst.operand is 14;
+    }
 
-    private static Type? FindType(string ns, string typeName) =>
-        CompatibilityPatchUtil.FindType(ns, typeName);
+    private static Type? FindType(string ns, string typeName)
+    {
+        return CompatibilityPatchUtil.FindType(ns, typeName);
+    }
+
+    internal sealed class AppliedFlag
+    {
+        public bool Value;
+    }
 }
