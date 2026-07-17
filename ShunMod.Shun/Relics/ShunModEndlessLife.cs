@@ -2,6 +2,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Relics;
+using MegaCrit.Sts2.Core.Factories;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
@@ -72,28 +73,27 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
         if (allCards.Count == 0)
             return;
 
-        // 逐张处理：消耗手牌 → 生成升级卡 → 加入手牌 → 首次免费
-        for (var i = 0; i < count; i++)
+        // 先逐张消耗（消耗动画快，不影响体验）
+        foreach (var card in selected)
+            await CardCmd.Exhaust(choiceContext, card);
+
+        // 批量生成卡牌，一步到位（单次动画）
+        var newCards = CardFactory.GetForCombat(
+            Owner, allCards, count,
+            Owner.RunState.Rng.CombatCardGeneration).ToList();
+
+        // 批量升级（无动画）
+        CardCmd.Upgrade(newCards, CardPreviewStyle.None);
+
+        // 首次打出免费
+        foreach (var card in newCards)
         {
-            // 消耗手牌（进消耗牌堆）
-            await CardCmd.Exhaust(choiceContext, selected[i]);
-
-            // 生成随机卡牌
-            var canonical = Owner.PlayerRng.Transformations.NextItem(allCards);
-            if (canonical == null) continue;
-            var newCard = Owner.Creature.CombatState!.CreateCard(canonical, Owner);
-
-            // 升级
-            if (newCard.IsUpgradable)
-                CardCmd.Upgrade(newCard);
-
-            // 首次打出免费（能量+星辉）
-            newCard.EnergyCost.SetUntilPlayed(0);
-            newCard.SetStarCostUntilPlayed(0);
-
-            // 加入手牌
-            await CardPileCmd.AddGeneratedCardToCombat(newCard, PileType.Hand, Owner);
+            card.EnergyCost.SetUntilPlayed(0);
+            card.SetStarCostUntilPlayed(0);
         }
+
+        // 批量加入手牌——单次飞入动画代替逐张
+        await CardPileCmd.Add(newCards, PileType.Hand);
 
         // 获得消耗数量的能量
         await PlayerCmd.GainEnergy(count, Owner);
