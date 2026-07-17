@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Models;
@@ -29,12 +30,12 @@ public static class InfiniteUpgradeMaxUpgrade
         var baseGetter = AccessTools.PropertyGetter(typeof(CardModel), nameof(CardModel.MaxUpgradeLevel));
         if (baseGetter != null) getters.Add(baseGetter);
 
-        foreach (var type in typeof(CardModel).Assembly.GetTypes())
-        {
-            if (type.IsAbstract || !typeof(CardModel).IsAssignableFrom(type)) continue;
-            var getter = AccessTools.PropertyGetter(type, nameof(CardModel.MaxUpgradeLevel));
-            if (getter != null && getter.DeclaringType == type) getters.Add(getter);
-        }
+        getters.AddRange(
+            typeof(CardModel).Assembly.GetTypes()
+                .Where(t => !t.IsAbstract && typeof(CardModel).IsAssignableFrom(t))
+                .Select(t => (type: t, getter: AccessTools.PropertyGetter(t, nameof(CardModel.MaxUpgradeLevel))))
+                .Where(x => x.getter?.DeclaringType == x.type)
+                .Select(x => x.getter!));
 
         return getters;
     }
