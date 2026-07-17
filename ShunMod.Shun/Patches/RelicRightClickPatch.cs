@@ -12,7 +12,6 @@ namespace ShunMod.Shun.Patches;
 
 // ReSharper disable UnusedType.Global — Harmony 反射调用
 // ReSharper disable UnusedMember.Local — Harmony 反射调用
-
 /// <summary>
 ///     NRelic 右键点击补丁 — 为 ShunMod 遗物添加右键交互。
 ///     在 NRelic._Ready 后连接 GuiInput 信号，检测右键点击 / 控制器取消键，

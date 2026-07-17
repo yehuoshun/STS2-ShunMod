@@ -13,7 +13,6 @@ using ShunMod.Shun.Base;
 namespace ShunMod.Shun.Relics;
 
 // ReSharper disable UnusedType.Global — 游戏框架通过反射/泛型基类实例化
-
 /// <summary>
 ///     生生不息 — 右键点击遗物触发。
 ///     消耗任意数量的手牌，每消耗一张生成随机已升级的卡牌（不分角色）加入手卡，
