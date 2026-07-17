@@ -73,6 +73,8 @@ ShunMod.Core          ← 基础框架，无依赖
 
 ## 编码约定
 
+> Rider 代码检查抑制规则详见 [`Rider.md`](./Rider.md)，修改代码前先读。
+
 - **命名空间**按模块：`ShunMod.Core.xxx` / `ShunMod.Shun.xxx` / `ShunMod.Tweaks.xxx` / `ShunMod.Compat.xxx`
 - **Harmony Patch** 类命名：`{功能}Patch`，放在 `Patches/` 目录下
 - **日志前缀**：`[ShunMod_Core]` / `[ShunMod_Shun]` / `[ShunMod_Tweaks]` / `[ShunMod_Compat]`
