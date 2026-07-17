@@ -6,10 +6,14 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   # ── 先构建 Core（其他模块依赖 Core） ────────────────────────────────────
   build-core:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -54,7 +58,7 @@ jobs:
   # ── 剩余模块并行构建 ────────────────────────────────────────────────────
   build-modules:
     needs: build-core
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         module:
@@ -142,7 +146,7 @@ jobs:
   # ── 汇总打包 ────────────────────────────────────────────────────────────
   package:
     needs: [build-core, build-modules]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
