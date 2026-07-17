@@ -2,7 +2,6 @@
 bin/
 /android/
 .git/
-.idea/
 .vs/
 publish/
 Properties/
