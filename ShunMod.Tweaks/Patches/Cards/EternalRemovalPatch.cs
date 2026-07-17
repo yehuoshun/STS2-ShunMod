@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Models;
 
@@ -10,24 +11,27 @@ namespace ShunMod.Tweaks.Patches.Cards;
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // ReSharper disable UnusedType.Global — Harmony 反射调用
-// ReSharper disable InconsistentNaming — Harmony __result 约定
-
+// ReSharper disable once RedundantAssignment
 [HarmonyPatch(typeof(CardModel), nameof(CardModel.IsRemovable), MethodType.Getter)]
 public static class EternalRemovablePatch
 {
     [HarmonyPostfix]
-    // ReSharper disable once RedundantAssignment
+    [SuppressMessage("ReSharper", "UnusedMember.Local")]
+    [SuppressMessage("ReSharper", "RedundantAssignment")]
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static void Postfix(ref bool __result)
     {
         __result = true;
     }
 }
 
+// ReSharper disable once RedundantAssignment
+// ReSharper disable once InconsistentNaming
 [HarmonyPatch(typeof(CardModel), nameof(CardModel.IsTransformable), MethodType.Getter)]
 public static class EternalTransformablePatch
 {
     [HarmonyPostfix]
-    // ReSharper disable once RedundantAssignment
+    [SuppressMessage("ReSharper", "UnusedMember.Local")]
     private static void Postfix(ref bool __result)
     {
         __result = true;
