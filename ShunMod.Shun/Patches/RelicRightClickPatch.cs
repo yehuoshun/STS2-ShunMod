@@ -61,7 +61,13 @@ internal static class RelicRightClickPatch
         {
             EnsureHotkeyRegistered();
             NHotkeyManager.Instance?.PushHotkeyPressedBinding(EndlessLifeHotkey, OnHotkeyPressed);
+            __instance.TreeExiting += () => OnRelicRemoved();
         }
+    }
+
+    private static void OnRelicRemoved()
+    {
+        NHotkeyManager.Instance?.RemoveHotkeyPressedBinding(EndlessLifeHotkey, OnHotkeyPressed);
     }
 
     private static void OnHotkeyPressed()
