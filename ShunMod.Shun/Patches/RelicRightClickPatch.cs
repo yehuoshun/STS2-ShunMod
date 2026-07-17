@@ -34,15 +34,9 @@ internal static class RelicRightClickPatch
 
         instance.SetMeta(MetaKey, true);
 
-        // 获取子 NRelic 节点
-        var relic = instance.Relic;
-        if (relic == null)
-            return;
-
         // Icon 和 Outline 默认 MouseFilter.Stop 会吃掉鼠标事件，GuiInput 到不了 holder
-        relic.Icon.MouseFilter = Control.MouseFilterEnum.Ignore;
-        if (relic.Outline != null)
-            relic.Outline.MouseFilter = Control.MouseFilterEnum.Ignore;
+        instance.Relic.Icon.MouseFilter = Control.MouseFilterEnum.Ignore;
+        instance.Relic.Outline.MouseFilter = Control.MouseFilterEnum.Ignore;
 
         // 在 holder 上监听 GuiInput（holder 是 NButton，NClickableControl._GuiInput 只处理左键，
         // 右键事件会触发 GuiInput 信号）
