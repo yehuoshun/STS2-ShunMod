@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Combat;
@@ -8,6 +9,9 @@ using MegaCrit.Sts2.Core.Nodes.Relics;
 using ShunMod.Shun.Relics;
 
 namespace ShunMod.Shun.Patches;
+
+// ReSharper disable UnusedType.Global — Harmony 反射调用
+// ReSharper disable UnusedMember.Local — Harmony 反射调用
 
 /// <summary>
 ///     NRelic 右键点击补丁 — 为 ShunMod 遗物添加右键交互。
@@ -20,6 +24,7 @@ internal static class RelicRightClickPatch
     private const string MetaKey = "shunmod_relic_right_click_bound";
 
     [HarmonyPostfix]
+    [SuppressMessage("ReSharper", "UnusedMember.Local")]
     private static void Postfix(NRelic instance)
     {
         if (instance.HasMeta(MetaKey))
