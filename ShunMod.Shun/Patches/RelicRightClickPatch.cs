@@ -1,11 +1,9 @@
-using System.Diagnostics.CodeAnalysis;
 using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.ControllerInput;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Helpers;
-using MegaCrit.Sts2.Core.Nodes.CommonUi;
 using MegaCrit.Sts2.Core.Nodes.Relics;
 using ShunMod.Shun.Relics;
 
@@ -23,14 +21,13 @@ internal static class RelicRightClickPatch
     private const string MetaKey = "shunmod_relic_right_click_bound";
 
     [HarmonyPostfix]
-    [SuppressMessage("ReSharper", "UnusedMember.Local")]
-    private static void Postfix(NRelic __instance)
+    private static void Postfix(NRelic instance)
     {
-        if (__instance.HasMeta(MetaKey))
+        if (instance.HasMeta(MetaKey))
             return;
 
-        __instance.SetMeta(MetaKey, true);
-        __instance.Connect(Control.SignalName.GuiInput, Callable.From((InputEvent inputEvent) => OnGuiInput(__instance, inputEvent)));
+        instance.SetMeta(MetaKey, true);
+        instance.Connect(Control.SignalName.GuiInput, Callable.From((InputEvent inputEvent) => OnGuiInput(instance, inputEvent)));
     }
 
     private static void OnGuiInput(NRelic relicNode, InputEvent inputEvent)
