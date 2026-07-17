@@ -12,6 +12,8 @@ using ShunMod.Shun.Base;
 
 namespace ShunMod.Shun.Relics;
 
+// ReSharper disable UnusedType.Global — 游戏框架通过反射/泛型基类实例化
+
 /// <summary>
 ///     生生不息 — 右键点击遗物触发。
 ///     消耗任意数量的手牌，每消耗一张生成随机已升级的卡牌（不分角色）加入手卡，
@@ -72,7 +74,7 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
         for (var i = 0; i < count; i++)
         {
             // 消耗手牌（进消耗牌堆）
-            await CardCmd.Exhaust(choiceContext, selected[i]!);
+            await CardCmd.Exhaust(choiceContext, selected[i]);
 
             // 生成随机卡牌
             var canonical = Owner.PlayerRng.Transformations.NextItem(allCards);
