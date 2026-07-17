@@ -49,7 +49,7 @@ public class ShunModStokeModified() : CardModel(1, CardType.Skill, CardRarity.Ra
 
         // 升级后：生成的牌自动升级
         if (IsUpgraded)
-            CardCmd.Upgrade(cards, CardPreviewStyle.None);
+            CardCmd.Upgrade(cards, CardUpgradePreviewType.None);
 
         await CardPileCmd.Add(
             cards, PileType.Hand);
