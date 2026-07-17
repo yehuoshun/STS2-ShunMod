@@ -36,7 +36,7 @@ public static class ShowTotalDamage
     [HarmonyPostfix]
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony __instance/__result 约定")]
     [SuppressMessage("ReSharper", "UnusedMember.Local")]
-    [SuppressMessage("ReSharper", "SpellingInStringLiteral", Justification = "#ffcc00 是有效的十六进制颜色代码")]
+    [SuppressMessage("ReSharper", "StringLiteralTypo", Justification = "#ffcc00 是有效的十六进制颜色代码")]
     private static void Postfix(CardModel __instance, ref string __result)
     {
         try

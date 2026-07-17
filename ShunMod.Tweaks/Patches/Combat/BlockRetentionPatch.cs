@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
@@ -17,7 +16,7 @@ public static class BlockRetentionClearBlockPatch
     private static MethodInfo? TargetMethod() =>
         AccessTools.Method(CreatureReflection.CreatureType, "ClearBlock");
 
-    [SuppressMessage("ReSharper", "RedundantAssignment", Justification = "Harmony Prefix 覆盖 __result 是正常用法")]
+    // ReSharper disable once RedundantAssignment
     private static bool Prefix(object __instance, ref Task __result)
     {
         if (!CreatureReflection.IsPlayer(__instance)) return true;
