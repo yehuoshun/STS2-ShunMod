@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
@@ -7,6 +8,7 @@ using ShunMod.Compat.Patches.Compatibility;
 namespace ShunMod.Compat;
 
 [ModInitializer(nameof(Initialize))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
 public static class ModEntry
 {
     /// <summary>ShunMod.Compat 日志前缀 / Harmony ID，供各模块统一引用。</summary>

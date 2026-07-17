@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
@@ -8,6 +9,7 @@ using ShunMod.Shun.Events;
 namespace ShunMod.Shun;
 
 [ModInitializer(nameof(Initialize))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
 public static class ModEntry
 {
     private const string ModId = "ShunMod_Shun";

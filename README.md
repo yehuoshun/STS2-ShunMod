@@ -65,9 +65,7 @@
 
 ## 事件
 
-| 名称 | 模块 | 说明 |
-|---|---|---|
-| 🏪 遗物交易所 | Shun | ①随机遗物换随机遗物 ②随机遗物换卡牌附魔 ③扣5HP刷新 ④退出。可反复交易直到退出 |
+> 当前无自定义事件。`ShunModEventRegistry` 保留事件框架，后续添加事件只需继承 `ShunEventModel` + 标记 `[EventPool]`。
 
 ---
 
@@ -117,10 +115,10 @@ STS2-ShunMod/
 │   │   └── ShunModSuperApotheosis.cs   # 超级神化
 │   ├── Relics/
 │   │   ├── ShunModBossTrophy.cs        # 首领奖杯
-│   │   ├── ShunModBountifulFrond.cs    # 丰饶叶
-│   │   └── ShunModInfiniteGirya.cs     # 无限壶铃
+│   ├── ShunModBountifulFrond.cs    # 丰饶叶
+│   ├── ShunModEndlessLife.cs       # 生生不息
+│   └── ShunModInfiniteGirya.cs     # 无限壶铃
 │   └── Events/
-│       ├── ShunModRelicExchange.cs     # 遗物交易所
 │       └── ShunModEventRegistry.cs     # 事件注册 + 注入补丁
 │
 ├── ShunMod.Tweaks/                     # 数值/机制修改
