@@ -79,7 +79,7 @@ ShunMod.Core          ← 基础框架，无依赖
 
 ## 编码约定
 
-> Rider 代码检查抑制规则详见 [`Rider.md`](./Rider.md)，修改代码前先读。
+> Rider 代码检查规则（SuppressMessage、Harmony 命名约定等）详见 [`Rider.md`](./Rider.md)，修改代码前先读。
 
 - **命名空间**按模块：`ShunMod.Core.xxx` / `ShunMod.Shun.xxx` / `ShunMod.Tweaks.xxx` / `ShunMod.Compat.xxx`
 - **Harmony Patch** 类命名：`{功能}Patch`，放在 `Patches/` 目录下
@@ -95,8 +95,6 @@ ShunMod.Core          ← 基础框架，无依赖
   if (FindType(ns, type) is not { } t) return;
   DoSomething(t);
   ```
-- **Harmony 参数抑制**：`__instance`/`__result`/`__exception` 必须配 `[SuppressMessage("ReSharper", "InconsistentNaming")]`
-- **禁止 `// ReSharper disable All`**：用具体 `[SuppressMessage]` 替代
 - **每次修改后必须 `git commit + push`**，commit message 用中文
 
 ---
