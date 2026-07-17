@@ -120,9 +120,7 @@ internal static class InfiniteUpgradeSafety
         if (card == null) return level;
 
         var originalMax = Math.Max(0, card.MaxUpgradeLevel);
-        if (level <= originalMax) return level;
-
-        if (CanUseUnlimitedGrowth(card, originalMax)) return level;
+        if (level <= originalMax || CanUseUnlimitedGrowth(card, originalMax)) return level;
 
         save.CurrentUpgradeLevel = originalMax;
         return originalMax;
