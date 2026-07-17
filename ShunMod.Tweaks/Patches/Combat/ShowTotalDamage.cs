@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Models;
@@ -49,8 +50,8 @@ public static class ShowTotalDamage
 
             var perHitTruncated = (int)perHit;
             var total = perHitTruncated * totalHits;
-            var perHitStr = perHitTruncated.ToString();
-            var totalStr = total.ToString();
+            var perHitStr = perHitTruncated.ToString(CultureInfo.InvariantCulture);
+            var totalStr = total.ToString(CultureInfo.InvariantCulture);
             var lang = SaveManager.Instance.SettingsSave.Language;
             var label = lang == "zhs"
                 ? $"({perHitStr} × {totalHits} = {totalStr} 总伤害)"
