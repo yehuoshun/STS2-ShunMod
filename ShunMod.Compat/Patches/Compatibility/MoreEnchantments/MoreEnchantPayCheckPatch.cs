@@ -1,4 +1,4 @@
-using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
@@ -77,7 +77,8 @@ internal static class MoreEnchantPayCheckPatch
     /// 使 MoreEnchantPayCheckPatch.OnCardClicked Prefix 中的
     /// <c>num &gt;= maxEnchantments</c> 检查永远无法触发。
     /// </summary>
-    // ReSharper disable once RedundantAssignment
+    [SuppressMessage("ReSharper", "RedundantAssignment")]
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static void GetMaxEnchantments_Postfix(ref int __result)
     {
         __result = int.MaxValue;
