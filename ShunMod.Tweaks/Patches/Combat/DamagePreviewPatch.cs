@@ -44,9 +44,8 @@ public static class DamagePreview
     {
         var combat = CombatManager.Instance;
         if (combat == null || !combat.IsInProgress) return;
-        if (combat._state == null) return;
-
-        var state = combat._state;
+        var state = CombatManager.Instance.DebugOnlyGetState();
+        if (state == null) return;
 
         // 玩家
         foreach (var pc in state.PlayerCreatures)

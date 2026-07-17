@@ -80,16 +80,8 @@ public class EnchantRestSiteOption(Player owner) : RestSiteOption(owner)
 
         var card = cards[0];
 
-        // 手动处理：已有同类型附魔则叠加，否则直接附魔
-        var enchantment = _cachedEnchantment.ToMutable();
-        if (card.Enchantment?.GetType() == enchantment.GetType())
-        {
-            card.Enchantment.Amount += EnchantStacks;
-        }
-        else
-        {
-            CardCmd.Enchant(enchantment, card, EnchantStacks);
-        }
+        // CardCmd.Enchant 内部自动处理同类型叠加 + 记录历史
+        CardCmd.Enchant(_cachedEnchantment.ToMutable(), card, EnchantStacks);
 
         return true;
     }
