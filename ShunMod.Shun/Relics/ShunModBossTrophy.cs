@@ -21,7 +21,7 @@ public sealed class ShunModBossTrophy : ShunRelicModel<ShunModBossTrophy>
 
     public override bool TryModifyRewards(Player player, List<Reward> rewards, AbstractRoom? room)
     {
-        if (player != Owner || room == null || room.RoomType != RoomType.Boss)
+        if (player != Owner || room is not { RoomType: RoomType.Boss })
             return false;
 
         Flash();
