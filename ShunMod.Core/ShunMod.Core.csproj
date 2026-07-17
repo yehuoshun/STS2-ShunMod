@@ -17,7 +17,7 @@
         <NoWarn>$(NoWarn);MSB3270</NoWarn>
     </PropertyGroup>
 
-    <ItemGroup Condition="Exists('$(Sts2DataDir)/sts2.dll')" >
+    <ItemGroup Condition="Exists('$(Sts2DataDir)/sts2.dll')">
         <Reference Include="0Harmony">
             <HintPath>$(Sts2DataDir)/0Harmony.dll</HintPath>
             <Private>false</Private>
@@ -29,7 +29,7 @@
     </ItemGroup>
 
     <ItemGroup Condition="'$(PublicizeSts)' != 'false'">
-        <Publicize Include="sts2" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
+        <Publicize Include="sts2" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -41,17 +41,17 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="..\.gitignore" />
-        <None Include="ShunMod_Core.json" />
+        <None Include="..\.gitignore"/>
+        <None Include="ShunMod_Core.json"/>
     </ItemGroup>
 
     <Target Name="CheckDependencyPaths" BeforeTargets="CoreCompile">
-        <Error Text=" Slay the Spire 2 data not found at path '$(Sts2DataDir)'" Condition="'$(Sts2DataDir)' == '' or !Exists('$(Sts2DataDir)/sts2.dll')" />
+        <Error Text=" Slay the Spire 2 data not found at path '$(Sts2DataDir)'" Condition="'$(Sts2DataDir)' == '' or !Exists('$(Sts2DataDir)/sts2.dll')"/>
     </Target>
 
     <Target Name="CopyToModsFolderOnBuild" AfterTargets="PostBuildEvent">
-        <Message Text="Copying .dll and manifest to mods folder." Importance="high" />
-        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModsPath)$(AssemblyName)/" />
-        <Copy SourceFiles="ShunMod_Core.json" DestinationFolder="$(ModsPath)$(AssemblyName)/" />
+        <Message Text="Copying .dll and manifest to mods folder." Importance="high"/>
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModsPath)$(AssemblyName)/"/>
+        <Copy SourceFiles="ShunMod_Core.json" DestinationFolder="$(ModsPath)$(AssemblyName)/"/>
     </Target>
 </Project>

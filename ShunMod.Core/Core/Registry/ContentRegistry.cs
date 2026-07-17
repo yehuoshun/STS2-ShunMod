@@ -12,6 +12,7 @@ public static class ContentRegistry
 {
     /// <summary>事件类型回调 — 由 Shun 项目的 ModEntry 设置。</summary>
     public static Action<Type>? OnEventTypeFound { get; set; }
+
     /// <summary>
     ///     扫描程序集中所有非抽象类，按特性类型分别注册。
     ///     用 else if 链而非 continue 是为了显式表达三者互斥：

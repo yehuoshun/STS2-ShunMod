@@ -17,10 +17,18 @@ public static class CreatureReflection
     private static readonly PropertyInfo? IsPlayerProperty =
         AccessTools.Property(CreatureType, "IsPlayer");
 
-    public static int GetBlock(object creature) => BlockProperty?.GetValue(creature) as int? ?? 0;
+    public static int GetBlock(object creature)
+    {
+        return BlockProperty?.GetValue(creature) as int? ?? 0;
+    }
 
-    public static void SetBlock(object creature, int value) => BlockProperty?.SetValue(creature, value);
+    public static void SetBlock(object creature, int value)
+    {
+        BlockProperty?.SetValue(creature, value);
+    }
 
-    public static bool IsPlayer(object? creature) =>
-        creature != null && IsPlayerProperty?.GetValue(creature) is true;
+    public static bool IsPlayer(object? creature)
+    {
+        return creature != null && IsPlayerProperty?.GetValue(creature) is true;
+    }
 }
