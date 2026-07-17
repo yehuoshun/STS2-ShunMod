@@ -54,7 +54,7 @@ internal static class RelicRightClickPatch
             return;
 
         var relic = holder.Relic;
-        if (relic?.Model is not ShunModEndlessLife endlessLife)
+        if (relic.Model is not ShunModEndlessLife endlessLife)
             return;
 
         var combat = CombatManager.Instance;
