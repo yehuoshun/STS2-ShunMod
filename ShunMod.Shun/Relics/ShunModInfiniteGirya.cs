@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
@@ -22,6 +23,7 @@ namespace ShunMod.Shun.Relics;
 ///     无限壶铃 — 基于原版 Girya，去掉 maxLifts=3 限制，休息处无限举重获得力量。
 /// </summary>
 [RelicPool(typeof(SharedRelicPool))]
+[SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
 public sealed class ShunModInfiniteGirya : ShunRelicModel<ShunModInfiniteGirya>
 {
     private int _timesLifted;
