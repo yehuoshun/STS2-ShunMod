@@ -12,24 +12,19 @@ namespace ShunMod.Tweaks.Patches.RestSite;
 /// <summary>
 ///     休息处附魔：选一张牌，施加预选附魔（层数5）。已附魔的牌会被替换或叠加。
 /// </summary>
-public class EnchantRestSiteOption : RestSiteOption
+public class EnchantRestSiteOption(Player owner) : RestSiteOption(owner)
 {
     public override string OptionId => "ENCHANT";
 
     /// <summary>
     ///     预选的附魔，在构造时随机决定，显示在选项描述中。
     /// </summary>
-    private readonly EnchantmentModel _cachedEnchantment;
+    private readonly EnchantmentModel _cachedEnchantment = RollRandomEnchantment(owner);
 
     /// <summary>
     ///     附魔层数，默认 5 层。
     /// </summary>
     private const int EnchantStacks = 5;
-
-    public EnchantRestSiteOption(Player owner) : base(owner)
-    {
-        _cachedEnchantment = RollRandomEnchantment(owner);
-    }
 
     private const string CustomDescKey = "shunmod_enchant_custom_desc";
     private static bool _localizationAdded;
@@ -76,16 +71,16 @@ public class EnchantRestSiteOption : RestSiteOption
             Cancelable = true
         };
 
-        var selected = await CardSelectCmd.FromDeckGeneric(
+        var cards = (await CardSelectCmd.FromDeckGeneric(
             Owner,
             prefs,
             card => card.Type != CardType.Curse
-                    && card.Type != CardType.Status);
+                    && card.Type != CardType.Status)).ToList();
 
-        if (!selected.Any())
+        if (cards.Count == 0)
             return false;
 
-        var card = selected.First();
+        var card = cards[0];
 
         // 手动处理：已有同类型附魔则叠加，否则直接附魔
         var enchantment = _cachedEnchantment.ToMutable();
