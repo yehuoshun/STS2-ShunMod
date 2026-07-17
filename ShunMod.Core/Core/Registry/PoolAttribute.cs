@@ -17,5 +17,3 @@ public class RelicPoolAttribute(Type poolType) : Attribute
 {
     public Type PoolType { get; } = poolType;
 }
-
-

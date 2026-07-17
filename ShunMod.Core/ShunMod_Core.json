@@ -3,7 +3,7 @@
   "name": "ShunMod Core",
   "author": "yehuoshun",
   "description": "ShunMod shared framework",
-  "version": "v0.0.27",
+  "version": "v0.0.28",
   "has_pck": false,
   "has_dll": true,
   "affects_gameplay": true
