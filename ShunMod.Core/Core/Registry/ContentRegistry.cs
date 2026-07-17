@@ -1,5 +1,6 @@
 using System.Reflection;
 using MegaCrit.Sts2.Core.Logging;
+using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Modding;
 
 namespace ShunMod.Core.Core.Registry;
@@ -25,6 +26,7 @@ public static class ContentRegistry
             var cardAttr = type.GetCustomAttribute<CardPoolAttribute>();
             if (cardAttr != null)
             {
+                ModelDb.Inject(type);
                 ModHelper.AddModelToPool(cardAttr.PoolType, type);
                 cardCount++;
                 continue;
@@ -32,6 +34,7 @@ public static class ContentRegistry
 
             var relicAttr = type.GetCustomAttribute<RelicPoolAttribute>();
             if (relicAttr == null) continue;
+            ModelDb.Inject(type);
             ModHelper.AddModelToPool(relicAttr.PoolType, type);
             relicCount++;
         }
