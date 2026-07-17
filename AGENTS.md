@@ -22,7 +22,7 @@ ShunMod.Core          ← 基础框架，无依赖
   └── ShunMod.Compat  ← 引用 Core，第三方模组兼容
 ```
 
-**各模块初始化流程**：`ModEntry.Initialize()` → 创建 Harmony 实例 → `PatchAll()` → （Shun 额外走 ContentRegistry 注册内容）
+**各模块初始化流程**：`ModEntry.Initialize()` → `new Harmony(ModId)` → `PatchAll()` → （Shun 额外走 ContentRegistry 注册内容）
 
 ---
 
@@ -69,6 +69,12 @@ ShunMod.Core          ← 基础框架，无依赖
 - 统一入口 `CompatibilityPatches.ApplyAll()`，按类型分组
 - 每个补丁类有独立的 `Apply(Harmony)` 静态方法
 
+### 共享补丁模式（LimitPatchHelper）
+
+- `BgLimitPatch` / `SkinLimitPatch` 共用 `LimitPatchHelper` 的 Transpiler 模式
+- `AppliedFlag` 包装 bool 解决闭包捕获限制（C# 不允许局部函数捕获 ref 参数）
+- `OnAssemblyLoad` 延迟加载兜底：目标模组 DLL 未加载时订阅 AssemblyLoad 事件
+
 ---
 
 ## 编码约定
@@ -77,32 +83,35 @@ ShunMod.Core          ← 基础框架，无依赖
 
 - **命名空间**按模块：`ShunMod.Core.xxx` / `ShunMod.Shun.xxx` / `ShunMod.Tweaks.xxx` / `ShunMod.Compat.xxx`
 - **Harmony Patch** 类命名：`{功能}Patch`，放在 `Patches/` 目录下
-- **日志前缀**：`[ShunMod_Core]` / `[ShunMod_Shun]` / `[ShunMod_Tweaks]` / `[ShunMod_Compat]`
+- **日志前缀**：统一用 `ModId` 常量，不要 `HarmonyId` 别名或 `var id` 中间变量
 - **资源路径**：用 `ShunCard.PortraitPath<T>()` / `ShunRelic.IconPath<T>()` / `ShunModHelper.EventImagePath(type)` 生成，不要硬编码路径字符串
 - **ModEntry 单例**：每个模块的 `Initialize()` 有 `lock` 防重入
 - **事件图片**：`EventPortraitRedirectPatch` 有 Texture2D 缓存，改事件图片路径逻辑要看这里
-- **守卫优先，减少嵌套**：能提前 return 就别用 if 包。以下模式禁止：
+- **守卫优先，减少嵌套**：能提前 return 就别用 if 包。嵌套控制在 2 层以内。
   ```csharp
   // ❌ 不要
-  if (FindType(ns, type) is { } t)
-  {
-      DoSomething(t);
-  }
-  ```
-  ```csharp
+  if (FindType(ns, type) is { } t) { DoSomething(t); }
   // ✅ 要
   if (FindType(ns, type) is not { } t) return;
   DoSomething(t);
   ```
-  同理：`if (x != null) { ... }` → `if (x == null) return; ...`，
-  `if (!condition) { ... }` → `if (condition) return; ...`。
-  嵌套控制在 2 层以内。
+- **Harmony 参数抑制**：`__instance`/`__result`/`__exception` 必须配 `[SuppressMessage("ReSharper", "InconsistentNaming")]`
+- **禁止 `// ReSharper disable All`**：用具体 `[SuppressMessage]` 替代
+- **每次修改后必须 `git commit + push`**，commit message 用中文
 
 ---
 
 ## 构建
 
-构建由 GitHub Actions CI 自动触发，无需本地 build。
+### 本地 build
+
+- 全量：`dotnet build`（或 Rider 按 F9）
+- 单模块：`dotnet build ShunMod.Shun/ShunMod.Shun.csproj`
+- Rider 已配好 4 个独立 Build 配置（Build: Core/Shun/Tweaks/Compat），可添加到 Services 窗口管理
+
+### CI
+
+GitHub Actions 自动触发，无需本地 build。
 
 ---
 
@@ -113,3 +122,5 @@ ShunMod.Core          ← 基础框架，无依赖
 3. **ContentRegistry 的 else if 链**是刻意设计——一个类只能标记一种 Pool 类型，双重标记会被静默跳过。
 4. **事件图片缓存**在 `EventPortraitRedirectPatch` 是静态 Dictionary，不是线程安全的，但游戏主线程不会并发，所以安全。
 5. **Shun 模块的 .pck 打包**由 BSchneppe.StS2.PckPacker 在构建后自动执行，改 assets 后要重新 build。
+6. **AssemblyLoad 延迟加载**：兼容补丁的 `OnAssemblyLoad` 订阅了 `AppDomain.CurrentDomain.AssemblyLoad`，改 `Apply` 逻辑时注意取消订阅，防止内存泄漏。
+7. **Rider 独立模块 Build**：配置在 `.idea/runConfigurations/`，只有 build 不 run。添加到 Services 窗口后可单独 build 任意模块。
