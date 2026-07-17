@@ -5,15 +5,16 @@ namespace ShunMod.Shun.Helpers;
 /// <summary>
 ///     ShunMod 工具类 — 资源路径推导。
 /// </summary>
-public static class ShunModHelper
+public static partial class ShunModHelper
 {
     private const string ResourceRoot = "res://ShunMod_Shun/images";
     private const string ShunModCardsPath = "cards/shunCards";
 
     private const string ShunModRelicsPath = "relics/shunRelics";
 
-    // PascalCase → snake_case 编译正则（static readonly 实例化一次，RegexOptions.Compiled 加速匹配）
-    private static readonly Regex PascalToSnake = new("([a-z])([A-Z])", RegexOptions.Compiled);
+    // PascalCase → snake_case 生成正则（编译期生成，避免运行时编译开销）
+    [GeneratedRegex("([a-z])([A-Z])", RegexOptions.Compiled)]
+    private static partial Regex PascalToSnake { get; }
 
     /// <summary>类名 → snake_case（如 ShunModSuperApotheosis → shun_mod_super_apotheosis）</summary>
     private static string ClassToSnakeCase(Type type)
