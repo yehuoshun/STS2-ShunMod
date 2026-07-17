@@ -244,9 +244,7 @@ public static class DamagePreviewPatch
 
         ClearPlayerLabel();
         _playerLabel = CreateLabel($"-{netDamage}", 52);
-        _playerLabel.Modulate = block > 0
-            ? new Color(1.0f, 0.6f, 0.0f) // 橙色：有格挡不够
-            : new Color(1.0f, 0.1f, 0.1f); // 红色：纯伤害
+        _playerLabel.Modulate = new Color(1.0f, 0.1f, 0.1f);
 
         node.AddChild(_playerLabel);
         _playerLabel.Owner = node.Owner ?? node;
@@ -327,10 +325,7 @@ public static class DamagePreviewPatch
         if (node == null) return;
 
         var label = CreateLabel(text, 44);
-        // 颜色：多段攻击用橙色，单段用红色
-        label.Modulate = hitCount > 1
-            ? new Color(1.0f, 0.7f, 0.1f)
-            : new Color(1.0f, 0.1f, 0.1f);
+        label.Modulate = new Color(1.0f, 0.1f, 0.1f);
 
         node.AddChild(label);
         label.Owner = node.Owner ?? node;
