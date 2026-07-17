@@ -1,7 +1,5 @@
 using System.Text.RegularExpressions;
 using MegaCrit.Sts2.Core.Helpers;
-using MegaCrit.Sts2.Core.HoverTips;
-using MegaCrit.Sts2.Core.Models;
 
 namespace ShunMod.Shun.Helpers;
 
@@ -54,20 +52,6 @@ public static class ShunModHelper
     public static string EventImagePath(Type type)
     {
         return $"{ResourceRoot}/{ShunModEventsPath}/{ClassToSnakeCase(type)}.png";
-    }
-
-    // 未注册 Pool 的遗物直接访问 HoverTips 会抛 InvalidOperationException，吞掉防 UI 崩
-    /// <summary>安全获取遗物悬浮提示，捕获 Pool 缺失导致的异常。</summary>
-    public static List<IHoverTip> SafeRelicHoverTips(RelicModel relic)
-    {
-        try
-        {
-            return relic.HoverTips.ToList();
-        }
-        catch (InvalidOperationException)
-        {
-            return new List<IHoverTip>();
-        }
     }
 
     // 自定义事件 GetAssetPaths() 样板提取，替换默认路径为 mod 图片路径

@@ -65,7 +65,7 @@
 
 ## 事件
 
-> 当前无自定义事件。`ShunModEventRegistry` 保留事件框架，后续添加事件只需继承 `ShunEventModel` + 标记 `[EventPool]`。
+> 当前无自定义事件。`ShunModEventRegistry` 保留事件框架，后续添加事件只需继承 `EventModel` + 标记 `[EventPool]`，用 `ShunModHelper.ReplaceEventImage` 替换图片路径。
 
 ---
 
@@ -101,7 +101,6 @@ STS2-ShunMod/
 │       ├── ShunModHelper.cs            # 资源路径工具
 │       ├── ShunRelic.cs                # 遗物路径工具（静态泛型 helper）
 │       ├── ShunCard.cs                 # 卡牌肖像工具（静态泛型 helper）
-│       ├── ShunEvent.cs                # 事件基类
 │       ├── CompatibilityPatchUtil.cs   # 兼容补丁共享工具（类型查找/单例发现）
 │       └── CreatureReflection.cs       # Creature 反射工具（Block/IsPlayer）
 │
@@ -180,7 +179,7 @@ public class MyCard : CardModel
 
 `ShunMod.Shun/ModEntry.cs` 中的 `ContentRegistry.RegisterAll()` 在启动时扫描所有 `[CardPool]` / `[RelicPool]` / `[EventPool]` 类并注册到对应池。
 
-> 卡牌、遗物、事件分别对应 `[CardPool]`、`[RelicPool]`、`[EventPool]` 特性，路径工具类 `ShunCard` / `ShunRelic` / `ShunEvent` 自动生成资源路径。
+> 卡牌、遗物、事件分别对应 `[CardPool]`、`[RelicPool]`、`[EventPool]` 特性，路径工具类 `ShunCard` / `ShunRelic` 自动生成资源路径，`ShunModHelper.ReplaceEventImage` 替换事件图片路径。
 
 ### 添加新补丁
 
