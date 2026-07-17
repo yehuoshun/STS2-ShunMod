@@ -40,8 +40,6 @@ public class EnchantRestSiteOption(Player owner) : RestSiteOption(owner)
         var table = LocManager.Instance.GetTable("rest_site_ui");
         table.MergeWith(new Dictionary<string, string>
         {
-            ["OPTION_ENCHANT.name"] = "附魔",
-            ["OPTION_ENCHANT.prompt"] = "选择要附魔的牌",
             [CustomDescKey] = "为牌组中的一张牌施加 [gold]{enchantment}：{enchant_desc}[/gold]"
         });
     }
