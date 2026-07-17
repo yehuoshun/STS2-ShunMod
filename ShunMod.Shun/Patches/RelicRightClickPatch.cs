@@ -5,6 +5,7 @@ using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.ControllerInput;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Helpers;
+using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Nodes.Relics;
 using ShunMod.Shun.Relics;
 
@@ -46,15 +47,23 @@ internal static class RelicRightClickPatch
         if (relicNode.Model is not ShunModEndlessLife endlessLife)
             return;
 
-        if (!CombatManager.Instance.IsInProgress
-            || CombatManager.Instance.IsEnding
-            || CombatManager.Instance.PlayerActionsDisabled)
+        var combat = CombatManager.Instance;
+        if (combat == null || !combat.IsInProgress || combat.IsEnding)
             return;
 
         viewport.SetInputAsHandled();
 
-        var choiceContext = new BlockingPlayerChoiceContext();
-        TaskHelper.RunSafely(endlessLife.ExecuteRightClick(choiceContext));
+        try
+        {
+            var choiceContext = new BlockingPlayerChoiceContext();
+            TaskHelper.RunSafely(endlessLife.ExecuteRightClick(choiceContext));
+        }
+        catch (Exception e)
+        {
+            Log.Error($"[EndlessLife] 右键执行失败: {e.GetType().Name}: {e.Message}");
+            if (e.InnerException != null)
+                Log.Error($"[EndlessLife]   \u2192 inner: {e.InnerException.GetType().Name}: {e.InnerException.Message}");
+        }
     }
 
     private static bool TryGetTrigger(Control node, InputEvent inputEvent)

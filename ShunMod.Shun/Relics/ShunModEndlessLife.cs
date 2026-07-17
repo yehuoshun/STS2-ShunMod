@@ -42,6 +42,9 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
             Cancelable = true
         };
 
+        // 立即视觉反馈
+        Flash();
+
         var selected = (await CardSelectCmd.FromHand(
             choiceContext,
             Owner,
@@ -52,7 +55,6 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
         if (selected.Count == 0)
             return;
 
-        Flash();
         var count = selected.Count;
 
         // 获取所有可生成的卡牌池
