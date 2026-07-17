@@ -13,7 +13,7 @@ namespace ShunMod.Tweaks.Patches.Combat;
 [HarmonyPatch]
 public static class BlockRetentionClearBlockPatch
 {
-    private static MethodBase TargetMethod() =>
+    private static MethodInfo? TargetMethod() =>
         AccessTools.Method(CreatureReflection.CreatureType, "ClearBlock");
 
     private static bool Prefix(object __instance, ref Task __result)
@@ -28,7 +28,7 @@ public static class BlockRetentionClearBlockPatch
 [HarmonyPatch]
 public static class BlockRetentionPrepareForNextTurnPatch
 {
-    private static MethodBase TargetMethod() =>
+    private static MethodInfo? TargetMethod() =>
         AccessTools.Method(CreatureReflection.CreatureType, "PrepareForNextTurn");
 
     private static void Prefix(object __instance, ref int __state)

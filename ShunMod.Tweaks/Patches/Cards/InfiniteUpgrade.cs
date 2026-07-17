@@ -17,14 +17,14 @@ public static class InfiniteUpgradeMaxUpgrade
     private const int UpgradeCap = 99;
 
     // 缓存所有 CardModel 子类的 MaxUpgradeLevel getter（200+ 类型，只扫一次）
-    // Harmony 对 TargetMethods() 只迭代一次，List<MethodBase> 无影响
-    private static readonly List<MethodBase> TargetGetterCache = BuildTargetGetters();
+    // Harmony 对 TargetMethods() 只迭代一次，List<MethodInfo> 无影响
+    private static readonly List<MethodInfo> TargetGetterCache = BuildTargetGetters();
 
-    private static IEnumerable<MethodBase> TargetMethods() => TargetGetterCache;
+    private static IEnumerable<MethodInfo> TargetMethods() => TargetGetterCache;
 
-    private static List<MethodBase> BuildTargetGetters()
+    private static List<MethodInfo> BuildTargetGetters()
     {
-        var getters = new List<MethodBase>();
+        var getters = new List<MethodInfo>();
 
         var baseGetter = AccessTools.PropertyGetter(typeof(CardModel), nameof(CardModel.MaxUpgradeLevel));
         if (baseGetter != null) getters.Add(baseGetter);
