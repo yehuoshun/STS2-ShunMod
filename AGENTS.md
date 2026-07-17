@@ -33,6 +33,7 @@ ShunMod.Core          ← 基础框架，无依赖
 | 加新卡牌 | `ShunMod.Shun/Cards/` 新建类，继承 `CardModel`，加 `[CardPool]` 特性 |
 | 加新遗物 | `ShunMod.Shun/Relics/` 新建类，继承 `RelicModel`，加 `[RelicPool]` 特性 |
 | 加新事件 | `ShunMod.Shun/Events/` 新建类，继承 `EventModel`，加 `[EventPool]` 特性 |
+| 加休息处选项 | `ShunMod.Shun/RestSite/` 新建类，继承 `RestSiteOption` + Patch `RestSiteOption.Generate` |
 | 加游戏机制修改 | `ShunMod.Tweaks/Patches/` 新建 Harmony Patch 类 |
 | 加第三方兼容 | `ShunMod.Compat/Patches/Compatibility/` 新建类，在 `CompatibilityPatches.ApplyAll()` 中注册 |
 | 改 Core 框架工具 | `ShunMod.Core/Core/` 下对应工具类 |

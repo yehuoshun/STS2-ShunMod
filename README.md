@@ -50,6 +50,7 @@
 | ⚔️ 锻造拉回 | Tweaks | 所有锻造行为自动将非手牌的君王之剑拉回手牌。 |
 | ⚡ 能量保留 | Tweaks | 回合开始时能量不清零，剩余能量累积（冰激凌逻辑）。 |
 | 🖱️ 遗物右键交互 | Shun | 为 ShunMod 遗物添加右键点击支持（GuiInput 信号）。 |
+| ✨ 休息处附魔 | Shun | 休息处增加「附魔」选项，随机选一种附魔施加到牌组中的一张牌上。 |
 
 ## 兼容性补丁
 
@@ -116,6 +117,9 @@ STS2-ShunMod/
 │   ├── ShunModBountifulFrond.cs    # 丰饶叶
 │   ├── ShunModEndlessLife.cs       # 生生不息
 │   └── ShunModInfiniteGirya.cs     # 无限壶铃
+│   ├── RestSite/
+│   │   ├── EnchantRestSiteOption.cs    # 休息处附魔选项
+│   │   └── EnchantRestSitePatch.cs     # 注入 Generate 方法
 │   └── Events/
 │       └── （框架预留）
 │
