@@ -63,6 +63,7 @@ internal static class MoreEnchantStackPatch
     }
 
     [SuppressMessage("ReSharper", "RedundantAssignment")]
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static bool CanApply_Prefix(
         CardModel card,
         EnchantmentModel canonical,

@@ -50,6 +50,7 @@ public static class ShadowverseEvolutionPointPatch
     }
 
     [SuppressMessage("ReSharper", "RedundantAssignment")]
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static bool TryUse_Prefix(ref bool __result)
     {
         __result = true;
