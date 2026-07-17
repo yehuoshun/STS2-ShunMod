@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Threading;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
@@ -11,7 +10,7 @@ namespace ShunMod.Shun;
 [ModInitializer(nameof(Initialize))]
 public static class ModEntry
 {
-    private const string HarmonyId = "ShunMod_Shun";
+    private const string ModId = "ShunMod_Shun";
     private static readonly Lock Lock = new();
     private static bool _initialized;
     private static Harmony? _harmony;
@@ -24,21 +23,20 @@ public static class ModEntry
             _initialized = true;
         }
 
-        var id = "ShunMod_Shun";
-        Log.Info($"[{id}] ============================================================");
-        Log.Info($"[{id}] Initializing {id}");
+        Log.Info($"[{ModId}] ============================================================");
+        Log.Info($"[{ModId}] Initializing {ModId}");
 
-        _harmony = new Harmony(HarmonyId);
+        _harmony = new Harmony(ModId);
         try
         {
             _harmony.PatchAll(Assembly.GetExecutingAssembly());
-            Log.Info($"[{id}] Harmony patches installed successfully");
+            Log.Info($"[{ModId}] Harmony patches installed successfully");
         }
         catch (Exception e)
         {
-            Log.Error($"[{id}] Harmony patching failed: {e.GetType().Name}: {e.Message}");
+            Log.Error($"[{ModId}] Harmony patching failed: {e.GetType().Name}: {e.Message}");
             if (e.InnerException != null)
-                Log.Error($"[{id}]   \u2192 inner: {e.InnerException.GetType().Name}: {e.InnerException.Message}");
+                Log.Error($"[{ModId}]   \u2192 inner: {e.InnerException.GetType().Name}: {e.InnerException.Message}");
         }
 
         // Phase 2: Set up ContentRegistry callback for event registration
@@ -47,9 +45,7 @@ public static class ModEntry
         // Phase 3: Content registration
         ContentRegistry.RegisterAll(Assembly.GetExecutingAssembly());
 
-        Log.Info($"[{id}] Initialization complete");
-        Log.Info($"[{id}] ============================================================");
+        Log.Info($"[{ModId}] Initialization complete");
+        Log.Info($"[{ModId}] ============================================================");
     }
-
-
 }

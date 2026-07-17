@@ -10,7 +10,7 @@ namespace ShunMod.Tweaks;
 [SuppressMessage("ReSharper", "UnusedType.Global")]
 public static class ModEntry
 {
-    private const string HarmonyId = "ShunMod_Tweaks";
+    private const string ModId = "ShunMod_Tweaks";
     private static readonly Lock Lock = new();
     private static bool _initialized;
     private static Harmony? _harmony;
@@ -23,23 +23,23 @@ public static class ModEntry
             _initialized = true;
         }
 
-        Log.Info($"[{HarmonyId}] ============================================================");
-        Log.Info($"[{HarmonyId}] Initializing {HarmonyId}");
+        Log.Info($"[{ModId}] ============================================================");
+        Log.Info($"[{ModId}] Initializing {ModId}");
 
-        _harmony = new Harmony(HarmonyId);
+        _harmony = new Harmony(ModId);
         try
         {
             _harmony.PatchAll(Assembly.GetExecutingAssembly());
-            Log.Info($"[{HarmonyId}] Harmony patches installed successfully");
+            Log.Info($"[{ModId}] Harmony patches installed successfully");
         }
         catch (Exception e)
         {
-            Log.Error($"[{HarmonyId}] Harmony patching failed: {e.GetType().Name}: {e.Message}");
+            Log.Error($"[{ModId}] Harmony patching failed: {e.GetType().Name}: {e.Message}");
             if (e.InnerException != null)
-                Log.Error($"[{HarmonyId}]   \u2192 inner: {e.InnerException.GetType().Name}: {e.InnerException.Message}");
+                Log.Error($"[{ModId}]   \u2192 inner: {e.InnerException.GetType().Name}: {e.InnerException.Message}");
         }
 
-        Log.Info($"[{HarmonyId}] Initialization complete");
-        Log.Info($"[{HarmonyId}] ============================================================");
+        Log.Info($"[{ModId}] Initialization complete");
+        Log.Info($"[{ModId}] ============================================================");
     }
 }
