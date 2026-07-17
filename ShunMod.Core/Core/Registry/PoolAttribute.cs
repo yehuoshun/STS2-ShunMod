@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace ShunMod.Core.Core.Registry;
 
 /// <summary>
@@ -20,8 +22,10 @@ public class RelicPoolAttribute(Type poolType) : Attribute
 
 /// <summary>
 ///     标记自定义事件。ContentRegistry 扫描后收集类型，由 ShunModEventRegistry 注册。
+///     当前无事件使用，作为框架预留保留。
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
+[SuppressMessage("ReSharper", "UnusedType.Global", Justification = "框架预留: 未来事件类标记[EventPool]时使用, ContentRegistry反射扫描")]
 public class EventPoolAttribute : Attribute
 {
 }
