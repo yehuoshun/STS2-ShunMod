@@ -2,11 +2,13 @@ using System.Diagnostics.CodeAnalysis;
 using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Combat;
+using MegaCrit.Sts2.Core.Context;
+using MegaCrit.Sts2.Core.Nodes.Combat;
 using MegaCrit.Sts2.Core.ControllerInput;
-using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.Helpers;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Nodes.Relics;
+using MegaCrit.Sts2.Core.Runs;
 using ShunMod.Shun.Relics;
 
 namespace ShunMod.Shun.Patches;
@@ -54,23 +56,25 @@ internal static class RelicRightClickPatch
             return;
 
         var combat = CombatManager.Instance;
-        if (combat == null || !combat.IsInProgress || combat.IsEnding)
+        if (!combat.IsInProgress || combat.IsEnding)
+            return;
+
+        // 选目标中不触发右键
+        if (NTargetManager.Instance?.IsInSelection == true)
+            return;
+
+        // 只响应本地玩家
+        if (endlessLife.Owner == null || !LocalContext.IsMe(endlessLife.Owner))
             return;
 
         viewport.SetInputAsHandled();
 
-        try
-        {
-            var choiceContext = new BlockingPlayerChoiceContext();
-            TaskHelper.RunSafely(endlessLife.ExecuteRightClick(choiceContext));
-        }
-        catch (Exception e)
-        {
-            Log.Error($"[EndlessLife] 右键执行失败: {e.GetType().Name}: {e.Message}");
-            if (e.InnerException != null)
-                Log.Error(
-                    $"[EndlessLife]   \u2192 inner: {e.InnerException.GetType().Name}: {e.InnerException.Message}");
-        }
+        var player = LocalContext.GetMe(endlessLife.Owner.RunState);
+        if (player == null)
+            return;
+
+        var action = new EndlessLifeRightClickAction(player, endlessLife);
+        RunManager.Instance.ActionQueueSynchronizer.RequestEnqueue(action);
     }
 
     private static bool TryGetTrigger(Control node, InputEvent inputEvent)
