@@ -187,7 +187,7 @@ public static class DamagePreview
         var cid = enemy.CombatId.Value;
 
         if (EnemyLabels.TryGetValue(cid, out var existing) && IsValid(existing)
-                                                           && existing.Text == text
+                                                           && existing.Text == text)
             return;
 
         RemoveEnemyLabel(enemy);
