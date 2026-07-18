@@ -106,6 +106,9 @@ jobs:
           name: build-core
           path: build-core/
 
+      - name: Restore
+        run: dotnet restore ${{ matrix.module.proj }}
+
       - name: Place Core.dll for project reference
         run: |
           mkdir -p "${{ matrix.module.dir }}/.godot/mono/temp/bin/Release"
