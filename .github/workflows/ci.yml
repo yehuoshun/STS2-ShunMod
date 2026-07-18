@@ -7,10 +7,9 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  # ── 先构建 Core（其他模块依赖 Core） ────────────────────────────────────
+  build-core:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -43,10 +42,108 @@ jobs:
       - name: Restore
         run: dotnet restore STS2_ShunMod.sln
 
-      - name: Build all projects
-        run: dotnet build STS2_ShunMod.sln -c Release -p:Sts2DataDir="$(realpath deps)" --no-restore
+      - name: Build Core
+        run: |
+          dotnet build ShunMod.Core/ShunMod.Core.csproj \
+            -c Release \
+            -p:Sts2DataDir="$(realpath deps)" \
+            --no-restore
 
-      - name: Export .pck (Shun only)
+      - name: Upload Core artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-core
+          path: |
+            ShunMod.Core/.godot/mono/temp/bin/Release/ShunMod_Core.dll
+            ShunMod.Core/ShunMod_Core.json
+          retention-days: 1
+
+  # ── 剩余模块并行构建 ────────────────────────────────────────────────────
+  build-modules:
+    needs: build-core
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module:
+          - name: Shun
+            proj: ShunMod.Shun/ShunMod.Shun.csproj
+            dir: ShunMod.Shun
+            asm: ShunMod_Shun
+            has_pck: true
+          - name: Tweaks
+            proj: ShunMod.Tweaks/ShunMod.Tweaks.csproj
+            dir: ShunMod.Tweaks
+            asm: ShunMod_Tweaks
+            has_pck: false
+          - name: Compat
+            proj: ShunMod.Compat/ShunMod.Compat.csproj
+            dir: ShunMod.Compat
+            asm: ShunMod_Compat
+            has_pck: false
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 9.0
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Download game references
+        run: |
+          mkdir -p deps
+          DEPS_URL="https://github.com/${{ github.repository }}/releases/download/0.107.1"
+          curl -sL "${DEPS_URL}/sts2.dll" -o deps/sts2.dll
+          curl -sL "${DEPS_URL}/0Harmony.dll" -o deps/0Harmony.dll
+          ls -la deps/
+
+      - name: Download Core artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-core
+          path: build-core/
+
+      - name: Place Core.dll for project reference
+        run: |
+          mkdir -p "${{ matrix.module.dir }}/.godot/mono/temp/bin/Release"
+          cp build-core/ShunMod_Core.dll "${{ matrix.module.dir }}/.godot/mono/temp/bin/Release/"
+          cp build-core/ShunMod_Core.json "${{ matrix.module.dir }}/.godot/mono/temp/bin/Release/"
+
+      - name: Build ${{ matrix.module.name }}
+        run: |
+          dotnet build ${{ matrix.module.proj }} \
+            -c Release \
+            -p:Sts2DataDir="$(realpath deps)" \
+            --no-restore
+
+      - name: Upload ${{ matrix.module.name }} artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.module.name }}
+          path: |
+            ${{ matrix.module.dir }}/.godot/mono/temp/bin/Release/${{ matrix.module.asm }}.dll
+            ${{ matrix.module.dir }}/${{ matrix.module.asm }}.json
+          retention-days: 1
+
+  # ── 汇总打包 ────────────────────────────────────────────────────────────
+  package:
+    needs: build-modules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: build-*
+          merge-multiple: true
+
+      - name: Download Godot for .pck export
         run: |
           echo "=== Downloading Godot 4.5.1 Mono ==="
           GODOT_URL="https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_mono_linux_x86_64.zip"
@@ -61,21 +158,16 @@ jobs:
 
       - name: Package individual zips
         run: |
-          for entry in "Core|ShunMod.Core" "Shun|ShunMod.Shun" "Tweaks|ShunMod.Tweaks" "Compat|ShunMod.Compat"; do
-            PROJ="${entry%%|*}"
-            DIR="${entry##*|}"
-            ASM="ShunMod_${PROJ}"
-            PROJ_BUILD="${DIR}/.godot/mono/temp/bin/Release"
+          for entry in "Core|ShunMod_Core" "Shun|ShunMod_Shun" "Tweaks|ShunMod_Tweaks" "Compat|ShunMod_Compat"; do
+            NAME="${entry%%|*}"
+            ASM="${entry##*|}"
             echo "=== Packaging ${ASM} ==="
             mkdir -p "publish/${ASM}"
-            cp "$PROJ_BUILD/${ASM}.dll" "publish/${ASM}/"
-            cp "${DIR}/${ASM}.json" "publish/${ASM}/"
+            cp "${ASM}.dll" "publish/${ASM}/" 2>/dev/null || echo "  No dll found for ${ASM}"
+            cp "${ASM}.json" "publish/${ASM}/" 2>/dev/null || echo "  No json found for ${ASM}"
             # Shun 项目有 pck
-            PCK=$(find "$PROJ_BUILD" -name "${ASM}.pck" -type f 2>/dev/null | head -1)
-            if [ -z "$PCK" ]; then
-              PCK=$(find . -maxdepth 1 -name "${ASM}.pck" -type f 2>/dev/null | head -1)
-            fi
-            if [ -n "$PCK" ]; then
+            PCK=$(find . -maxdepth 1 -name "ShunMod_Shun.pck" -type f 2>/dev/null | head -1)
+            if [ -n "$PCK" ] && [ "$ASM" = "ShunMod_Shun" ]; then
               cp "$PCK" "publish/${ASM}/"
             fi
             ls -la "publish/${ASM}/"
@@ -86,19 +178,12 @@ jobs:
       - name: Package full zip
         run: |
           mkdir -p publish
-          for entry in "Core|ShunMod.Core" "Shun|ShunMod.Shun" "Tweaks|ShunMod.Tweaks" "Compat|ShunMod.Compat"; do
-            PROJ="${entry%%|*}"
-            DIR="${entry##*|}"
-            ASM="ShunMod_${PROJ}"
-            mkdir -p "publish/${ASM}"
-            cp "${DIR}/.godot/mono/temp/bin/Release/${ASM}.dll" "publish/${ASM}/"
-            cp "${DIR}/${ASM}.json" "publish/${ASM}/"
+          for asm in ShunMod_Core ShunMod_Shun ShunMod_Tweaks ShunMod_Compat; do
+            mkdir -p "publish/${asm}"
+            cp "${asm}.dll" "publish/${asm}/" 2>/dev/null || true
+            cp "${asm}.json" "publish/${asm}/" 2>/dev/null || true
           done
-          # Shun 的 pck
-          PCK=$(find "ShunMod.Shun/.godot/mono/temp/bin/Release" -name "ShunMod_Shun.pck" -type f 2>/dev/null | head -1)
-          if [ -z "$PCK" ]; then
-            PCK=$(find . -maxdepth 1 -name "ShunMod_Shun.pck" -type f 2>/dev/null | head -1)
-          fi
+          PCK=$(find . -maxdepth 1 -name "ShunMod_Shun.pck" -type f 2>/dev/null | head -1)
           if [ -n "$PCK" ]; then
             cp "$PCK" "publish/ShunMod_Shun/"
           fi

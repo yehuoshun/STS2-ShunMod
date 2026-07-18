@@ -4,6 +4,9 @@ using MegaCrit.Sts2.Core.Models.Enchantments;
 
 namespace ShunMod.Tweaks.Patches.Enchantments;
 
+// ReSharper disable UnusedType.Global — Harmony 反射调用
+// ReSharper disable UnusedMember.Local — Harmony 反射调用
+
 /// <summary>
 ///     解除注能（Imbued）只能附魔技能牌的限制，改为所有类型均可附魔。
 /// </summary>
