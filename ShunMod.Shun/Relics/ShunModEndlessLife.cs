@@ -21,47 +21,19 @@ namespace ShunMod.Shun.Relics;
 ///     生生不息 — 右键点击遗物触发。
 ///     消耗任意数量的手牌，每消耗一张生成随机已升级的卡牌（不分角色）加入手卡，
 ///     并且首次打出免费，获得消耗数量的能量。
-///     每场战斗最多使用 3 次。
+///     无使用次数限制。
 /// </summary>
 [RelicPool(typeof(SharedRelicPool))]
 // ReSharper disable once UnusedType.Global — instantiated via ContentRegistry reflection
 public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
 {
-    private const int MaxUsesPerCombat = 3;
     private static readonly LocString SelectionPrompt = new("card_selection", "TO_EXHAUST");
 
-    // 非持久化字段：每场战斗由 AfterRoomEntered/AfterCombatEnd 管理
-    private int _remainingUses;
-
     public override RelicRarity Rarity => RelicRarity.Rare;
-
-    /// <summary>战斗中显示剩余次数计数器</summary>
-    public override bool ShowCounter => CombatManager.Instance.IsInProgress && Owner != null;
-
-    public override int DisplayAmount => _remainingUses;
 
     public override bool IsAllowed(IRunState runState)
     {
         return IsBeforeAct3TreasureChest(runState);
-    }
-
-    /// <summary>进入战斗时重置使用次数</summary>
-    public override Task AfterRoomEntered(AbstractRoom room)
-    {
-        if (room is CombatRoom)
-        {
-            _remainingUses = MaxUsesPerCombat;
-            InvokeDisplayAmountChanged();
-        }
-        return Task.CompletedTask;
-    }
-
-    /// <summary>战斗结束时清空计数器</summary>
-    public override Task AfterCombatEnd(CombatRoom room)
-    {
-        _remainingUses = 0;
-        InvokeDisplayAmountChanged();
-        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -70,10 +42,6 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
     public async Task ExecuteRightClick(PlayerChoiceContext choiceContext)
     {
         if (Owner == null)
-            return;
-
-        // 次数用尽，不执行
-        if (_remainingUses <= 0)
             return;
 
         // 右键即闪烁，立即视觉反馈
@@ -96,7 +64,7 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
             _ => true,
             this)).ToList();
 
-        // 未选任何牌，不消耗次数
+        // 取消选择，不执行
         if (selected.Count == 0)
             return;
 
@@ -144,9 +112,5 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
 
         // 获得消耗数量的能量
         await PlayerCmd.GainEnergy(count, Owner);
-
-        // 扣除一次使用次数（无论消耗了几张牌，都算一次右键操作）
-        _remainingUses = Math.Max(0, _remainingUses - 1);
-        InvokeDisplayAmountChanged();
     }
 }

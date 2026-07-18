@@ -25,20 +25,20 @@ internal static class RelicRightClickPatch
 
     [HarmonyPostfix]
     [SuppressMessage("ReSharper", "UnusedMember.Local")]
-    private static void Postfix(NRelic instance)
+    private static void Postfix(NRelic __instance)
     {
-        if (instance.HasMeta(MetaKey))
+        if (__instance.HasMeta(MetaKey))
             return;
 
-        instance.SetMeta(MetaKey, true);
+        __instance.SetMeta(MetaKey, true);
 
         // Icon 和 Outline 默认 MouseFilter.Stop 会吃掉鼠标事件，GuiInput 到不了 NRelic
-        instance.Icon.MouseFilter = Control.MouseFilterEnum.Ignore;
-        if (instance.Outline != null)
-            instance.Outline.MouseFilter = Control.MouseFilterEnum.Ignore;
+        __instance.Icon.MouseFilter = Control.MouseFilterEnum.Ignore;
+        if (__instance.Outline != null)
+            __instance.Outline.MouseFilter = Control.MouseFilterEnum.Ignore;
 
-        instance.Connect(Control.SignalName.GuiInput,
-            Callable.From((InputEvent inputEvent) => OnGuiInput(instance, inputEvent)));
+        __instance.Connect(Control.SignalName.GuiInput,
+            Callable.From((InputEvent inputEvent) => OnGuiInput(__instance, inputEvent)));
     }
 
     private static void OnGuiInput(NRelic relicNode, InputEvent inputEvent)
