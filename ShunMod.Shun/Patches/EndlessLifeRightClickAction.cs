@@ -11,27 +11,18 @@ namespace ShunMod.Shun.Patches;
 ///     确保 CardSelectCmd 能正确获取 PlayerChoiceContext。
 ///     （单机限定，不支持多人同步）
 /// </summary>
-public sealed class EndlessLifeRightClickAction : GameAction
+public sealed class EndlessLifeRightClickAction(Player player, ShunModEndlessLife relic) : GameAction
 {
-    public override ulong OwnerId => Player.NetId;
+    public override ulong OwnerId => player.NetId;
 
     public override GameActionType ActionType => GameActionType.CombatPlayPhaseOnly;
 
     public override bool RecordableToReplay => false;
 
-    private Player Player { get; }
-    private ShunModEndlessLife Relic { get; }
-
-    public EndlessLifeRightClickAction(Player player, ShunModEndlessLife relic)
-    {
-        Player = player;
-        Relic = relic;
-    }
-
     protected override async Task ExecuteAction()
     {
         var choiceContext = new GameActionPlayerChoiceContext(this);
-        await Relic.ExecuteRightClick(choiceContext);
+        await relic.ExecuteRightClick(choiceContext);
     }
 
     /// <summary>
