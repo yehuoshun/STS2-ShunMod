@@ -4,6 +4,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.RestSite;
 using MegaCrit.Sts2.Core.Localization;
+using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Enchantments;
 
@@ -81,7 +82,16 @@ public class EnchantRestSiteOption(Player owner) : RestSiteOption(owner)
         var card = cards[0];
 
         // CardCmd.Enchant 内部自动处理同类型叠加 + 记录历史
-        CardCmd.Enchant(_cachedEnchantment.ToMutable(), card, EnchantStacks);
+        // 部分 mod（如 RepeatableEnchantments）会检查兼容性，不兼容时抛异常，需兜底
+        try
+        {
+            CardCmd.Enchant(_cachedEnchantment.ToMutable(), card, EnchantStacks);
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"[EnchantRestSiteOption] 附魔失败：{e.Message}");
+            return false;
+        }
 
         return true;
     }
