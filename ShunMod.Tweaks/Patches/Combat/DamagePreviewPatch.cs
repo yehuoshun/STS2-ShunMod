@@ -230,6 +230,18 @@ public static class DamagePreview
         if (EnemyLabels.Remove(cid, out var label) && GodotObject.IsInstanceIdValid(label.GetInstanceId()))
             label.QueueFree();
     }
+
+    // ── 战斗结束清理 ──────────────────────────────────────────────────────
+
+    public static void ClearAll()
+    {
+        ClearPlayerLabel();
+        foreach (var label in EnemyLabels.Values)
+            if (IsValid(label))
+                label.QueueFree();
+        EnemyLabels.Clear();
+        _lastNetDamage = int.MinValue;
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -295,5 +307,36 @@ public static class DamagePreviewCardPlayed
     private static void Postfix()
     {
         DamagePreview.Refresh();
+    }
+}
+
+[HarmonyPatch]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
+public static class DamagePreviewCombatEnd
+{
+    private static readonly MethodInfo? Target =
+        AccessTools.DeclaredMethod(typeof(CombatManager), "EndCombatInternal");
+
+    private static MethodInfo? TargetMethod()
+    {
+        return Target;
+    }
+
+    private static bool Prepare()
+    {
+        if (Target != null)
+        {
+            Log.Info("[伤害预测] Hook: CombatManager.EndCombatInternal");
+            return true;
+        }
+
+        Log.Error("[伤害预测] 未找到 CombatManager.EndCombatInternal");
+        return false;
+    }
+
+    [SuppressMessage("ReSharper", "UnusedMember.Local")]
+    private static void Postfix()
+    {
+        DamagePreview.ClearAll();
     }
 }
