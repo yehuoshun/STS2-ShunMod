@@ -40,34 +40,41 @@ public static class DamagePreview
 
     public static void Refresh()
     {
-        var combat = CombatManager.Instance;
-        if (!combat.IsInProgress) return;
-        var state = CombatManager.Instance.DebugOnlyGetState();
-        if (state == null) return;
-
-        // 玩家
-        foreach (var pc in state.PlayerCreatures)
+        try
         {
-            var total = state.Enemies
-                .Where(e => !e.IsDead && e.IsPrimaryEnemy)
-                .Sum(GetEnemyTotalDamage);
+            var combat = CombatManager.Instance;
+            if (!combat.IsInProgress) return;
+            var state = CombatManager.Instance.DebugOnlyGetState();
+            if (state == null) return;
 
-            // 穿透所有加成（易伤、力量等）
-            var actual = Hook.ModifyDamage(state.RunState, state, pc, null, total,
-                ValueProp.Move, null, ModifyDamageHookType.All, CardPreviewMode.None, out _);
+            // 玩家
+            foreach (var pc in state.PlayerCreatures)
+            {
+                var total = state.Enemies
+                    .Where(e => !e.IsDead && e.IsPrimaryEnemy)
+                    .Sum(GetEnemyTotalDamage);
 
-            var net = Math.Max(0, (int)actual - pc.Block);
-            UpdatePlayerLabel(pc, net);
+                // 穿透所有加成（易伤、力量等）
+                var actual = Hook.ModifyDamage(state.RunState, state, pc, null, total,
+                    ValueProp.Move, null, ModifyDamageHookType.All, CardPreviewMode.None, out _);
+
+                var net = Math.Max(0, (int)actual - pc.Block);
+                UpdatePlayerLabel(pc, net);
+            }
+
+            // 敌人
+            foreach (var enemy in state.Enemies)
+            {
+                if (enemy.IsDead) continue;
+                UpdateEnemyLabel(enemy);
+            }
+
+            CleanupDeadEnemies(state);
         }
-
-        // 敌人
-        foreach (var enemy in state.Enemies)
+        catch (ObjectDisposedException)
         {
-            if (enemy.IsDead) continue;
-            UpdateEnemyLabel(enemy);
+            // 战斗场景清理时 Label 已被销毁，UI 同步失败不影响游戏
         }
-
-        CleanupDeadEnemies(state);
     }
 
     // ── 敌人意图 ──────────────────────────────────────────────────────────
@@ -109,14 +116,13 @@ public static class DamagePreview
             return;
         }
 
-        if (netDamage == _lastNetDamage && _playerLabel != null
-                                        && GodotObject.IsInstanceIdValid(_playerLabel.GetInstanceId()))
+        if (netDamage == _lastNetDamage && IsValid(_playerLabel))
             return;
 
         _lastNetDamage = netDamage;
 
         var node = player.GetCreatureNode();
-        if (node == null || !GodotObject.IsInstanceIdValid(node.GetInstanceId())) return;
+        if (!IsValid(node)) return;
 
         ClearPlayerLabel();
 
@@ -139,12 +145,25 @@ public static class DamagePreview
             .SetTrans(Tween.TransitionType.Sine);
     }
 
+    private static bool IsValid(GodotObject? obj)
+    {
+        if (obj == null) return false;
+        try
+        {
+            return GodotObject.IsInstanceIdValid(obj.GetInstanceId());
+        }
+        catch (ObjectDisposedException)
+        {
+            return false;
+        }
+    }
+
     private static void ClearPlayerLabel()
     {
-        if (_playerTween != null && GodotObject.IsInstanceIdValid(_playerTween.GetInstanceId()))
-            _playerTween.Kill();
-        if (_playerLabel != null && GodotObject.IsInstanceIdValid(_playerLabel.GetInstanceId()))
-            _playerLabel.QueueFree();
+        if (IsValid(_playerTween))
+            _playerTween!.Kill();
+        if (IsValid(_playerLabel))
+            _playerLabel!.QueueFree();
         _playerLabel = null;
         _playerTween = null;
         _lastNetDamage = int.MinValue;
@@ -167,14 +186,14 @@ public static class DamagePreview
         if (enemy.CombatId == null) return;
         var cid = enemy.CombatId.Value;
 
-        if (EnemyLabels.TryGetValue(cid, out var existing) && GodotObject.IsInstanceIdValid(existing.GetInstanceId())
-                                                           && existing.Text == text)
+        if (EnemyLabels.TryGetValue(cid, out var existing) && IsValid(existing)
+                                                           && existing.Text == text
             return;
 
         RemoveEnemyLabel(enemy);
 
         var node = enemy.GetCreatureNode();
-        if (node == null || !GodotObject.IsInstanceIdValid(node.GetInstanceId())) return;
+        if (!IsValid(node)) return;
 
         var label = new Label();
         label.Text = text;
@@ -193,7 +212,7 @@ public static class DamagePreview
     {
         if (enemy.CombatId == null) return;
         var cid = enemy.CombatId.Value;
-        if (EnemyLabels.Remove(cid, out var label) && GodotObject.IsInstanceIdValid(label.GetInstanceId()))
+        if (EnemyLabels.Remove(cid, out var label) && IsValid(label))
             label.QueueFree();
     }
 
