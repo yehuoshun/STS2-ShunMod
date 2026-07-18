@@ -4,6 +4,7 @@ using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
 using ShunMod.Core.Core.Registry;
+using ShunMod.Shun.RestSite;
 
 namespace ShunMod.Shun;
 
@@ -39,6 +40,9 @@ public static class ModEntry
             if (e.InnerException != null)
                 Log.Error($"[{ModId}]   \u2192 inner: {e.InnerException.GetType().Name}: {e.InnerException.Message}");
         }
+
+        // 注册休息处附魔选项的本地化条目
+        EnchantRestSiteOption.RegisterLocalization();
 
         // Content registration: 卡牌/遗物/事件
         ContentRegistry.RegisterAll(Assembly.GetExecutingAssembly());

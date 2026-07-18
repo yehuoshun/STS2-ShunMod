@@ -8,6 +8,7 @@ using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Enchantments;
 
+
 namespace ShunMod.Shun.RestSite;
 
 /// <summary>
@@ -20,8 +21,7 @@ public class EnchantRestSiteOption(Player owner) : RestSiteOption(owner)
     /// </summary>
     private const int EnchantStacks = 5;
 
-    private const string CustomDescKey = "shunmod_enchant_custom_desc";
-    private static bool _localizationAdded;
+    internal const string CustomDescKey = "shunmod_enchant_custom_desc";
 
     /// <summary>
     ///     预选的附魔，在构造时随机决定，显示在选项描述中。
@@ -37,7 +37,6 @@ public class EnchantRestSiteOption(Player owner) : RestSiteOption(owner)
     {
         get
         {
-            EnsureLocalizationEntries();
             var desc = new LocString("rest_site_ui", CustomDescKey);
             desc.Add("enchantment", _cachedEnchantment.Title.GetFormattedText());
             desc.Add("enchant_desc", _cachedEnchantment.DynamicDescription.GetFormattedText());
@@ -46,13 +45,10 @@ public class EnchantRestSiteOption(Player owner) : RestSiteOption(owner)
     }
 
     /// <summary>
-    ///     在本地化表中注入缺失的 ENCHANT 选项条目（仅一次）。
+    ///     在本地化表中注入 ENCHANT 选项条目。由 ModEntry.Initialize 在启动时调用一次。
     /// </summary>
-    private static void EnsureLocalizationEntries()
+    internal static void RegisterLocalization()
     {
-        if (_localizationAdded) return;
-        _localizationAdded = true;
-
         var table = LocManager.Instance.GetTable("rest_site_ui");
         table.MergeWith(new Dictionary<string, string>
         {
