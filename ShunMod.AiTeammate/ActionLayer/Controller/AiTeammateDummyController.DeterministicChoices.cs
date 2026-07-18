@@ -211,7 +211,7 @@ internal sealed partial class AiTeammateDummyController
         }
     }
 
-    private sealed class DeterministicCardSelector : ICardSelector
+    private sealed class DeterministicCardSelector
     {
         public Task<IEnumerable<CardModel>> GetSelectedCards(IEnumerable<CardModel> options, int minSelect, int maxSelect)
         {

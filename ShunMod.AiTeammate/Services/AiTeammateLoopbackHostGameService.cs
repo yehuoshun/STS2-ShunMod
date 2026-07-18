@@ -135,6 +135,11 @@ internal sealed class AiTeammateLoopbackHostGameService : INetHostGameService
         IsGameLoading = isLoading;
     }
 
+    public void SetBufferMessages(bool bufferMessages)
+    {
+        // Loopback service has no async message buffering; no-op.
+    }
+
     public string? GetRawLobbyIdentifier()
     {
         return "ai-teammate-local-lobby";
