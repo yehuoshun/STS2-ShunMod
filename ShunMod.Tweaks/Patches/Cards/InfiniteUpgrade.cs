@@ -11,6 +11,7 @@ namespace ShunMod.Tweaks.Patches.Cards;
 // ReSharper disable UnusedType.Global — Harmony 反射调用
 // ReSharper disable UnusedMember.Local — Harmony 反射调用
 // ReSharper disable InconsistentNaming — Harmony __instance/__result/__exception 约定
+// ReSharper disable RedundantAssignment — Harmony ref __result 直接赋值
 [HarmonyPatch]
 public static class InfiniteUpgradeMaxUpgrade
 {
