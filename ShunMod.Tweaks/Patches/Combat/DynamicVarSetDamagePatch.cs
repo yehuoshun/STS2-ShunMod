@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 
@@ -22,6 +23,9 @@ namespace ShunMod.Tweaks.Patches.Combat;
 public static class DynamicVarSetDamagePatch
 {
     [HarmonyPrefix]
+    [SuppressMessage("ReSharper", "UnusedMember.Local")]
+    [SuppressMessage("ReSharper", "RedundantAssignment")]
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     private static bool Prefix(DynamicVarSet __instance, ref DynamicVar __result)
     {
         if (__instance.TryGetValue("Damage", out var dv))
