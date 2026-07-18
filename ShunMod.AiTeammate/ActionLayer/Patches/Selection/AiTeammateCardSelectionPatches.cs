@@ -1,3 +1,4 @@
+// ReSharper disable InconsistentNaming
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +14,11 @@ using MegaCrit.Sts2.Core.Models;
 
 namespace ShunMod.AiTeammate;
 
+[SuppressMessage("ReSharper", "UnusedType.Global")]
 internal static class AiTeammateCardSelectionPatches
 {
     [HarmonyPatch(typeof(CardSelectCmd), nameof(CardSelectCmd.FromChooseACardScreen))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class CardSelectChooseACardPatch
     {
         private static bool Prefix(
@@ -36,6 +39,7 @@ internal static class AiTeammateCardSelectionPatches
     }
 
     [HarmonyPatch(typeof(CardSelectCmd), nameof(CardSelectCmd.FromSimpleGridForRewards))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class CardSelectSimpleGridRewardsPatch
     {
         private static bool Prefix(
@@ -60,6 +64,7 @@ internal static class AiTeammateCardSelectionPatches
     }
 
     [HarmonyPatch(typeof(CardSelectCmd), nameof(CardSelectCmd.FromSimpleGrid))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class CardSelectSimpleGridPatch
     {
         private static bool Prefix(
@@ -84,6 +89,7 @@ internal static class AiTeammateCardSelectionPatches
     }
 
     [HarmonyPatch(typeof(CardSelectCmd), nameof(CardSelectCmd.FromDeckForUpgrade))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class CardSelectDeckUpgradePatch
     {
         private static bool Prefix(Player player, CardSelectorPrefs prefs, ref Task<IEnumerable<CardModel>> __result)
@@ -100,6 +106,7 @@ internal static class AiTeammateCardSelectionPatches
     }
 
     [HarmonyPatch(typeof(CardSelectCmd), nameof(CardSelectCmd.FromDeckForTransformation))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class CardSelectDeckTransformPatch
     {
         private static bool Prefix(Player player, CardSelectorPrefs prefs, ref Task<IEnumerable<CardModel>> __result)
@@ -116,6 +123,7 @@ internal static class AiTeammateCardSelectionPatches
     }
 
     [HarmonyPatch(typeof(CardSelectCmd), nameof(CardSelectCmd.FromDeckForEnchantment), new[] { typeof(IReadOnlyList<CardModel>), typeof(EnchantmentModel), typeof(int), typeof(CardSelectorPrefs) })]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class CardSelectDeckEnchantmentPatch
     {
         private static bool Prefix(
@@ -138,6 +146,7 @@ internal static class AiTeammateCardSelectionPatches
     }
 
     [HarmonyPatch(typeof(CardSelectCmd), nameof(CardSelectCmd.FromDeckGeneric))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class CardSelectDeckGenericPatch
     {
         private static bool Prefix(
@@ -180,6 +189,7 @@ internal static class AiTeammateCardSelectionPatches
     }
 
     [HarmonyPatch(typeof(CardSelectCmd), nameof(CardSelectCmd.FromHand))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class CardSelectHandPatch
     {
         private static bool Prefix(
@@ -211,6 +221,7 @@ internal static class AiTeammateCardSelectionPatches
     }
 
     [HarmonyPatch(typeof(CardSelectCmd), nameof(CardSelectCmd.FromHandForUpgrade))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class CardSelectHandUpgradePatch
     {
         private static bool Prefix(
@@ -241,6 +252,7 @@ internal static class AiTeammateCardSelectionPatches
     }
 
     [HarmonyPatch(typeof(CardSelectCmd), nameof(CardSelectCmd.FromChooseABundleScreen))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class CardSelectBundlePatch
     {
         private static bool Prefix(

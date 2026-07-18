@@ -1,3 +1,4 @@
+// ReSharper disable InconsistentNaming
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using HarmonyLib;
@@ -7,9 +8,11 @@ using MegaCrit.Sts2.Core.Models;
 
 namespace ShunMod.AiTeammate;
 
+[SuppressMessage("ReSharper", "UnusedType.Global")]
 internal static class AiTeammateRelicSelectionPatches
 {
     [HarmonyPatch(typeof(RelicSelectCmd), nameof(RelicSelectCmd.FromChooseARelicScreen))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class RelicSelectPatch
     {
         private static bool Prefix(Player player, IReadOnlyList<RelicModel> relics, ref Task<RelicModel?> __result)

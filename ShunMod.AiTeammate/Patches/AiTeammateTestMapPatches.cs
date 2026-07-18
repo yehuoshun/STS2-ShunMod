@@ -1,3 +1,4 @@
+// ReSharper disable InconsistentNaming
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Map;
@@ -8,9 +9,11 @@ using MegaCrit.Sts2.Core.Runs;
 
 namespace ShunMod.AiTeammate;
 
+[SuppressMessage("ReSharper", "UnusedType.Global")]
 internal static class AiTeammateTestMapPatches
 {
     [HarmonyPatch(typeof(ActModel), nameof(ActModel.CreateMap))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class ActModelCreateMapPatch
     {
         private static void Postfix(RunState runState, ref ActMap __result)
@@ -26,6 +29,7 @@ internal static class AiTeammateTestMapPatches
     }
 
     [HarmonyPatch(typeof(RunManager), "RollRoomTypeFor")]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class RunManagerRollRoomTypeForPatch
     {
         private static bool Prefix(MapPointType pointType, ref RoomType __result)
@@ -43,6 +47,7 @@ internal static class AiTeammateTestMapPatches
     }
 
     [HarmonyPatch(typeof(RunManager), "CreateRoom")]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class RunManagerCreateRoomPatch
     {
         private static bool Prefix(RoomType roomType, MapPointType mapPointType, AbstractModel? model, ref AbstractRoom __result)
@@ -68,6 +73,7 @@ internal static class AiTeammateTestMapPatches
     }
 
     [HarmonyPatch(typeof(RunManager), nameof(RunManager.GenerateRooms))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class RunManagerGenerateRoomsPatch
     {
         private const int TestMapStartingGold = 999;

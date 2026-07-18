@@ -7,11 +7,13 @@ using MegaCrit.Sts2.Core.Runs;
 
 namespace ShunMod.AiTeammate;
 
+[SuppressMessage("ReSharper", "UnusedType.Global")]
 internal static class AiTeammateCombatTurnPatches
 {
     private static bool _syncingAiEnemyTurnReady;
 
     [HarmonyPatch(typeof(CombatManager), nameof(CombatManager.SetReadyToEndTurn))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class CombatManagerReadyToEndTurnPatch
     {
         private static void Postfix(Player player, bool canBackOut)
@@ -27,6 +29,7 @@ internal static class AiTeammateCombatTurnPatches
     }
 
     [HarmonyPatch(typeof(CombatManager), nameof(CombatManager.SetReadyToBeginEnemyTurn))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class CombatManagerReadyToBeginEnemyTurnPatch
     {
         private static void Postfix(Player player)

@@ -1,3 +1,4 @@
+// ReSharper disable InconsistentNaming
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
@@ -12,9 +13,11 @@ using MegaCrit.Sts2.Core.Runs;
 
 namespace ShunMod.AiTeammate;
 
+[SuppressMessage("ReSharper", "UnusedType.Global")]
 internal static class AiTeammateMapAndTreasurePatches
 {
     [HarmonyPatch(typeof(MapSelectionSynchronizer), nameof(MapSelectionSynchronizer.PlayerVotedForMapCoord))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class MapSelectionSynchronizerPatch
     {
         private static void Postfix(Player player, MapLocation source, MapVote? destination)
@@ -46,6 +49,7 @@ internal static class AiTeammateMapAndTreasurePatches
     }
 
     [HarmonyPatch(typeof(TreasureRoomRelicSynchronizer), nameof(TreasureRoomRelicSynchronizer.BeginRelicPicking))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class TreasureRoomRelicSynchronizerBeginRelicPickingPatch
     {
         private static void Postfix(TreasureRoomRelicSynchronizer __instance)

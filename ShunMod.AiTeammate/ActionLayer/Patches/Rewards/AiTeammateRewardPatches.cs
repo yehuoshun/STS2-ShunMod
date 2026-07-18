@@ -1,3 +1,4 @@
+// ReSharper disable InconsistentNaming
 using System.Linq;
 using System.Threading.Tasks;
 using HarmonyLib;
@@ -12,9 +13,11 @@ using MegaCrit.Sts2.Core.Runs;
 
 namespace ShunMod.AiTeammate;
 
+[SuppressMessage("ReSharper", "UnusedType.Global")]
 internal static class AiTeammateRewardPatches
 {
     [HarmonyPatch(typeof(RewardsSet), nameof(RewardsSet.Offer))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class RewardsSetOfferPatch
     {
         private static bool Prefix(RewardsSet __instance, ref Task __result)
@@ -30,6 +33,7 @@ internal static class AiTeammateRewardPatches
     }
 
     [HarmonyPatch(typeof(RewardsCmd), nameof(RewardsCmd.OfferForRoomEnd))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class RewardsCmdOfferForRoomEndPatch
     {
         private static void Postfix(Player player, AbstractRoom room, ref Task __result)
@@ -99,6 +103,7 @@ internal static class AiTeammateRewardPatches
     }
 
     [HarmonyPatch(typeof(CardReward), "OnSelect")]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class CardRewardOnSelectPatch
     {
         private static bool Prefix(CardReward __instance, ref Task<bool> __result)
@@ -114,6 +119,7 @@ internal static class AiTeammateRewardPatches
     }
 
     [HarmonyPatch(typeof(ActChangeSynchronizer), nameof(ActChangeSynchronizer.SetLocalPlayerReady))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class ActChangeSynchronizerSetLocalPlayerReadyPatch
     {
         private static void Postfix(ActChangeSynchronizer __instance)

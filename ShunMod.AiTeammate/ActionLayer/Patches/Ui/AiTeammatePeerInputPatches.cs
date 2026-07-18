@@ -15,9 +15,11 @@ using MegaCrit.Sts2.Core.Runs;
 
 namespace ShunMod.AiTeammate;
 
+[SuppressMessage("ReSharper", "UnusedType.Global")]
 internal static class AiTeammatePeerInputPatches
 {
     [HarmonyPatch(typeof(NRun), nameof(NRun._Process))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class NRunProcessPatch
     {
         private static void Postfix()
@@ -38,6 +40,7 @@ internal static class AiTeammatePeerInputPatches
     }
 }
 
+[SuppressMessage("ReSharper", "UnusedType.Global")]
 internal static class AiTeammatePeerInputStateSync
 {
     private static readonly HashSet<ulong> InitializedPeerInputPlayers = [];

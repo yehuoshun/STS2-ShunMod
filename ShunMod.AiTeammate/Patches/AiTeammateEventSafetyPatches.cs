@@ -1,3 +1,4 @@
+// ReSharper disable InconsistentNaming
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
@@ -5,9 +6,11 @@ using MegaCrit.Sts2.Core.Models.Events;
 
 namespace ShunMod.AiTeammate;
 
+[SuppressMessage("ReSharper", "UnusedType.Global")]
 internal static class AiTeammateEventSafetyPatches
 {
     [HarmonyPatch(typeof(ActModel), nameof(ActModel.GenerateRooms))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
     private static class ActModelGenerateRoomsPatch
     {
         private static void Postfix(ActModel __instance)

@@ -9,6 +9,7 @@ using MegaCrit.Sts2.Core.Nodes.Screens.MainMenu;
 namespace ShunMod.AiTeammate;
 
 [HarmonyPatch(typeof(NSubmenuStack), nameof(NSubmenuStack.Push))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
 public static class SubmenuBackButtonDiagnosticsPatch
 {
     public static void Postfix(NSubmenu screen)

@@ -1,3 +1,4 @@
+// ReSharper disable InconsistentNaming
 using System;
 using Godot;
 using HarmonyLib;
@@ -11,6 +12,7 @@ using MegaCrit.Sts2.Core.Nodes.Screens.MainMenu;
 namespace ShunMod.AiTeammate;
 
 [HarmonyPatch(typeof(NMainMenu), nameof(NMainMenu._Ready))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
 public static class MainMenuAiTeammatePatch
 {
     private const string ButtonName = "AiTeammateButton";

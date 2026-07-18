@@ -1,3 +1,4 @@
+// ReSharper disable InconsistentNaming
 using System;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Multiplayer;
@@ -10,6 +11,7 @@ using MegaCrit.Sts2.Core.Runs;
 namespace ShunMod.AiTeammate;
 
 [HarmonyPatch(typeof(RunManager), nameof(RunManager.Abandon))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
 internal static class AiTeammateRunManagerAbandonPatch
 {
     [HarmonyPrefix]
@@ -20,6 +22,7 @@ internal static class AiTeammateRunManagerAbandonPatch
 }
 
 [HarmonyPatch(typeof(RunManager), nameof(RunManager.CleanUp))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
 internal static class AiTeammateRunManagerCleanUpPatch
 {
     [HarmonyPostfix]
@@ -36,6 +39,7 @@ internal static class AiTeammateRunManagerCleanUpPatch
 }
 
 [HarmonyPatch(typeof(RunLobby), nameof(RunLobby.AbandonRun))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
 internal static class AiTeammateRunLobbyAbandonRunPatch
 {
     [HarmonyPrefix]
