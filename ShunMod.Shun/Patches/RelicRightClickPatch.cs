@@ -37,17 +37,15 @@ internal static class RelicRightClickPatch
         // NRelic 是视觉节点，MouseFilter 被 .tscn 设为 Ignore（让事件穿透到 InventoryHolder）。
         // 不修改 Icon/Outline 的 MouseFilter，直接注册到父级 NRelicInventoryHolder 的 MouseReleased 信号。
         // NRelicInventoryHolder 的 _Ready 比 NRelic 早，信号已就绪。
-        if (instance.GetParent() is NRelicInventoryHolder holder)
-        {
-            // 用 unique meta key 防止重复绑定
-            var holderMeta = $"{MetaKey}_holder";
-            if (!holder.HasMeta(holderMeta))
-            {
-                holder.SetMeta(holderMeta, true);
-                holder.Connect(NClickableControl.SignalName.MouseReleased,
-                    Callable.From<InputEvent>(inputEvent => OnHolderMouseReleased(holder, inputEvent)));
-            }
-        }
+        if (instance.GetParent() is not NRelicInventoryHolder holder) return;
+
+        // 用 unique meta key 防止重复绑定
+        var holderMeta = $"{MetaKey}_holder";
+        if (holder.HasMeta(holderMeta)) return;
+
+        holder.SetMeta(holderMeta, true);
+        holder.Connect(NClickableControl.SignalName.MouseReleased,
+            Callable.From<InputEvent>(inputEvent => OnHolderMouseReleased(holder, inputEvent)));
     }
 
     private static void OnHolderMouseReleased(NRelicInventoryHolder holder, InputEvent inputEvent)
@@ -62,7 +60,7 @@ internal static class RelicRightClickPatch
             return;
 
         var relic = holder.Relic;
-        if (relic?.Model is not ShunModEndlessLife endlessLife)
+        if (relic.Model is not ShunModEndlessLife endlessLife)
             return;
 
         var combat = CombatManager.Instance;
