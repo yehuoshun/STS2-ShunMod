@@ -80,11 +80,6 @@ jobs:
             dir: ShunMod.Compat
             asm: ShunMod_Compat
             has_pck: false
-          - name: AiTeammate
-            proj: ShunMod.AiTeammate/ShunMod.AiTeammate.csproj
-            dir: ShunMod.AiTeammate
-            asm: ShunMod_AiTeammate
-            has_pck: false
       fail-fast: false
 
     steps:
@@ -166,7 +161,7 @@ jobs:
 
       - name: Package individual zips
         run: |
-          for entry in "Core|ShunMod_Core" "Shun|ShunMod_Shun" "Tweaks|ShunMod_Tweaks" "Compat|ShunMod_Compat" "AiTeammate|ShunMod_AiTeammate"; do
+          for entry in "Core|ShunMod_Core" "Shun|ShunMod_Shun" "Tweaks|ShunMod_Tweaks" "Compat|ShunMod_Compat"; do
             NAME="${entry%%|*}"
             ASM="${entry##*|}"
             echo "=== Packaging ${ASM} ==="
@@ -186,7 +181,7 @@ jobs:
       - name: Package full zip
         run: |
           mkdir -p publish
-          for asm in ShunMod_Core ShunMod_Shun ShunMod_Tweaks ShunMod_Compat ShunMod_AiTeammate; do
+          for asm in ShunMod_Core ShunMod_Shun ShunMod_Tweaks ShunMod_Compat; do
             mkdir -p "publish/${asm}"
             cp "${asm}.dll" "publish/${asm}/" 2>/dev/null || true
             cp "${asm}.json" "publish/${asm}/" 2>/dev/null || true
@@ -208,6 +203,5 @@ jobs:
             ShunMod_Shun.zip
             ShunMod_Tweaks.zip
             ShunMod_Compat.zip
-            ShunMod_AiTeammate.zip
             STS2_ShunMod.zip
           if-no-files-found: error
