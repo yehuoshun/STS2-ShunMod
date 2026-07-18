@@ -109,8 +109,8 @@ jobs:
       - name: Place Core.dll for project reference
         run: |
           mkdir -p "${{ matrix.module.dir }}/.godot/mono/temp/bin/Release"
-          cp build-core/ShunMod_Core.dll "${{ matrix.module.dir }}/.godot/mono/temp/bin/Release/"
-          cp build-core/ShunMod_Core.json "${{ matrix.module.dir }}/.godot/mono/temp/bin/Release/"
+          find build-core -name "ShunMod_Core.dll" -exec cp {} "${{ matrix.module.dir }}/.godot/mono/temp/bin/Release/" \;
+          find build-core -name "ShunMod_Core.json" -exec cp {} "${{ matrix.module.dir }}/.godot/mono/temp/bin/Release/" \;
 
       - name: Build ${{ matrix.module.name }}
         run: |
