@@ -38,6 +38,9 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
         if (Owner == null)
             return;
 
+        // 右键即闪烁，立即视觉反馈
+        Flash();
+
         // 从手牌选任意张（0 到手牌上限）
         var hand = PileType.Hand.GetPile(Owner).Cards.ToList();
         if (hand.Count == 0)
@@ -58,7 +61,6 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
         if (selected.Count == 0)
             return;
 
-        Flash();
         var count = selected.Count;
 
         // 获取所有可生成的卡牌池

@@ -2,11 +2,11 @@ using System.Diagnostics.CodeAnalysis;
 using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Combat;
-using MegaCrit.Sts2.Core.Context;
-using MegaCrit.Sts2.Core.Nodes.Combat;
-using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.ControllerInput;
+using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Helpers;
+using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Nodes.Relics;
-using MegaCrit.Sts2.Core.Runs;
 using ShunMod.Shun.Relics;
 
 namespace ShunMod.Shun.Patches;
@@ -43,37 +43,56 @@ internal static class RelicRightClickPatch
 
     private static void OnGuiInput(NRelic relicNode, InputEvent inputEvent)
     {
-        // 只处理右键释放
-        if (inputEvent is not InputEventMouseButton { ButtonIndex: MouseButton.Right } mouseButton
-            || !mouseButton.IsReleased())
+        if (!TryGetTrigger(relicNode, inputEvent, out _))
             return;
 
         var viewport = relicNode.GetViewport();
         if (viewport.IsInputHandled())
             return;
 
+        // 只处理我们自己的遗物
         if (relicNode.Model is not ShunModEndlessLife endlessLife)
             return;
 
-        var combat = CombatManager.Instance;
-        if (!combat.IsInProgress || combat.IsEnding)
+        if (endlessLife.Owner == null)
             return;
 
-        // 选目标中不触发右键
-        if (NTargetManager.Instance?.IsInSelection == true)
-            return;
-
-        // 只响应本地玩家
-        if (endlessLife.Owner == null || !LocalContext.IsMe(endlessLife.Owner))
+        // 战斗中进行
+        if (!CombatManager.Instance.IsInProgress
+            || CombatManager.Instance.IsEnding)
             return;
 
         viewport.SetInputAsHandled();
 
-        var player = LocalContext.GetMe(endlessLife.Owner.RunState);
-        if (player == null)
-            return;
+        // 使用 BlockingPlayerChoiceContext（不涉及游戏动作同步，纯 UI 选择）
+        // 这是 6f61c2fb 验证过的执行方式，不走 GameAction 队列避免排队被拒
+        try
+        {
+            var choiceContext = new BlockingPlayerChoiceContext();
+            TaskHelper.RunSafely(endlessLife.ExecuteRightClick(choiceContext));
+        }
+        catch (Exception e)
+        {
+            Log.Error($"[EndlessLife] 右键执行失败: {e.GetType().Name}: {e.Message}");
+            if (e.InnerException != null)
+                Log.Error($"[EndlessLife]   -> inner: {e.InnerException.GetType().Name}: {e.InnerException.Message}");
+        }
+    }
 
-        var action = new EndlessLifeRightClickAction(player, endlessLife);
-        RunManager.Instance.ActionQueueSynchronizer.RequestEnqueue(action);
+    private static bool TryGetTrigger(Control node, InputEvent inputEvent, out bool isController)
+    {
+        switch (inputEvent)
+        {
+            case InputEventMouseButton { ButtonIndex: MouseButton.Right } mouseButton when mouseButton.IsReleased():
+                isController = false;
+                return true;
+            case InputEventAction { Action: var action } actionEvent
+                when action == MegaInput.cancel && actionEvent.IsPressed() && node.HasFocus():
+                isController = true;
+                return true;
+            default:
+                isController = default;
+                return false;
+        }
     }
 }
