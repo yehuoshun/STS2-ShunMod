@@ -49,7 +49,7 @@
 | 💥 显示总伤害 | Tweaks | 多段卡/X卡在卡牌描述末尾显示总伤害（单段伤害 × 段数）。 |
 | ⚔️ 锻造拉回 | Tweaks | 所有锻造行为自动将非手牌的君王之剑拉回手牌。 |
 | ⚡ 能量保留 | Tweaks | 回合开始时能量不清零，剩余能量累积（冰激凌逻辑）。 |
-| 🌀 涡旋附魔解锁 | Tweaks | 取消涡旋（Spiral）附魔的「仅限基础打击/防御」限制，任意卡牌均可附魔。 |
+| 🔓 附魔限制解除 | Tweaks | 运行时扫描所有附魔子类，自动解除 CanEnchant / CanEnchantCardType 限制，任意卡牌可接受任意附魔。 |
 | 🖱️ 遗物右键交互 | Shun | 为 ShunMod 遗物添加右键点击支持（GuiInput 信号）。 |
 | ✨ 休息处附魔 | Shun | 休息处增加「附魔」选项，随机选一种附魔施加到牌组中的一张牌上。 |
 
@@ -139,8 +139,7 @@ STS2-ShunMod/
 │       │   ├── EternalRemovalPatch.cs      # 永恒卡牌移除/变化限制解除
 │       │   └── InfiniteUpgrade.cs          # 无限升级
 │       └── Enchantments/
-│           ├── ImbuedAllCardTypesPatch.cs  # 注能附魔类型限制解除
-│           └── SpiralCanEnchantPatch.cs    # 涡旋附魔卡牌限制解除
+│           └── EnchantRestrictionRemover.cs  # 运行时扫描所有附魔子类，自动解除限制
 │
 ├── ShunMod.Compat/                     # 兼容性补丁
 │   ├── ShunMod.Compat.csproj           # AssemblyName: ShunMod_Compat → 引用 Core
