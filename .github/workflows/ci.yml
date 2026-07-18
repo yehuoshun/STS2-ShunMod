@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  DEPS_VERSION: "0.107.1"
+  GODOT_VERSION: "4.5.1-stable"
+
 jobs:
   # ── 先构建 Core（其他模块依赖 Core） ────────────────────────────────────
   build-core:
@@ -20,10 +24,26 @@ jobs:
         with:
           dotnet-version: 9.0.x
 
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', '**/*.props') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Cache game references
+        id: cache-deps
+        uses: actions/cache@v4
+        with:
+          path: deps
+          key: deps-${{ env.DEPS_VERSION }}
+
       - name: Download game references
+        if: steps.cache-deps.outputs.cache-hit != 'true'
         run: |
           mkdir -p deps
-          DEPS_URL="https://github.com/${{ github.repository }}/releases/download/0.107.1"
+          DEPS_URL="https://github.com/${{ github.repository }}/releases/download/${{ env.DEPS_VERSION }}"
           curl -sL "${DEPS_URL}/sts2.dll" -o deps/sts2.dll
           curl -sL "${DEPS_URL}/0Harmony.dll" -o deps/0Harmony.dll
           ls -la deps/
@@ -33,8 +53,8 @@ jobs:
           if [ ! -f deps/sts2.dll ]; then
             echo ""
             echo "=============================================="
-            echo "  sts2.dll not found in 0.107.1 release!"
-            echo "  Upload with: gh release upload 0.107.1 sts2.dll 0Harmony.dll"
+            echo "  sts2.dll not found in ${{ env.DEPS_VERSION }} release!"
+            echo "  Upload with: gh release upload ${{ env.DEPS_VERSION }} sts2.dll 0Harmony.dll"
             echo "=============================================="
             exit 1
           fi
@@ -92,10 +112,26 @@ jobs:
         with:
           dotnet-version: 9.0.x
 
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', '**/*.props') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Cache game references
+        id: cache-deps
+        uses: actions/cache@v4
+        with:
+          path: deps
+          key: deps-${{ env.DEPS_VERSION }}
+
       - name: Download game references
+        if: steps.cache-deps.outputs.cache-hit != 'true'
         run: |
           mkdir -p deps
-          DEPS_URL="https://github.com/${{ github.repository }}/releases/download/0.107.1"
+          DEPS_URL="https://github.com/${{ github.repository }}/releases/download/${{ env.DEPS_VERSION }}"
           curl -sL "${DEPS_URL}/sts2.dll" -o deps/sts2.dll
           curl -sL "${DEPS_URL}/0Harmony.dll" -o deps/0Harmony.dll
           ls -la deps/
@@ -146,14 +182,26 @@ jobs:
           pattern: build-*
           merge-multiple: true
 
+      - name: Cache Godot binary
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: godot-bin
+          key: godot-${{ env.GODOT_VERSION }}
+
       - name: Download Godot for .pck export
+        if: steps.cache-godot.outputs.cache-hit != 'true'
         run: |
-          echo "=== Downloading Godot 4.5.1 Mono ==="
-          GODOT_URL="https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_mono_linux_x86_64.zip"
+          echo "=== Downloading Godot ${{ env.GODOT_VERSION }} Mono ==="
+          GODOT_URL="https://github.com/godotengine/godot/releases/download/${{ env.GODOT_VERSION }}/Godot_v${{ env.GODOT_VERSION }}_mono_linux_x86_64.zip"
           curl -sL "$GODOT_URL" -o godot.zip || { echo "Download failed"; exit 0; }
-          unzip -q godot.zip -d godot 2>/dev/null
-          GODOT=$(find godot -name "Godot*" -type f -executable | head -1)
-          [ -z "$GODOT" ] && { echo "Godot not found"; exit 0; }
+          unzip -q godot.zip -d godot-bin 2>/dev/null
+          ls -la godot-bin/
+
+      - name: Export .pck
+        run: |
+          GODOT=$(find godot-bin -name "Godot*" -type f -executable | head -1)
+          [ -z "$GODOT" ] && { echo "Godot not found, skipping .pck export"; exit 0; }
           chmod +x "$GODOT"
           echo "=== Exporting .pck ==="
           "$GODOT" --headless --export-pack "BasicExport" ShunMod_Shun.pck
@@ -168,7 +216,6 @@ jobs:
             mkdir -p "publish/${ASM}"
             cp "${ASM}.dll" "publish/${ASM}/" 2>/dev/null || echo "  No dll found for ${ASM}"
             cp "${ASM}.json" "publish/${ASM}/" 2>/dev/null || echo "  No json found for ${ASM}"
-            # Shun 项目有 pck
             PCK=$(find . -maxdepth 1 -name "ShunMod_Shun.pck" -type f 2>/dev/null | head -1)
             if [ -n "$PCK" ] && [ "$ASM" = "ShunMod_Shun" ]; then
               cp "$PCK" "publish/${ASM}/"
