@@ -1,29 +1,29 @@
-using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Factories;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.RelicPools;
-using MegaCrit.Sts2.Core.Nodes.CommonUi;
 using MegaCrit.Sts2.Core.Runs;
+using MegaCrit.Sts2.Core.Rooms;
 using ShunMod.Core.Core.Registry;
 using ShunMod.Shun.Base;
 
 namespace ShunMod.Shun.Relics;
 
-// ReSharper disable UnusedType.Global — 游戏框架反射使用
-// ReSharper disable UnusedType.Instantiation — 游戏框架反射实例化
 /// <summary>
 ///     生生不息 — 右键点击遗物触发。
 ///     消耗任意数量的手牌，每消耗一张生成随机已升级的卡牌（不分角色）加入手卡，
 ///     并且首次打出免费，获得消耗数量的能量。
 /// </summary>
 [RelicPool(typeof(SharedRelicPool))]
-[SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
+// ReSharper disable once UnusedType.Global — instantiated via ContentRegistry reflection
 public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
 {
     private static readonly LocString SelectionPrompt = new("card_selection", "TO_EXHAUST");
@@ -35,6 +35,9 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
     /// </summary>
     public async Task ExecuteRightClick(PlayerChoiceContext choiceContext)
     {
+        if (Owner == null)
+            return;
+
         // 从手牌选任意张（0 到手牌上限）
         var hand = PileType.Hand.GetPile(Owner).Cards.ToList();
         if (hand.Count == 0)
@@ -44,9 +47,6 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
         {
             Cancelable = true
         };
-
-        // 立即视觉反馈
-        Flash();
 
         var selected = (await CardSelectCmd.FromHand(
             choiceContext,
@@ -58,6 +58,7 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
         if (selected.Count == 0)
             return;
 
+        Flash();
         var count = selected.Count;
 
         // 获取所有可生成的卡牌池
@@ -68,35 +69,35 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
                         && c.Rarity != CardRarity.Event
                         && c.Rarity != CardRarity.Token
                         && c.Rarity != CardRarity.Status
-                        && c.Rarity != CardRarity.Curse
-                        && c.Rarity != CardRarity.Quest)
+                        && c.Rarity != CardRarity.Curse)
             .Distinct()
             .ToList();
 
         if (allCards.Count == 0)
             return;
 
-        // 先逐张消耗（消耗动画快，不影响体验）
-        foreach (var card in selected)
-            await CardCmd.Exhaust(choiceContext, card);
-
-        // 批量生成卡牌，一步到位（单次动画）
-        var newCards = CardFactory.GetForCombat(
-            Owner, allCards, count,
-            Owner.RunState.Rng.CombatCardGeneration).ToList();
-
-        // 批量升级（无动画）
-        CardCmd.Upgrade(newCards, CardPreviewStyle.None);
-
-        // 首次打出免费
-        foreach (var card in newCards)
+        // 逐张处理：消耗手牌 → 生成升级卡 → 加入手牌 → 首次免费
+        for (var i = 0; i < count; i++)
         {
-            card.EnergyCost.SetUntilPlayed(0);
-            card.SetStarCostUntilPlayed(0);
-        }
+            // 消耗手牌（进消耗牌堆）
+            await CardCmd.Exhaust(choiceContext, selected[i]!);
 
-        // 批量加入手牌——单次飞入动画代替逐张
-        await CardPileCmd.Add(newCards, PileType.Hand);
+            // 生成随机卡牌
+            var canonical = Owner.PlayerRng.Transformations.NextItem(allCards);
+            if (canonical == null) continue;
+            var newCard = Owner.Creature.CombatState!.CreateCard(canonical, Owner);
+
+            // 升级
+            if (newCard.IsUpgradable)
+                CardCmd.Upgrade(newCard);
+
+            // 首次打出免费（能量+星辉）
+            newCard.EnergyCost.SetUntilPlayed(0);
+            newCard.SetStarCostUntilPlayed(0);
+
+            // 加入手牌
+            await CardPileCmd.AddGeneratedCardToCombat(newCard, PileType.Hand, Owner);
+        }
 
         // 获得消耗数量的能量
         await PlayerCmd.GainEnergy(count, Owner);
