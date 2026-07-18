@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Godot;
 using HarmonyLib;
@@ -137,7 +138,7 @@ public static class DamagePreview
         _playerLabel.Position = new Vector2(0, -60);
 
         _playerTween = _playerLabel.CreateTween();
-        _playerTween.SetLoops();
+        _playerTween!.SetLoops();
         _playerTween.SetParallel();
         _playerTween.TweenProperty(_playerLabel, "position:y", -55, 1.0f)
             .SetTrans(Tween.TransitionType.Sine);
@@ -145,7 +146,7 @@ public static class DamagePreview
             .SetTrans(Tween.TransitionType.Sine);
     }
 
-    private static bool IsValid(GodotObject? obj)
+    private static bool IsValid([NotNullWhen(true)] GodotObject? obj)
     {
         if (obj == null) return false;
         try
