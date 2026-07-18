@@ -1,0 +1,11 @@
+{
+  "id": "ShunMod_AiTeammate",
+  "name": "ShunMod AI Teammate",
+  "author": "yehuoshun",
+  "description": "AI-controlled teammates for local singleplayer runs. Forked from SallyHong2347/sts2-ai-teammate, adapted for current game version.",
+  "version": "1.0.0",
+  "has_pck": false,
+  "has_dll": true,
+  "affects_gameplay": true,
+  "dependencies": ["ShunMod_Core"]
+}

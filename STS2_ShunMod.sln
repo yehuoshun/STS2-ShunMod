@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShunMod.Tweaks", "ShunMod.T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShunMod.Compat", "ShunMod.Compat\ShunMod.Compat.csproj", "{COMPAT-GUID}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShunMod.AiTeammate", "ShunMod.AiTeammate\ShunMod.AiTeammate.csproj", "{BFC6ACF7-EAEC-4397-8BDB-B608EE3DA0B9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{COMPAT-GUID}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{COMPAT-GUID}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{COMPAT-GUID}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFC6ACF7-EAEC-4397-8BDB-B608EE3DA0B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFC6ACF7-EAEC-4397-8BDB-B608EE3DA0B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFC6ACF7-EAEC-4397-8BDB-B608EE3DA0B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFC6ACF7-EAEC-4397-8BDB-B608EE3DA0B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
