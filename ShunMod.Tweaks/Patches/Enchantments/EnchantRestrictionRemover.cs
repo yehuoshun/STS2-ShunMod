@@ -5,6 +5,9 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 
+// ReSharper disable UnusedMember.Local — Harmony 反射调用
+// ReSharper disable InconsistentNaming — Harmony __result 约定
+
 namespace ShunMod.Tweaks.Patches.Enchantments;
 
 /// <summary>
@@ -20,16 +23,18 @@ internal static class EnchantRestrictionRemover
     public static void ApplyAll(Harmony harmony)
     {
         var enchantmentType = typeof(EnchantmentModel);
+        var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+
         var canEnchant = enchantmentType.GetMethod(
             nameof(EnchantmentModel.CanEnchant),
-            BindingFlags.Public | BindingFlags.Instance,
+            flags,
             null,
             [typeof(CardModel)],
             null);
 
         var canEnchantCardType = enchantmentType.GetMethod(
             nameof(EnchantmentModel.CanEnchantCardType),
-            BindingFlags.Public | BindingFlags.Instance,
+            flags,
             null,
             [typeof(CardType)],
             null);
@@ -60,12 +65,12 @@ internal static class EnchantRestrictionRemover
                     {
                         var method = type.GetMethod(
                             nameof(EnchantmentModel.CanEnchant),
-                            BindingFlags.Public | BindingFlags.Instance,
+                            flags,
                             null,
                             [typeof(CardModel)],
                             null);
 
-                        if (method != null && method.DeclaringType == type && method != canEnchant)
+                        if (method != null && method.DeclaringType == type && method.IsVirtual && method != canEnchant)
                         {
                             var postfix = new HarmonyMethod(typeof(EnchantRestrictionRemover),
                                 nameof(ForceTruePostfix));
@@ -79,12 +84,12 @@ internal static class EnchantRestrictionRemover
                     {
                         var method = type.GetMethod(
                             nameof(EnchantmentModel.CanEnchantCardType),
-                            BindingFlags.Public | BindingFlags.Instance,
+                            flags,
                             null,
                             [typeof(CardType)],
                             null);
 
-                        if (method != null && method.DeclaringType == type && method != canEnchantCardType)
+                        if (method != null && method.DeclaringType == type && method.IsVirtual && method != canEnchantCardType)
                         {
                             var prefix = new HarmonyMethod(typeof(EnchantRestrictionRemover),
                                 nameof(SkipAndReturnTrue));
@@ -108,12 +113,14 @@ internal static class EnchantRestrictionRemover
 
     /// <summary>
     ///     CanEnchant Postfix：强制返回 true（保留原方法执行的副作用，但覆盖返回值）。
+    ///     CardModel 参数为 null 时不覆盖结果（保留原始逻辑），匹配旧 SpiralCanEnchantPatch 行为。
     /// </summary>
     [SuppressMessage("ReSharper", "UnusedMember.Local")]
     [SuppressMessage("ReSharper", "InconsistentNaming")]
-    private static void ForceTruePostfix(ref bool __result)
+    private static void ForceTruePostfix(CardModel __0, ref bool __result)
     {
-        __result = true;
+        if (__0 != null)
+            __result = true;
     }
 
     /// <summary>
