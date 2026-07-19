@@ -17,11 +17,11 @@ public static class ForgePullBladesToHandPatch
     [HarmonyPostfix]
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony __result 约定")]
     [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Harmony 反射调用")]
-    private static void Postfix(Task<IEnumerable<SovereignBlade>> __result, Player player)
+    private static async void Postfix(Task<IEnumerable<SovereignBlade>> __result, Player player)
     {
         try
         {
-            var blades = __result.GetAwaiter().GetResult();
+            await __result;
 
             if (player.PlayerCombatState == null) return;
             if (CombatManager.Instance.IsOverOrEnding) return;
@@ -32,7 +32,7 @@ public static class ForgePullBladesToHandPatch
                 .ToList();
 
             foreach (var blade in bladesToPull)
-                CardPileCmd.Add(blade, PileType.Hand).GetAwaiter().GetResult();
+                await CardPileCmd.Add(blade, PileType.Hand);
         }
         catch (Exception ex)
         {
