@@ -26,7 +26,6 @@ public static class ContentRegistry
             var cardAttr = type.GetCustomAttribute<CardPoolAttribute>();
             if (cardAttr != null)
             {
-                ModelDb.Inject(type);
                 ModHelper.AddModelToPool(cardAttr.PoolType, type);
                 cardCount++;
                 continue;
@@ -34,7 +33,6 @@ public static class ContentRegistry
 
             var relicAttr = type.GetCustomAttribute<RelicPoolAttribute>();
             if (relicAttr == null) continue;
-            ModelDb.Inject(type);
             ModHelper.AddModelToPool(relicAttr.PoolType, type);
             relicCount++;
         }
