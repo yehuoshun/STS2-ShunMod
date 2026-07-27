@@ -72,7 +72,7 @@ public static class SolidTimeRunePatch
         try
         {
             var owner = OwnerProperty?.GetValue(__instance) as Player;
-            if (owner == null || combatCard == null)
+            if (owner == null)
             {
                 deckCard = null;
                 __result = false;
