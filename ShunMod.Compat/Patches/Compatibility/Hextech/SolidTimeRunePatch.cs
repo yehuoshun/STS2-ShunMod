@@ -16,6 +16,8 @@ namespace ShunMod.Compat.Patches.Compatibility.Hextech;
 // 只检查 deckCard 是否为能力卡且存在于牌组中。
 // ═══════════════════════════════════════════════════════════════════════════════
 
+// ReSharper disable UnusedMember.Local — Prefix 由 Harmony 反射调用
+// ReSharper disable InconsistentNaming — Harmony __instance / __result 命名约定
 public static class SolidTimeRunePatch
 {
     private const string ModId = ModEntry.ModId;
@@ -59,6 +61,7 @@ public static class SolidTimeRunePatch
     ///     修改后：
     ///         if (deckCard.Type == CardType.Power)
     /// </summary>
+    // ReSharper disable RedundantAssignment — __result 全部路径覆盖，Rider 认为最后一条多余
     private static bool Prefix(
         object __instance,
         CardModel combatCard,
