@@ -44,10 +44,18 @@ public static class SolidTimeRunePatch
             ? AccessTools.Method(SolidTimeRuneType, "AppendStoredCard")
             : null;
 
-    private static readonly MethodInfo? FlashMethod =
-        SolidTimeRuneType?.BaseType != null
-            ? AccessTools.Method(SolidTimeRuneType.BaseType, "Flash")
-            : null;
+    private static readonly MethodInfo? FlashMethod = GetFlashMethod();
+
+    private static MethodInfo? GetFlashMethod()
+    {
+        if (SolidTimeRuneType == null) return null;
+        for (var t = SolidTimeRuneType; t != null; t = t.BaseType)
+        {
+            var m = AccessTools.Method(t, "Flash");
+            if (m != null) return m;
+        }
+        return null;
+    }
 
     private static bool _applied;
 
@@ -168,7 +176,7 @@ public static class SolidTimeRunePatch
             Log.Error($"[SolidTimeRunePatch/AfterCardPlayed] {ex.GetType().Name}: {ex.Message}");
         }
 
-        // 跳过原版 AfterCardPlayed（原版 TryGetDeckPower 会返回 false，只会 goto end）
-        return false;
+        // 继续走原版 AfterCardPlayed（TryGetDeckPower 返回 false，只会 goto end，无事发生）
+        return true;
     }
 }
