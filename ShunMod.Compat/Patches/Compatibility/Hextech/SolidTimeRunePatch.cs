@@ -66,14 +66,15 @@ public static class SolidTimeRunePatch
     private static bool Prefix(
         object __instance,
         CardModel combatCard,
-        ref CardModel deckCard,
+        ref CardModel? deckCard,
         ref bool __result)
     {
         try
         {
             var owner = OwnerProperty?.GetValue(__instance) as Player;
-            if (owner == null)
+            if (owner == null || combatCard == null)
             {
+                deckCard = null;
                 __result = false;
                 return false;
             }
