@@ -84,17 +84,44 @@ ShunMod.Core          ← 基础框架，无依赖
 
 ---
 
-## 构建
+## 使用指引
 
-### 本地 build
+> 修改此文档体系（模板/结构/坑点）前先读 [`docs/UPDATE.md`](./docs/UPDATE.md)。
+
+### 新文件模板
+
+`docs/templates/` 目录下有 4 个模板文件，新建卡牌/遗物/Patch/休息处选项时先复制对应模板：
+
+| 模板 | 路径 |
+|------|------|
+| 新卡牌 | `docs/templates/NewCard.cs.txt` |
+| 新遗物 | `docs/templates/NewRelic.cs.txt` |
+| 新 Harmony Patch | `docs/templates/NewPatch.cs.txt` |
+| 新休息处选项 | `docs/templates/NewRestSite.cs.txt` |
+
+每个模板内嵌了检查清单，逐项核对后再提交。
+
+### 构建
+
+#### 本地 build
 
 - 全量：`dotnet build`（或 Rider 按 F9）
 - 单模块：`dotnet build ShunMod.Shun/ShunMod.Shun.csproj`
 - Rider 已配好 4 个独立 Build 配置（Build: Core/Shun/Tweaks/Compat），可添加到 Services 窗口管理
 
-### CI
+#### CI
 
 GitHub Actions 自动触发，无需本地 build。
+
+**验证流程**：
+
+```
+Agent 写代码 → 复制模板 → 填充逻辑
+         ↓
+git commit + push → CI build
+         ↓
+CI 失败 → 回传错误 → Agent 修 → 再来一轮
+```
 
 ---
 
@@ -105,3 +132,7 @@ GitHub Actions 自动触发，无需本地 build。
 3. **Shun 模块的 .pck 打包**由 BSchneppe.StS2.PckPacker 在构建后自动执行，改 assets 后要重新 build。
 4. **AssemblyLoad 延迟加载**：兼容补丁的 `OnAssemblyLoad` 订阅了 `AppDomain.CurrentDomain.AssemblyLoad`，改 `Apply` 逻辑时注意取消订阅，防止内存泄漏。
 5. **Rider 独立模块 Build**：配置在 `.idea/runConfigurations/`，只有 build 不 run。添加到 Services 窗口后可单独 build 任意模块。
+6. **RestSiteOption 的本地化注册必须走 Patch**：不能直接在 ModEntry.Initialize 中注册（此时 LocManager 未就绪），必须挂载到 `NMainMenu._Ready` 的 Harmony Postfix 中。参照 `EnchantLocalizationPatch`。
+7. **ShunRelicModel 泛型**：继承 `ShunRelicModel<T>` 时 T 必须填自身类，否则图片路径生成失败。
+8. **非无色卡牌需传 color 参数**：`ShunCard.PortraitPath<T>("ironclad")`，不加参数默认 "colorless"。
+9. **CI 依赖 deps release**：`deps/` 目录下载自 GitHub Release，版本号在 `.github/workflows/` 中。如果本地缺 deps 文件，build 会失败。

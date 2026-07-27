@@ -1,4 +1,5 @@
 using HarmonyLib;
+using ShunMod.Compat.Patches.Compatibility.Hextech;
 using ShunMod.Compat.Patches.Compatibility.MoreEnchantments;
 using ShunMod.Compat.Patches.Compatibility.Shadowverse;
 
@@ -24,6 +25,9 @@ internal static class CompatibilityPatches
 
         // MoreEnchant 附魔模组：解除 UI 层附魔上限检查（附魔已满拦截）
         MoreEnchantPayCheckPatch.Apply(harmony);
+
+        // Hextech 海克斯模组：SolidTimeRune 移除 pile.Type == 6 限制
+        SolidTimeRunePatch.Apply(harmony);
         // ──────────────────────────
     }
 }

@@ -4,7 +4,7 @@ using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 
-namespace ShunMod.Tweaks.Patches.Compat;
+namespace ShunMod.Compat.Patches.Compatibility.Hextech;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SolidTimeRune.TryGetDeckPower 修改
@@ -16,32 +16,40 @@ namespace ShunMod.Tweaks.Patches.Compat;
 // 只检查 deckCard 是否为能力卡且存在于牌组中。
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// ReSharper disable UnusedType.Global — Harmony 反射调用
-// ReSharper disable UnusedMember.Local — Harmony 反射调用
-// ReSharper disable InconsistentNaming — Harmony __instance 命名约定
-[HarmonyPatch]
-public static class SolidTimeRuneTryGetDeckPowerPatch
+public static class SolidTimeRunePatch
 {
-    private static Type? _solidTimeRuneType;
-    private static PropertyInfo? _ownerProperty;
+    private const string ModId = ModEntry.ModId;
 
-    /// <summary>
-    ///     动态查找 HextechRunes.SolidTimeRune.TryGetDeckPower，
-    ///     因为 HextechRunes 是外部 mod，编译时没有引用。
-    /// </summary>
-    private static MethodInfo? TargetMethod()
+    private static readonly Type? SolidTimeRuneType =
+        AccessTools.TypeByName("HextechRunes.SolidTimeRune");
+
+    private static readonly PropertyInfo? OwnerProperty =
+        SolidTimeRuneType?.BaseType != null
+            ? AccessTools.Property(SolidTimeRuneType.BaseType, "Owner")
+            : null;
+
+    private static bool _applied;
+
+    public static void Apply(Harmony harmony)
     {
-        _solidTimeRuneType = AccessTools.TypeByName("HextechRunes.SolidTimeRune");
-        if (_solidTimeRuneType == null)
+        if (_applied) return;
+        if (SolidTimeRuneType == null)
         {
             Log.Warn("[SolidTimeRunePatch] HextechRunes.SolidTimeRune not found — skipping");
-            return null;
+            return;
         }
 
-        // Owner 定义在 HextechRelicBase 或其父类上
-        _ownerProperty = AccessTools.Property(_solidTimeRuneType.BaseType, "Owner");
+        var target = AccessTools.Method(SolidTimeRuneType, "TryGetDeckPower");
+        if (target == null)
+        {
+            Log.Warn("[SolidTimeRunePatch] TryGetDeckPower not found — skipping");
+            return;
+        }
 
-        return AccessTools.Method(_solidTimeRuneType, "TryGetDeckPower");
+        var prefix = AccessTools.Method(typeof(SolidTimeRunePatch), nameof(Prefix));
+        harmony.Patch(target, prefix: new HarmonyMethod(prefix));
+        _applied = true;
+        Log.Info("[SolidTimeRunePatch] Applied — removed pile.Type == 6 restriction");
     }
 
     /// <summary>
@@ -59,7 +67,7 @@ public static class SolidTimeRuneTryGetDeckPowerPatch
     {
         try
         {
-            var owner = _ownerProperty?.GetValue(__instance) as Player;
+            var owner = OwnerProperty?.GetValue(__instance) as Player;
             if (owner == null)
             {
                 __result = false;

@@ -1,0 +1,56 @@
+// ─── 模板：Harmony Patch 补丁 ───────────────────────────────────────────
+// 用法：复制此文件，替换目标类和方法，填充逻辑。
+// 检查清单（提交前逐项过）：
+//   [ ] [HarmonyPatch] 标记正确
+//   [ ] 补丁方法命名：Prefix / Postfix / Transpiler
+//   [ ] 命名空间：ShunMod.{模块}.Patches.{子目录}
+//   [ ] 反射调用补丁：实现 TargetMethod() 返回 MethodInfo
+//   [ ] 类名格式：{功能}Patch
+//   [ ] git commit + push
+
+using System.Diagnostics.CodeAnalysis;
+using HarmonyLib;
+using MegaCrit.Sts2.Core.Logging;
+
+namespace ShunMod.Tweaks.Patches; // 或 ShunMod.Shun.Patches / ShunMod.Compat.Patches
+
+// ReSharper disable UnusedType.Global — Harmony 反射调用
+// ReSharper disable UnusedMember.Local — Harmony 反射调用
+// ReSharper disable InconsistentNaming — Harmony __instance/__result/__state 约定
+
+/// <summary>
+///     {功能描述} — {一句话说明补丁做了什么}。
+/// </summary>
+[HarmonyPatch(typeof(TargetType), nameof(TargetType.MethodName))] // 或 [HarmonyPatch] + TargetMethod()
+[SuppressMessage("ReSharper", "UnusedType.Global")]
+[SuppressMessage("ReSharper", "UnusedMember.Local")]
+internal static class YourFeaturePatch
+{
+    // ── 方案 A：直接引用（已知目标类型） ──
+    // [HarmonyPrefix] — 在原始方法之前执行，return false 跳过原始方法
+    // [HarmonyPostfix] — 在原始方法之后执行
+    // [HarmonyTranspiler] — 修改 IL 指令
+
+    [HarmonyPostfix]
+    private static void Postfix(TargetType __instance)
+    {
+        // __instance — 原始方法的 this 实例
+        // __result — 原始方法的返回值（ref 或 out 参数需用 ref/out 修饰）
+        // __state — Prefix 和 Postfix 之间的状态传递，配合 __state 参数
+    }
+
+    // ── 方案 B：反射调用（未知目标类型，如 Compat 模块） ──
+    /*
+    private static MethodInfo? TargetMethod()
+    {
+        return AccessTools.Method(typeof(TargetType), "MethodName");
+    }
+
+    private static bool Prefix(object __instance, ref Task __result)
+    {
+        // 反射方式：参数类型用 object
+        // 用 CreatureReflection 等工具类访问私有成员
+        return true; // true 继续执行原始方法，false 跳过
+    }
+    */
+}

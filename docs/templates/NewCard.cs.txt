@@ -1,0 +1,65 @@
+// ─── 模板：新卡牌 ───────────────────────────────────────────────────────
+// 用法：复制此文件，替换类名 ShunModYourCardName，填充逻辑。
+// 检查清单（提交前逐项过）：
+//   [ ] 类名格式：ShunMod{功能描述}
+//   [ ] [CardPool(typeof(池类型))] — 可选：ColorlessCardPool / IroncladCardPool / SilentCardPool 等
+//   [ ] 命名空间：ShunMod.Shun.Cards
+//   [ ] 本地化键：SHUN_MOD_{大写下划线名}.title / .description
+//   [ ] 本地化文件：ShunMod.Shun/assets/localization/eng+zhs/cards.json
+//   [ ] 图片资源：ShunMod.Shun/assets/images/<card_portrait_name>.png
+//   [ ] 非无色卡牌：ShunCard.PortraitPath<T>() 传 color 参数
+//   [ ] git commit + push
+
+using System.Diagnostics.CodeAnalysis;
+using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.CardPools;
+using MegaCrit.Sts2.Core.Nodes.CommonUi;
+using ShunMod.Core.Core.Registry;
+using ShunMod.Shun.Base;
+
+namespace ShunMod.Shun.Cards;
+
+/// <summary>
+///     {功能描述} — {一句话说明效果}。
+///     {费用}费→{升级后费用}费（升级后），{类型}，{稀有度}，{颜色}。
+/// </summary>
+[CardPool(typeof(ColorlessCardPool))]
+[SuppressMessage("ReSharper", "UnusedType.Global")]
+public class ShunModYourCardName() : CardModel(
+    energyCost: 2,                    // 费用
+    cardType: CardType.Skill,         // CardType.Skill / Attack / Power
+    cardRarity: CardRarity.Rare,      // CardRarity.Rare / Uncommon / Common
+    targetType: TargetType.Self       // TargetType.Self / SingleEnemy / AllEnemy / None
+)
+{
+    public override string PortraitPath => ShunCard.PortraitPath<ShunModYourCardName>();
+    // 非无色卡牌传 color 参数：ShunCard.PortraitPath<ShunModYourCardName>("ironclad");
+
+    protected override Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
+        var owner = Owner;
+        if (owner.PlayerCombatState == null)
+            return Task.CompletedTask;
+
+        // ── 卡牌效果逻辑写这里 ──
+        // 常用 API：
+        //   CardCmd.Upgrade(card, CardPreviewStyle.None) — 升级卡牌
+        //   CreatureCmd.GainMaxHp(owner.Creature, amount) — 增加最大生命
+        //   CreatureCmd.ApplyPower(owner.Creature, power, stacks) — 施加力量/敏捷等
+        //   CardCmd.Draw(owner, count) — 抽牌
+        //   CardCmd.Exhaust(owner, card) — 消耗
+        //   CardCmd.CreateCardInHand(owner, card) — 在手牌中生成卡牌
+        //   DamageCmd.DealDamage(owner, target, damage, DamageType) — 造成伤害
+
+        return Task.CompletedTask;
+    }
+
+    protected override void OnUpgrade()
+    {
+        base.OnUpgrade();
+        // 升级效果，例如：EnergyCost.UpgradeBy(-1);
+    }
+}

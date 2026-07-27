@@ -1,0 +1,63 @@
+// ─── 模板：休息处选项 ───────────────────────────────────────────────────
+// 用法：复制此文件，替换类名，填充逻辑。
+// 检查清单（提交前逐项过）：
+//   [ ] 类名格式：{功能}RestSiteOption
+//   [ ] 继承 RestSiteOption
+//   [ ] 命名空间：ShunMod.Shun.RestSite
+//   [ ] OptionId 唯一（不与其他选项冲突）
+//   [ ] 注册本地化：在 RegisterLocalization() 中注入条目
+//   [ ] 注册 Patch：在 ShunMod.Shun.Patches 下新建 Patch 类，Postfix RestSiteOption.Generate
+//   [ ] 本地化文件：ShunMod.Shun/assets/localization/eng+zhs/rest_site_ui.json
+//   [ ] git commit + push
+
+using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Entities.RestSite;
+using MegaCrit.Sts2.Core.Localization;
+using MegaCrit.Sts2.Core.Logging;
+
+namespace ShunMod.Shun.RestSite;
+
+/// <summary>
+///     {功能描述} — {一句话说明}。
+/// </summary>
+public class YourFeatureRestSiteOption(Player owner) : RestSiteOption(owner)
+{
+    internal const string CustomDescKey = "shunmod_your_feature_custom_desc";
+
+    public override string OptionId => "YOUR_FEATURE";
+
+    public override LocString Description
+    {
+        get
+        {
+            var desc = new LocString("rest_site_ui", CustomDescKey);
+            // desc.Add("key", value); — 模板变量
+            return desc;
+        }
+    }
+
+    /// <summary>
+    ///     在本地化表中注入选项条目。由 Patch 在 LocManager 就绪后调用。
+    /// </summary>
+    internal static void RegisterLocalization()
+    {
+        var table = LocManager.Instance.GetTable("rest_site_ui");
+        table.MergeWith(new Dictionary<string, string>
+        {
+            [CustomDescKey] = "你的选项描述文本，支持 [gold]BB 代码[/gold]"
+        });
+    }
+
+    public override async Task<bool> OnSelect()
+    {
+        // ── 选项执行逻辑写这里 ──
+        // 参考 EnchantRestSiteOption：
+        //   CardSelectCmd.FromDeckGeneric(Owner, prefs, filter) — 从牌组选牌
+        //   CardCmd.Upgrade/Exhaust/Enchant — 卡牌操作
+        // return true 表示成功执行，false 表示取消
+
+        return true;
+    }
+}

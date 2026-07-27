@@ -1,0 +1,58 @@
+// ─── 模板：新遗物 ───────────────────────────────────────────────────────
+// 用法：复制此文件，替换类名，填充逻辑。
+// 检查清单（提交前逐项过）：
+//   [ ] 类名格式：ShunMod{功能描述}
+//   [ ] [RelicPool(typeof(池类型))] — SharedRelicPool / BossRelicPool / ShopRelicPool 等
+//   [ ] 继承 ShunRelicModel<自身类>
+//   [ ] 命名空间：ShunMod.Shun.Relics
+//   [ ] 本地化键：SHUN_MOD_{大写下划线名}.title / .description / .flavor
+//   [ ] 本地化文件：ShunMod.Shun/assets/localization/eng+zhs/relics.json
+//   [ ] 图片资源：ShunMod.Shun/assets/images/<relic_icon>.png
+//   [ ] git commit + push
+
+using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Entities.Relics;
+using MegaCrit.Sts2.Core.Helpers;
+using MegaCrit.Sts2.Core.Models.RelicPools;
+using MegaCrit.Sts2.Core.Rewards;
+using MegaCrit.Sts2.Core.Rooms;
+using ShunMod.Core.Core.Registry;
+using ShunMod.Shun.Base;
+
+// ReSharper disable UnusedType.Global — 游戏框架反射使用
+// ReSharper disable UnusedType.Instantiation — 游戏框架反射实例化
+namespace ShunMod.Shun.Relics;
+
+/// <summary>
+///     {功能描述} — {一句话说明效果}。
+/// </summary>
+[RelicPool(typeof(SharedRelicPool))]
+public sealed class ShunModYourRelicName : ShunRelicModel<ShunModYourRelicName>
+{
+    public override RelicRarity Rarity => RelicRarity.Rare;
+    // RelicRarity.Rare / Uncommon / Common / Special / Boss / Starter
+
+    // 常用覆写方法：
+    //   override Task AfterPlayerTurnStart(PlayerChoiceContext, Player) — 回合开始
+    //   override Task AfterPlayerTurnEnd(PlayerChoiceContext, Player) — 回合结束
+    //   override bool TryModifyRewards(Player, List<Reward>, AbstractRoom?) — 战利品修改
+    //   override bool TryModifyRewardsPostCombat(Player, List<Reward>) — 战后战利品
+
+    public override bool TryModifyRewards(Player player, List<Reward> rewards, AbstractRoom? room)
+    {
+        if (player != Owner || room is not { RoomType: RoomType.Boss })
+            return false;
+
+        Flash();
+
+        // ── 遗物效果逻辑写这里 ──
+        // Flash() — 遗物闪烁动画
+        // CreatureCmd.GainMaxHp(Owner.Creature, amount) — 增加最大生命
+        // PotionFactory.CreateRandomPotionOutOfCombat(...) — 生成药水
+        // GoldCmd.Add(...) — 加金币
+        // CardCmd.CreateCardReward(...) — 卡牌奖励
+
+        return false; // 返回 false 表示不阻止原有奖励
+    }
+}
