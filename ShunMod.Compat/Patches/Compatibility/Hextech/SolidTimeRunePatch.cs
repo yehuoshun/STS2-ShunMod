@@ -13,8 +13,9 @@ namespace ShunMod.Compat.Patches.Compatibility.Hextech;
 //   原效果：打出牌组内的能力卡时，将其从牌组中移除。
 //   修改后：打出能力卡时，将其从牌组中移除（如果是牌组中存在的卡）。
 //
-// 关键改动：移除 pile.Type == 6（卡必须在牌组堆中）的限制，
-// 只检查 deckCard 是否为能力卡且存在于牌组中。
+// 改动：
+//   1. 移除 pile.Type == 6（卡必须在牌组堆中）限制
+//   2. DeckVersion 为 null 时按卡牌 CanconicalInstance.Id 在牌组中查找匹配
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // ReSharper disable UnusedMember.Local — Prefix 由 Harmony 反射调用
@@ -56,11 +57,15 @@ public static class SolidTimeRunePatch
     }
 
     /// <summary>
-    ///     Prefix 替换原逻辑：移除 pile.Type == 6 检查。
+    ///     Prefix 替换原逻辑：
+    ///     1. 移除 pile.Type == 6 检查
+    ///     2. DeckVersion 为 null 时按 card canonical ID 在牌组中查找匹配
+    ///
     ///     原版：
     ///         if (pile != null && pile.Type == 6 && deckCard.Type == 3)
     ///     修改后：
-    ///         if (deckCard.Type == CardType.Power)
+    ///         if (deckCard.Type == CardType.Power)  // 优先判 DeckVersion
+    ///         或按 canonical ID 在牌组中匹配            // DeckVersion 为 null 时补底
     /// </summary>
     // ReSharper disable RedundantAssignment — __result 全部路径覆盖，Rider 认为最后一条多余
     private static bool Prefix(
@@ -79,15 +84,35 @@ public static class SolidTimeRunePatch
                 return false;
             }
 
+            // ── 路径 A：直接通过 DeckVersion 匹配 ──
             deckCard = combatCard.DeckVersion;
-
-            // 修改点：不再要求卡必须在"牌组堆"（pile.Type == 6）中
-            // 只要 deckCard 是能力卡且牌组中确实存在，就算合法
             if (deckCard != null
                 && deckCard.Owner == owner
-                && deckCard.Type == CardType.Power)
+                && deckCard.Type == CardType.Power
+                && owner.Deck.Cards.Contains(deckCard))
             {
-                __result = owner.Deck.Cards.Contains(deckCard);
+                __result = true;
+                return false;
+            }
+
+            // ── 路径 B：DeckVersion 为 null 或不在牌组中 → 按 canonical ID 查找 ──
+            var canonicalId = combatCard.CanonicalInstance?.Id;
+            if (canonicalId == null)
+            {
+                deckCard = null;
+                __result = false;
+                return false;
+            }
+
+            // 在牌组中找同 ID 的能力卡（不限制 pile type）
+            deckCard = owner.Deck.Cards.FirstOrDefault(c =>
+                c.CanonicalInstance.Id.Category == canonicalId.Category
+                && c.CanonicalInstance.Id.Entry == canonicalId.Entry
+                && c.Type == CardType.Power);
+
+            if (deckCard != null)
+            {
+                __result = true;
                 return false;
             }
         }
