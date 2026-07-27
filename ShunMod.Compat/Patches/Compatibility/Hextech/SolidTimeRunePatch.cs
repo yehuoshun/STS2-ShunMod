@@ -96,13 +96,7 @@ public static class SolidTimeRunePatch
             }
 
             // ── 路径 B：DeckVersion 为 null 或不在牌组中 → 按 canonical ID 查找 ──
-            var canonicalId = combatCard.CanonicalInstance?.Id;
-            if (canonicalId == null)
-            {
-                deckCard = null;
-                __result = false;
-                return false;
-            }
+            var canonicalId = combatCard.CanonicalInstance.Id;
 
             // 在牌组中找同 ID 的能力卡（不限制 pile type）
             deckCard = owner.Deck.Cards.FirstOrDefault(c =>
