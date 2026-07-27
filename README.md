@@ -62,6 +62,7 @@
 | 🖼️ 影之诗背景包限制解除 | Compat | 影之诗模组背景包启用数从 7→无限，Patch BgPackManager。纯反射，无依赖。 |
 | 📚 附魔叠加上限解除 | Compat | 解除 MoreEnchantmentsMod 单卡附魔叠加上限（CanApply 跳过上限检查）。 |
 | 📚 附魔已满拦截解除 | Compat | 解除 MoreEnchantmentsMod 附魔界面 UI 层上限检查，上限后仍可继续附魔。 |
+| ⏳ 凝固时间符文修改 | Compat | 海克斯模组 SolidTimeRune：打出能力卡时移除牌组中对应卡（取消 pile.Type == 6 限制），战斗开始时触发所有被移除牌效果。 |
 
 ---
 
@@ -147,9 +148,15 @@ STS2-ShunMod/
 │   ├── ModEntry.cs                     # Harmony.PatchAll + CompatibilityPatches
 │   └── Patches/Compatibility/
 │       ├── CompatibilityPatches.cs         # 统一入口
-│       ├── ShadowverseEvolutionPointPatch.cs  # 影之诗进化点解除
-│       ├── ShadowverseSkinLimitPatch.cs       # 影之诗皮肤限制解除
-│       └── ShadowverseBgLimitPatch.cs         # 影之诗背景包限制解除
+│       ├── Shadowverse/
+│       │   ├── ShadowverseEvolutionPointPatch.cs  # 影之诗进化点解除
+│       │   ├── ShadowverseSkinLimitPatch.cs       # 影之诗皮肤限制解除
+│       │   └── ShadowverseBgLimitPatch.cs         # 影之诗背景包限制解除
+│       ├── MoreEnchantments/
+│       │   ├── MoreEnchantStackPatch.cs           # 附魔叠加上限解除
+│       │   └── MoreEnchantPayCheckPatch.cs        # 附魔已满拦截解除
+│       └── Hextech/
+│           └── SolidTimeRunePatch.cs              # 凝固时间符文 pile.Type == 6 限制解除
 │
 │   └── assets/                         # Godot 资源（图片/本地化）
 │       ├── images/                     # 卡牌/遗物/事件美术

@@ -36,7 +36,7 @@ ShunMod.Core          ← 基础框架，无依赖
 | 加休息处选项 | `ShunMod.Shun/RestSite/` 新建类，继承 `RestSiteOption` + Patch `RestSiteOption.Generate` |
 | 加游戏机制修改 | `ShunMod.Tweaks/Patches/` 新建 Harmony Patch 类 |
 | 加伤害预览/预测 | `ShunMod.Tweaks/Patches/Combat/DamagePreviewPatch.cs` 已有 `DamagePreview` 静态类 + `DamagePreviewTurnStart` / `DamagePreviewCardPlayed` 两个 Hook |
-| 加第三方兼容 | `ShunMod.Compat/Patches/Compatibility/` 新建类，在 `CompatibilityPatches.ApplyAll()` 中注册 |
+| 加第三方兼容 | `ShunMod.Compat/Patches/Compatibility/{厂商}/` 新建类，在 `CompatibilityPatches.ApplyAll()` 中注册 |
 | 改 Core 框架工具 | `ShunMod.Core/Core/` 下对应工具类 |
 | 改本地化文本 | `ShunMod.Shun/assets/localization/` 下对应 JSON |
 | 改卡牌/遗物图片 | `ShunMod.Shun/assets/images/` |
@@ -54,6 +54,7 @@ ShunMod.Core          ← 基础框架，无依赖
 - 所有兼容补丁**纯反射实现**，不硬依赖目标模组 DLL
 - 统一入口 `CompatibilityPatches.ApplyAll()`，按类型分组
 - 每个补丁类有独立的 `Apply(Harmony)` 静态方法
+- 按目标模组分目录：`Hextech/` / `Shadowverse/` / `MoreEnchantments/`
 
 ### 共享补丁模式（LimitPatchHelper）
 
