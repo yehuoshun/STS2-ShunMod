@@ -89,13 +89,13 @@ internal static class EnchantRestrictionRemover
                             [typeof(CardType)],
                             null);
 
-                        if (method != null && method.DeclaringType == type && method.IsVirtual && method != canEnchantCardType)
-                        {
-                            var prefix = new HarmonyMethod(typeof(EnchantRestrictionRemover),
-                                nameof(SkipAndReturnTrue));
-                            harmony.Patch(method, prefix: prefix);
-                            patched.Add($"{type.Name}.CanEnchantCardType");
-                        }
+                        if (method == null || method.DeclaringType != type || !method.IsVirtual || method == canEnchantCardType)
+                            continue;
+
+                        var prefix = new HarmonyMethod(typeof(EnchantRestrictionRemover),
+                            nameof(SkipAndReturnTrue));
+                        harmony.Patch(method, prefix: prefix);
+                        patched.Add($"{type.Name}.CanEnchantCardType");
                     }
                 }
             }
