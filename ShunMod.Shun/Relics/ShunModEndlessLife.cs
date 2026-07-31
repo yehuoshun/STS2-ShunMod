@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -10,8 +11,6 @@ using MegaCrit.Sts2.Core.Runs;
 using ShunMod.Core.Core.Registry;
 using ShunMod.Shun.Base;
 
-// ReSharper disable UnusedType.Global — ContentRegistry 反射使用
-// ReSharper disable UnusedType.Instantiation — ContentRegistry 反射实例化
 namespace ShunMod.Shun.Relics;
 
 /// <summary>
@@ -21,6 +20,7 @@ namespace ShunMod.Shun.Relics;
 ///     无使用次数限制。
 /// </summary>
 [RelicPool(typeof(SharedRelicPool))]
+[SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
 public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
 {
     private static readonly LocString SelectionPrompt = new("card_selection", "TO_EXHAUST");
