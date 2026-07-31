@@ -45,14 +45,18 @@ public class EnchantRestSiteOption(Player owner) : RestSiteOption(owner)
     }
 
     /// <summary>
-    ///     在本地化表中注入 ENCHANT 选项条目。由 ModEntry.Initialize 在启动时调用一次。
+    ///     在本地化表中注入 ENCHANT 选项条目。由 EnchantLocalizationPatch 在 LocManager 就绪后调用。
+    ///     代码注册作为 .pck JSON 加载失败时的兜底（实际中英文 JSON 文件也有同名键）。
     /// </summary>
     internal static void RegisterLocalization()
     {
         var table = LocManager.Instance.GetTable("rest_site_ui");
         table.MergeWith(new Dictionary<string, string>
         {
-            [CustomDescKey] = "为牌组中的一张牌施加 [gold]{enchantment}：{enchant_desc}[/gold]"
+            ["OPTION_ENCHANT.name"] = "附魔",
+            ["OPTION_ENCHANT.description"] = "为[gold]牌组[/gold]中的一张牌随机施加一个[gold]附魔[/gold]。",
+            ["OPTION_ENCHANT.prompt"] = "选择一张要附魔的牌",
+            [CustomDescKey] = "为牌组中的一张牌施加 [gold]{enchantment}：{enchant_desc}[/gold]",
         });
     }
 
