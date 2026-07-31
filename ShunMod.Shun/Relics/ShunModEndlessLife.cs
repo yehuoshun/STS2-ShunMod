@@ -37,9 +37,6 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
     /// </summary>
     public async Task ExecuteRightClick(PlayerChoiceContext choiceContext)
     {
-        if (Owner == null)
-            return;
-
         // 右键即闪烁，立即视觉反馈
         Flash();
 
