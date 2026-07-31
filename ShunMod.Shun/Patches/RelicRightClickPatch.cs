@@ -53,9 +53,6 @@ internal static class RelicRightClickPatch
         if (relicNode.Model is not ShunModEndlessLife endlessLife)
             return;
 
-        if (endlessLife.Owner == null)
-            return;
-
         // 战斗中进行
         if (!CombatManager.Instance.IsInProgress
             || CombatManager.Instance.IsEnding)
