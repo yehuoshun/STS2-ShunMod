@@ -54,7 +54,7 @@ public static class SolidTimeRunePatch
         }
 
         var prefix = AccessTools.Method(typeof(SolidTimeRunePatch), nameof(Prefix));
-        harmony.Patch(target, prefix: new HarmonyMethod(prefix));
+        harmony.Patch(target, new HarmonyMethod(prefix));
         _applied = true;
         Log.Info("[SolidTimeRunePatch] Applied");
     }
@@ -80,8 +80,8 @@ public static class SolidTimeRunePatch
             if (deckCard != null)
             {
                 __result = deckCard.Owner == owner
-                    && deckCard.Type == CardType.Power
-                    && owner.Deck.Cards.Contains(deckCard);
+                           && deckCard.Type == CardType.Power
+                           && owner.Deck.Cards.Contains(deckCard);
                 return false;
             }
 
