@@ -1,3 +1,4 @@
+using System.Globalization;
 using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -39,7 +40,7 @@ public class EnchantRestSiteOption(Player owner) : RestSiteOption(owner)
         {
             var desc = new LocString("rest_site_ui", CustomDescKey);
             desc.Add("enchantment", _cachedEnchantment.Title.GetFormattedText());
-            desc.Add("stacks", EnchantStacks.ToString());
+            desc.Add("stacks", EnchantStacks.ToString(CultureInfo.InvariantCulture));
             desc.Add("enchant_desc", _cachedEnchantment.DynamicDescription.GetFormattedText());
             return desc;
         }
