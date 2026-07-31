@@ -25,6 +25,7 @@ internal static class RelicRightClickPatch
 
     [HarmonyPostfix]
     [SuppressMessage("ReSharper", "UnusedMember.Local")]
+    [SuppressMessage("ReSharper", "ParameterName")]
     private static void Postfix(NRelic __instance)
     {
         if (__instance.HasMeta(MetaKey))
@@ -82,7 +83,7 @@ internal static class RelicRightClickPatch
             InputEventMouseButton { ButtonIndex: MouseButton.Right } mouseButton when mouseButton.IsReleased() => true,
             InputEventAction { Action: var action } actionEvent
                 when action == MegaInput.cancel && actionEvent.IsPressed() && node.HasFocus() => true,
-            _ => false,
+            _ => false
         };
     }
 }
