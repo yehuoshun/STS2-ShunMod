@@ -1,5 +1,4 @@
 using MegaCrit.Sts2.Core.Models;
-using ShunMod.Shun.Base;
 
 namespace ShunMod.Shun.Base;
 
