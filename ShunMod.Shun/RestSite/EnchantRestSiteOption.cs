@@ -21,7 +21,7 @@ public class EnchantRestSiteOption(Player owner) : RestSiteOption(owner)
     /// </summary>
     private const int EnchantStacks = 5;
 
-    internal const string CustomDescKey = "shunmod_enchant_custom_desc";
+    private const string CustomDescKey = "shunmod_enchant_custom_desc";
 
     /// <summary>
     ///     预选的附魔，在构造时随机决定，显示在选项描述中。
