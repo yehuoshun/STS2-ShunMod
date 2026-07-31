@@ -82,7 +82,7 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
         for (var i = 0; i < count; i++)
         {
             // 消耗手牌（进消耗牌堆）
-            await CardCmd.Exhaust(choiceContext, selected[i]!);
+            await CardCmd.Exhaust(choiceContext, selected[i]);
 
             // 从全卡池随机取一张
             var canonical = Owner.PlayerRng.Transformations.NextItem(allCards);
