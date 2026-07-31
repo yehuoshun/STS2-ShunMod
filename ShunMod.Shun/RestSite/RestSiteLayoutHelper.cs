@@ -61,7 +61,7 @@ internal static class RestSiteLayoutHelper
             GrowHorizontal = control.GrowHorizontal,
             GrowVertical = control.GrowVertical,
             Columns = 1,
-            CustomMinimumSize = new Vector2(799f, 162.879f),
+            CustomMinimumSize = new Vector2(799f, 162.879f)
         };
 
         grid.AddThemeConstantOverride("h_separation", 100);
