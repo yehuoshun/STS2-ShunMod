@@ -67,8 +67,7 @@ public static class SolidTimeRunePatch
     {
         try
         {
-            var owner = OwnerProperty?.GetValue(__instance) as Player;
-            if (owner == null)
+            if (OwnerProperty?.GetValue(__instance) is not Player owner)
             {
                 deckCard = null;
                 __result = false;
