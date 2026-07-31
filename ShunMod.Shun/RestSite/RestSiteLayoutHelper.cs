@@ -12,7 +12,6 @@ internal static class RestSiteLayoutHelper
     private const float MaxLayoutWidth = 1720f;
     private const float ButtonWidth = 247f;
     private const int MaxColumnsPerRow = 10;
-    private const int DefaultHSeparation = 100;
     private const int MinHSeparation = 20;
     private const int VSeparation = 20;
     private const float MinButtonScale = 0.52f;
@@ -29,7 +28,9 @@ internal static class RestSiteLayoutHelper
 
     internal static void EnsureFlowContainer(NRestSiteRoom room)
     {
-        var control = (Control)ChoicesContainerField.GetValue(room);
+        var raw = ChoicesContainerField.GetValue(room);
+        if (raw is not Control control)
+            return;
 
         if (control is GridContainer)
             return;
@@ -201,7 +202,6 @@ internal static class RestSiteLayoutHelper
         public int Columns { get; }
         public int Rows { get; }
         public float UnscaledWidth { get; }
-        public float LayoutWidth { get; }
         public Vector2 Scale { get; }
 
         public LayoutPlan(int columns, int rows, float unscaledWidth, float layoutWidth, Vector2 scale)
@@ -209,7 +209,7 @@ internal static class RestSiteLayoutHelper
             Columns = columns;
             Rows = rows;
             UnscaledWidth = unscaledWidth;
-            LayoutWidth = layoutWidth;
+            _ = layoutWidth;
             Scale = scale;
         }
     }
