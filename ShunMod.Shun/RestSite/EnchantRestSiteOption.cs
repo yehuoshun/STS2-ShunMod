@@ -57,7 +57,7 @@ public class EnchantRestSiteOption(Player owner) : RestSiteOption(owner)
             ["OPTION_ENCHANT.name"] = "附魔",
             ["OPTION_ENCHANT.description"] = "为[gold]牌组[/gold]中的一张牌随机施加一个[gold]附魔[/gold]。",
             ["OPTION_ENCHANT.prompt"] = "选择一张要附魔的牌",
-            [CustomDescKey] = "为牌组中的一张牌施加 [gold]{enchantment}[/gold]（{stacks} 层）：{enchant_desc}",
+            [CustomDescKey] = "为牌组中的一张牌施加 [gold]{enchantment}[/gold]（{stacks} 层）：{enchant_desc}"
         });
     }
 
