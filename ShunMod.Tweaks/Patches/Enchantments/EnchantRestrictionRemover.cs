@@ -23,7 +23,7 @@ internal static class EnchantRestrictionRemover
     public static void ApplyAll(Harmony harmony)
     {
         var enchantmentType = typeof(EnchantmentModel);
-        var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+        const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
         var canEnchant = enchantmentType.GetMethod(
             nameof(EnchantmentModel.CanEnchant),
@@ -105,10 +105,9 @@ internal static class EnchantRestrictionRemover
             }
         }
 
-        if (patched.Count > 0)
-            Log.Info($"[{ModId}] EnchantRestrictionRemover: 已 Patch {patched.Count} 个方法：\n  {string.Join("\n  ", patched)}");
-        else
-            Log.Info($"[{ModId}] EnchantRestrictionRemover: 未发现需要 Patch 的附魔限制方法");
+        Log.Info(patched.Count > 0
+            ? $"[{ModId}] EnchantRestrictionRemover: 已 Patch {patched.Count} 个方法：\n  {string.Join("\n  ", patched)}"
+            : $"[{ModId}] EnchantRestrictionRemover: 未发现需要 Patch 的附魔限制方法");
     }
 
     /// <summary>
@@ -117,10 +116,9 @@ internal static class EnchantRestrictionRemover
     /// </summary>
     [SuppressMessage("ReSharper", "UnusedMember.Local")]
     [SuppressMessage("ReSharper", "InconsistentNaming")]
-    private static void ForceTruePostfix(CardModel __0, ref bool __result)
+    private static void ForceTruePostfix(ref bool __result)
     {
-        if (__0 != null)
-            __result = true;
+        __result = true;
     }
 
     /// <summary>
