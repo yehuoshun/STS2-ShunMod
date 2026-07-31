@@ -24,7 +24,8 @@ namespace ShunMod.Shun.Relics;
 ///     无使用次数限制。
 /// </summary>
 [RelicPool(typeof(SharedRelicPool))]
-// ReSharper disable once UnusedType.Global — instantiated via ContentRegistry reflection
+// ReSharper disable UnusedType.Global — ContentRegistry 反射使用
+// ReSharper disable UnusedType.Instantiation — ContentRegistry 反射实例化
 public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
 {
     private static readonly LocString SelectionPrompt = new("card_selection", "TO_EXHAUST");
