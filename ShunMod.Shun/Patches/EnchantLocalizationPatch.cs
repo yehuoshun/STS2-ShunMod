@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Nodes.Screens.MainMenu;
 using ShunMod.Shun.RestSite;
