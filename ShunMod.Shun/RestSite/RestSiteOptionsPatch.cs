@@ -14,11 +14,13 @@ namespace ShunMod.Shun.RestSite;
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 internal static class RestSiteOptionsPatch
 {
+    [SuppressMessage("ReSharper", "UnusedMember.Local")]
     private static void Prefix(NRestSiteRoom __instance)
     {
         RestSiteLayoutHelper.EnsureFlowContainer(__instance);
     }
 
+    [SuppressMessage("ReSharper", "UnusedMember.Local")]
     private static void Postfix(NRestSiteRoom __instance)
     {
         RestSiteLayoutHelper.AdjustLayout(__instance);
