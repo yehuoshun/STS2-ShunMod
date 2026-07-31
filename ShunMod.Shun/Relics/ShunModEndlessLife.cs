@@ -9,7 +9,7 @@ using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.RelicPools;
 using MegaCrit.Sts2.Core.Runs;
 using ShunMod.Core.Core.Registry;
-using ShunMod.Shun.Base;
+using ShunMod.Core.Base;
 
 namespace ShunMod.Shun.Relics;
 

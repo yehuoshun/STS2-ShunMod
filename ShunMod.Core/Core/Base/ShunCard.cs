@@ -1,4 +1,4 @@
-namespace ShunMod.Shun.Base;
+namespace ShunMod.Core.Base;
 
 /// <summary>
 ///     ShunMod 卡牌路径工具 — 自动生成 PortraitPath。
