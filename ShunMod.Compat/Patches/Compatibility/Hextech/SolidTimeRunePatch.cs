@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -58,7 +59,7 @@ public static class SolidTimeRunePatch
         Log.Info("[SolidTimeRunePatch] Applied");
     }
 
-    // ReSharper disable RedundantAssignment
+    [SuppressMessage("ReSharper", "RedundantAssignment")]
     private static bool Prefix(
         object __instance,
         CardModel combatCard,
