@@ -34,8 +34,7 @@ internal static class RelicRightClickPatch
 
         // Icon 和 Outline 默认 MouseFilter.Stop 会吃掉鼠标事件，GuiInput 到不了 NRelic
         __instance.Icon.MouseFilter = Control.MouseFilterEnum.Ignore;
-        if (__instance.Outline != null)
-            __instance.Outline.MouseFilter = Control.MouseFilterEnum.Ignore;
+        __instance.Outline.MouseFilter = Control.MouseFilterEnum.Ignore;
 
         __instance.Connect(Control.SignalName.GuiInput,
             Callable.From((InputEvent inputEvent) => OnGuiInput(__instance, inputEvent)));
