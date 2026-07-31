@@ -6,7 +6,7 @@ using MegaCrit.Sts2.Core.Models.RelicPools;
 using MegaCrit.Sts2.Core.Rewards;
 using MegaCrit.Sts2.Core.Rooms;
 using ShunMod.Core.Core.Registry;
-using ShunMod.Core.Base;
+using ShunMod.Core.Core.Base;
 
 // ReSharper disable UnusedType.Global — 游戏框架反射使用
 // ReSharper disable UnusedType.Instantiation — 游戏框架反射实例化
