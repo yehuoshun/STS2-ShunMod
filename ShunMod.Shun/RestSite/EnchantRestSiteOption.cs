@@ -31,7 +31,7 @@ public class EnchantRestSiteOption(Player owner) : RestSiteOption(owner)
     public override string OptionId => "ENCHANT";
 
     /// <summary>
-    ///     选项描述：原动作文本 + 附魔名 + 附魔描述。
+    ///     选项描述：附魔名 + 层数 + 附魔描述。
     /// </summary>
     public override LocString Description
     {
@@ -39,6 +39,7 @@ public class EnchantRestSiteOption(Player owner) : RestSiteOption(owner)
         {
             var desc = new LocString("rest_site_ui", CustomDescKey);
             desc.Add("enchantment", _cachedEnchantment.Title.GetFormattedText());
+            desc.Add("stacks", EnchantStacks.ToString());
             desc.Add("enchant_desc", _cachedEnchantment.DynamicDescription.GetFormattedText());
             return desc;
         }
@@ -56,7 +57,7 @@ public class EnchantRestSiteOption(Player owner) : RestSiteOption(owner)
             ["OPTION_ENCHANT.name"] = "附魔",
             ["OPTION_ENCHANT.description"] = "为[gold]牌组[/gold]中的一张牌随机施加一个[gold]附魔[/gold]。",
             ["OPTION_ENCHANT.prompt"] = "选择一张要附魔的牌",
-            [CustomDescKey] = "为牌组中的一张牌施加 [gold]{enchantment}：{enchant_desc}[/gold]",
+            [CustomDescKey] = "为牌组中的一张牌施加 [gold]{enchantment}[/gold]（{stacks} 层）：{enchant_desc}",
         });
     }
 
