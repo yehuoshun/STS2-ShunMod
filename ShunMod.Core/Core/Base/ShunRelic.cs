@@ -1,7 +1,7 @@
 using MegaCrit.Sts2.Core.Models;
-using ShunMod.Core.Helpers;
+using ShunMod.Core.Core.Helpers;
 
-namespace ShunMod.Core.Base;
+namespace ShunMod.Core.Core.Base;
 
 /// <summary>
 ///     ShunMod 遗物路径工具 — 自动生成 PackedIconPath / PackedIconOutlinePath / BigIconPath。
