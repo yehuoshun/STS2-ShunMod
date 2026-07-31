@@ -77,8 +77,7 @@ internal static class RestSiteLayoutHelper
 
     internal static void AdjustLayout(NRestSiteRoom room)
     {
-        var container = ChoicesContainerField.GetValue(room) as GridContainer;
-        if (container == null)
+        if (ChoicesContainerField.GetValue(room) is not GridContainer container)
             return;
 
         var childCount = container.GetChildCount();
@@ -136,14 +135,14 @@ internal static class RestSiteLayoutHelper
             var totalWidth = i * ButtonWidth + (i - 1) * hSeparation;
             var s = Math.Min(1f, MaxLayoutWidth / totalWidth);
 
-            if (s >= MinButtonScale || i <= 1)
-            {
-                columns = i;
-                rows = (int)Math.Ceiling((double)count / i);
-                scale = s;
-                unscaledWidth = totalWidth;
-                break;
-            }
+            if (s < MinButtonScale && i > 1)
+                continue;
+
+            columns = i;
+            rows = (int)Math.Ceiling((double)count / i);
+            scale = s;
+            unscaledWidth = totalWidth;
+            break;
         }
 
         return new LayoutPlan(
