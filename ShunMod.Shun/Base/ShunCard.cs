@@ -1,4 +1,4 @@
-using ShunMod.Shun.Helpers;
+using ShunMod.Shun.Base;
 
 namespace ShunMod.Shun.Base;
 
