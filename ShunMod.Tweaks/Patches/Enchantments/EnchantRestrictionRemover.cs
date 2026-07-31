@@ -80,23 +80,23 @@ internal static class EnchantRestrictionRemover
                     }
 
                     // ── CanEnchantCardType(CardType) override ──
-                    if (canEnchantCardType != null)
-                    {
-                        var method = type.GetMethod(
-                            nameof(EnchantmentModel.CanEnchantCardType),
-                            flags,
-                            null,
-                            [typeof(CardType)],
-                            null);
+                    if (canEnchantCardType == null)
+                        continue;
 
-                        if (method == null || method.DeclaringType != type || !method.IsVirtual || method == canEnchantCardType)
-                            continue;
+                    var ctMethod = type.GetMethod(
+                        nameof(EnchantmentModel.CanEnchantCardType),
+                        flags,
+                        null,
+                        [typeof(CardType)],
+                        null);
 
-                        var prefix = new HarmonyMethod(typeof(EnchantRestrictionRemover),
-                            nameof(SkipAndReturnTrue));
-                        harmony.Patch(method, prefix: prefix);
-                        patched.Add($"{type.Name}.CanEnchantCardType");
-                    }
+                    if (ctMethod == null || ctMethod.DeclaringType != type || !ctMethod.IsVirtual || ctMethod == canEnchantCardType)
+                        continue;
+
+                    var prefix = new HarmonyMethod(typeof(EnchantRestrictionRemover),
+                        nameof(SkipAndReturnTrue));
+                    harmony.Patch(ctMethod, prefix: prefix);
+                    patched.Add($"{type.Name}.CanEnchantCardType");
                 }
             }
             catch (ReflectionTypeLoadException)
