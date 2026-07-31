@@ -106,19 +106,13 @@ internal static class RestSiteLayoutHelper
     {
         int sep;
         if (optionCount > 6)
-        {
             sep = optionCount <= 8 ? 32 : 24;
-        }
         else
-        {
             sep = optionCount <= 4 ? 100 : 48;
-        }
 
         for (var i = sep; i >= MinHSeparation; i -= 4)
-        {
             if (optionCount <= MaxColumnsPerRow)
                 return i;
-        }
 
         return MinHSeparation;
     }

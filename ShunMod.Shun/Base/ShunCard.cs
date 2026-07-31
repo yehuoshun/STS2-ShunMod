@@ -1,4 +1,3 @@
-
 namespace ShunMod.Shun.Base;
 
 /// <summary>
