@@ -90,7 +90,7 @@ internal static class RelicRightClickPatch
                 isController = true;
                 return true;
             default:
-                isController = default;
+                isController = false;
                 return false;
         }
     }
