@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace ShunMod.Core.Base;
+namespace ShunMod.Core.Helpers;
 
 /// <summary>
 ///     ShunMod 工具类 — 资源路径推导。
