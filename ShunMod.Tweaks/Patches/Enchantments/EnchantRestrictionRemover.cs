@@ -115,7 +115,7 @@ internal static class EnchantRestrictionRemover
     ///     CardModel 参数为 null 时不覆盖结果（保留原始逻辑），匹配旧 SpiralCanEnchantPatch 行为。
     /// </summary>
     [SuppressMessage("ReSharper", "UnusedMember.Local")]
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    [SuppressMessage("ReSharper", "RedundantAssignment")]
     private static void ForceTruePostfix(ref bool __result)
     {
         __result = true;
