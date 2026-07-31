@@ -33,8 +33,8 @@ public static class ModEntry
             _harmony.PatchAll(Assembly.GetExecutingAssembly());
             Log.Info($"[{ModId}] Harmony patches installed successfully");
 
-        // 运行时扫描所有附魔子类，解除限制
-        EnchantRestrictionRemover.ApplyAll(_harmony);
+            // 运行时扫描所有附魔子类，解除限制
+            EnchantRestrictionRemover.ApplyAll(_harmony);
         }
         catch (Exception e)
         {

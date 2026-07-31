@@ -90,12 +90,13 @@ internal static class EnchantRestrictionRemover
                         [typeof(CardType)],
                         null);
 
-                    if (ctMethod == null || ctMethod.DeclaringType != type || !ctMethod.IsVirtual || ctMethod == canEnchantCardType)
+                    if (ctMethod == null || ctMethod.DeclaringType != type || !ctMethod.IsVirtual ||
+                        ctMethod == canEnchantCardType)
                         continue;
 
                     var prefix = new HarmonyMethod(typeof(EnchantRestrictionRemover),
                         nameof(SkipAndReturnTrue));
-                    harmony.Patch(ctMethod, prefix: prefix);
+                    harmony.Patch(ctMethod, prefix);
                     patched.Add($"{type.Name}.CanEnchantCardType");
                 }
             }
