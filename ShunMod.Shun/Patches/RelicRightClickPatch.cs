@@ -42,7 +42,7 @@ internal static class RelicRightClickPatch
 
     private static void OnGuiInput(NRelic relicNode, InputEvent inputEvent)
     {
-        if (!TryGetTrigger(relicNode, inputEvent, out _))
+        if (!TryGetTrigger(relicNode, inputEvent))
             return;
 
         var viewport = relicNode.GetViewport();
@@ -75,20 +75,14 @@ internal static class RelicRightClickPatch
         }
     }
 
-    private static bool TryGetTrigger(Control node, InputEvent inputEvent, out bool isController)
+    private static bool TryGetTrigger(Control node, InputEvent inputEvent)
     {
-        switch (inputEvent)
+        return inputEvent switch
         {
-            case InputEventMouseButton { ButtonIndex: MouseButton.Right } mouseButton when mouseButton.IsReleased():
-                isController = false;
-                return true;
-            case InputEventAction { Action: var action } actionEvent
-                when action == MegaInput.cancel && actionEvent.IsPressed() && node.HasFocus():
-                isController = true;
-                return true;
-            default:
-                isController = false;
-                return false;
-        }
+            InputEventMouseButton { ButtonIndex: MouseButton.Right } mouseButton when mouseButton.IsReleased() => true,
+            InputEventAction { Action: var action } actionEvent
+                when action == MegaInput.cancel && actionEvent.IsPressed() && node.HasFocus() => true,
+            _ => false,
+        };
     }
 }
