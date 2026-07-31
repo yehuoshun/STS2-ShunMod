@@ -154,12 +154,6 @@ internal static class InfiniteUpgradeSafety
 
     private static bool ComputeDrawSensitive(Type cardType)
     {
-        IEnumerable<Type> TypeHierarchy()
-        {
-            for (var t = cardType; t != null && typeof(CardModel).IsAssignableFrom(t); t = t.BaseType)
-                yield return t;
-        }
-
         return TypeHierarchy().Any(t =>
             DrawSensitiveMethods.Any(methodName =>
             {
@@ -167,5 +161,11 @@ internal static class InfiniteUpgradeSafety
                     BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
                 return method != null && !method.IsAbstract;
             }));
+
+        IEnumerable<Type> TypeHierarchy()
+        {
+            for (var t = cardType; t != null && typeof(CardModel).IsAssignableFrom(t); t = t.BaseType)
+                yield return t;
+        }
     }
 }
