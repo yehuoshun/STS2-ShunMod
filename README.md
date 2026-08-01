@@ -99,13 +99,16 @@ STS2-ShunMod/
 │   ├── ShunMod_Core.json               # 独立模组清单
 │   ├── ModEntry.cs                     # Harmony.PatchAll（保留入口）
 │   └── Core/
-│       ├── ContentRegistry.cs          # 扫描 + 注册（回调解耦）
-│       ├── PoolAttribute.cs            # [CardPool]/[RelicPool] 特性
-│       ├── ShunModHelper.cs            # 资源路径工具
-│       ├── ShunRelic.cs                # 遗物路径工具（静态泛型 helper）
-│       ├── ShunCard.cs                 # 卡牌肖像工具（静态泛型 helper）
-│       ├── CompatibilityPatchUtil.cs   # 兼容补丁共享工具（类型查找/单例发现）
-│       └── CreatureReflection.cs       # Creature 反射工具（Block/IsPlayer）
+│       ├── Base/
+│       │   ├── ShunCard.cs             # 卡牌肖像工具（静态泛型 helper）
+│       │   └── ShunRelic.cs            # 遗物路径工具（静态泛型 helper）
+│       ├── Helpers/
+│       │   ├── ShunModHelper.cs        # 资源路径工具
+│       │   └── CreatureReflection.cs   # Creature 反射工具（Block/IsPlayer）
+│       ├── Registry/
+│       │   ├── ContentRegistry.cs      # 扫描 + 注册（回调解耦）
+│       │   └── PoolAttribute.cs        # [CardPool]/[RelicPool] 特性
+│       └── CompatibilityPatchUtil.cs   # 兼容补丁共享工具（类型查找/单例发现）
 │
 ├── ShunMod.Shun/                       # 舜角色内容
 │   ├── ShunMod.Shun.csproj             # AssemblyName: ShunMod_Shun → 引用 Core
