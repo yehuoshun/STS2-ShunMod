@@ -1,4 +1,3 @@
-using System.Reflection.Emit;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using ShunMod.Compat.Patches.Compatibility.Shadowverse;
