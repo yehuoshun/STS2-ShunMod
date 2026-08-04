@@ -53,6 +53,13 @@ public class ShunModStokeModified() : CardModel(1, CardType.Skill, CardRarity.Ra
         if (IsUpgraded)
             CardCmd.Upgrade(cards, CardPreviewStyle.None);
 
+        // 首次打出免费（无需能量和星辉）
+        foreach (var card in cards)
+        {
+            card.EnergyCost.SetUntilPlayed(0);
+            card.SetStarCostUntilPlayed(0);
+        }
+
         await CardPileCmd.Add(
             cards, PileType.Hand);
     }
