@@ -92,14 +92,15 @@ internal static class LimitPatchHelper
 
     public static IEnumerable<CodeInstruction> ReplaceLimitConstant(
         IEnumerable<CodeInstruction> instructions,
-        Func<CodeInstruction, bool> isConstant)
+        Func<CodeInstruction, bool> isConstant,
+        int replacementValue = int.MaxValue)
     {
         foreach (var inst in instructions)
         {
             if (isConstant(inst))
             {
                 inst.opcode = OpCodes.Ldc_I4;
-                inst.operand = int.MaxValue;
+                inst.operand = replacementValue;
             }
 
             yield return inst;
@@ -116,6 +117,12 @@ internal static class LimitPatchHelper
     {
         return (inst.opcode == OpCodes.Ldc_I4_S || inst.opcode == OpCodes.Ldc_I4)
                && inst.operand is 14;
+    }
+
+    public static bool IsConstant40(CodeInstruction inst)
+    {
+        return (inst.opcode == OpCodes.Ldc_I4_S || inst.opcode == OpCodes.Ldc_I4)
+               && inst.operand is 40;
     }
 
     private static Type? FindType(string ns, string typeName)

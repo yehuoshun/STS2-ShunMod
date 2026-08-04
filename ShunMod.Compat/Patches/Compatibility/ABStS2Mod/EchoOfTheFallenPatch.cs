@@ -1,6 +1,7 @@
 using System.Reflection.Emit;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
+using ShunMod.Compat.Patches.Compatibility.Shadowverse;
 using ShunMod.Core.Core;
 
 namespace ShunMod.Compat.Patches.Compatibility.ABStS2Mod;
@@ -44,21 +45,6 @@ public static class EchoOfTheFallenPatch
     /// </summary>
     private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
     {
-        foreach (var inst in instructions)
-        {
-            if (IsConstant40(inst))
-            {
-                inst.opcode = OpCodes.Ldc_I4;
-                inst.operand = 100;
-            }
-
-            yield return inst;
-        }
-    }
-
-    private static bool IsConstant40(CodeInstruction inst)
-    {
-        return (inst.opcode == OpCodes.Ldc_I4_S && inst.operand is sbyte s && s == 40)
-            || (inst.opcode == OpCodes.Ldc_I4 && inst.operand is int i && i == 40);
+        return LimitPatchHelper.ReplaceLimitConstant(instructions, LimitPatchHelper.IsConstant40, 100);
     }
 }
