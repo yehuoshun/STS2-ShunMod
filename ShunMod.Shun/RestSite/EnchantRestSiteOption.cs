@@ -1,4 +1,7 @@
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using Godot;
 using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -29,6 +32,16 @@ public class EnchantRestSiteOption(Player owner) : RestSiteOption(owner)
     private readonly EnchantmentModel _cachedEnchantment = RollRandomEnchantment(owner);
 
     public override string OptionId => "ENCHANT";
+
+    /// <summary>
+    ///     无对应图标文件，返回 null 避免 AssetLoader 抛异常炸房。
+    /// </summary>
+    public override Texture2D Icon => null;
+
+    /// <summary>
+    ///     无图标资产，跳过预加载。
+    /// </summary>
+    public override IEnumerable<string> AssetPaths => Enumerable.Empty<string>();
 
     /// <summary>
     ///     选项描述：附魔名 + 层数 + 附魔描述。
