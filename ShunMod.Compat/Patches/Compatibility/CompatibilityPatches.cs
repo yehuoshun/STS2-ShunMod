@@ -1,4 +1,5 @@
 using HarmonyLib;
+using ShunMod.Compat.Patches.Compatibility.ABStS2Mod;
 using ShunMod.Compat.Patches.Compatibility.Hextech;
 using ShunMod.Compat.Patches.Compatibility.MoreEnchantments;
 using ShunMod.Compat.Patches.Compatibility.Shadowverse;
@@ -16,6 +17,7 @@ internal static class CompatibilityPatches
     public static void ApplyAll(Harmony harmony)
     {
         // ── 在此追加新的兼容补丁 ──
+        EchoOfTheFallenPatch.Apply(harmony);
         ShadowverseSkinLimitPatch.Apply(harmony);
         ShadowverseBgLimitPatch.Apply(harmony);
         ShadowverseEvolutionPointPatch.Apply(harmony);
