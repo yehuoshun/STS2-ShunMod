@@ -40,9 +40,11 @@ public class ShunModStokeModified() : CardModel(1, CardType.Skill, CardRarity.Ra
         var exhaustCount = selected.Count;
         if (exhaustCount == 0) return;
 
-        // 消耗选中的牌
+        // 消耗选中的牌，每消耗一张获得 1 点能量
         foreach (var card in selected)
             await CardCmd.Exhaust(choiceContext, card);
+
+        await PlayerCmd.GainEnergy(exhaustCount, owner);
 
         // 生成等量的随机牌（全卡池，不限定角色）
         var cards = CardFactory.GetForCombat(
