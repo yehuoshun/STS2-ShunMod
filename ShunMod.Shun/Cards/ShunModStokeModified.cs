@@ -46,9 +46,15 @@ public class ShunModStokeModified() : CardModel(1, CardType.Skill, CardRarity.Ra
 
         await PlayerCmd.GainEnergy(exhaustCount, owner);
 
-        // 生成等量的随机牌（全卡池，不限定角色）
+        // 生成等量的随机牌（全卡池，排除状态/诅咒/任务牌）
+        var pool = CardFactory.FilterForCombat(ModelDb.AllCards)
+            .Where(c => c.Rarity != CardRarity.Status
+                        && c.Rarity != CardRarity.Curse
+                        && c.Rarity != CardRarity.Quest)
+            .ToList();
+
         var cards = CardFactory.GetForCombat(
-            owner, ModelDb.AllCards, exhaustCount,
+            owner, pool, exhaustCount,
             owner.RunState.Rng.CombatCardGeneration).ToList();
 
         // 升级后：生成的牌自动升级
