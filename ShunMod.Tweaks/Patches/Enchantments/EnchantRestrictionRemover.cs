@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Text.Json;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Logging;
@@ -11,17 +12,29 @@ using MegaCrit.Sts2.Core.Models;
 namespace ShunMod.Tweaks.Patches.Enchantments;
 
 /// <summary>
-///     运行时扫描所有 EnchantmentModel 子类，自动 Patch 所有 override 了
-///     CanEnchant(CardModel) / CanEnchantCardType(CardType) 的附魔，
-///     解除其限制，让任何卡牌都能接受任何附魔。
+///     基于白名单的附魔限制解除器。
+///     从 <c>enchant_whitelist.json</c> 读取白名单，只对白名单内的附魔类型
+///     解除 CanEnchant(CardModel) / CanEnchantCardType(CardType) 限制，
+///     让任何卡牌都能接受被选中的附魔。
 ///     在 Harmony.PatchAll() 之后调用。
 /// </summary>
 internal static class EnchantRestrictionRemover
 {
     private const string ModId = "ShunMod_Tweaks";
+    private const string ConfigFileName = "enchant_whitelist.json";
 
+    /// <summary>扫描所有已加载程序集，对白名单内的附魔类型 Patch 限制解除。</summary>
     public static void ApplyAll(Harmony harmony)
     {
+        var whitelist = LoadWhitelist();
+        if (whitelist.Count == 0)
+        {
+            Log.Info($"[{ModId}] EnchantRestrictionRemover: 白名单为空，跳过所有附魔限制解除");
+            return;
+        }
+
+        Log.Info($"[{ModId}] EnchantRestrictionRemover: 白名单 ({whitelist.Count} 项)：{string.Join(", ", whitelist)}");
+
         var enchantmentType = typeof(EnchantmentModel);
         const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
@@ -47,7 +60,6 @@ internal static class EnchantRestrictionRemover
 
         var patched = new List<string>();
 
-        // 扫描所有已加载程序集中的类型
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
             if (assembly.IsDynamic)
@@ -58,6 +70,10 @@ internal static class EnchantRestrictionRemover
                 foreach (var type in assembly.GetTypes())
                 {
                     if (!enchantmentType.IsAssignableFrom(type) || type == enchantmentType || type.IsAbstract)
+                        continue;
+
+                    // 只处理白名单内的类型
+                    if (!whitelist.Contains(type.Name))
                         continue;
 
                     // ── CanEnchant(CardModel) override ──
@@ -106,14 +122,55 @@ internal static class EnchantRestrictionRemover
             }
         }
 
-        Log.Info(patched.Count > 0
-            ? $"[{ModId}] EnchantRestrictionRemover: 已 Patch {patched.Count} 个方法：\n  {string.Join("\n  ", patched)}"
-            : $"[{ModId}] EnchantRestrictionRemover: 未发现需要 Patch 的附魔限制方法");
+        if (patched.Count > 0)
+            Log.Info($"[{ModId}] EnchantRestrictionRemover: 已 Patch {patched.Count} 个方法：\n  {string.Join("\n  ", patched)}");
+        else
+            Log.Warn($"[{ModId}] EnchantRestrictionRemover: 白名单内有 {whitelist.Count} 项，但未找到匹配的附魔类型（可能类型名拼写错误或对应 DLL 未加载）");
+    }
+
+    /// <summary>
+    ///     从 DLL 同目录读取白名单 JSON 文件。
+    ///     文件不存在或格式错误时返回空列表（安全默认）。
+    /// </summary>
+    private static HashSet<string> LoadWhitelist()
+    {
+        try
+        {
+            var dllPath = Assembly.GetExecutingAssembly().Location;
+            var configPath = Path.Combine(Path.GetDirectoryName(dllPath) ?? ".", ConfigFileName);
+
+            if (!File.Exists(configPath))
+            {
+                Log.Info($"[{ModId}] EnchantRestrictionRemover: 未找到配置文件 {configPath}，使用空白名单（不解除任何限制）");
+                return [];
+            }
+
+            var json = File.ReadAllText(configPath);
+            var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            if (!root.TryGetProperty("whitelist", out var whitelistElement))
+            {
+                Log.Warn($"[{ModId}] EnchantRestrictionRemover: 配置文件缺少 \"whitelist\" 字段，使用空白名单");
+                return [];
+            }
+
+            var list = new HashSet<string>();
+            foreach (var item in whitelistElement.EnumerateArray())
+                list.Add(item.GetString() ?? "");
+
+            list.RemoveWhere(string.IsNullOrEmpty);
+            return list;
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"[{ModId}] EnchantRestrictionRemover: 读取配置文件失败: {e.GetType().Name}: {e.Message}，使用空白名单");
+            return [];
+        }
     }
 
     /// <summary>
     ///     CanEnchant Postfix：强制返回 true（保留原方法执行的副作用，但覆盖返回值）。
-    ///     CardModel 参数为 null 时不覆盖结果（保留原始逻辑），匹配旧 SpiralCanEnchantPatch 行为。
     /// </summary>
     [SuppressMessage("ReSharper", "UnusedMember.Local")]
     [SuppressMessage("ReSharper", "RedundantAssignment")]

@@ -1,0 +1,9 @@
+{
+  "//": "附魔限制解除白名单。只对白名单内的附魔类型解除 CanEnchant/CanEnchantCardType 限制。",
+  "//": "格式：[\"TypeName1\", \"TypeName2\", ...]。TypeName 是 EnchantmentModel 子类的类名（不含 namespace）。",
+  "//": "设为 [] 表示不解除任何限制（安全默认）。",
+  "whitelist": [
+    "Spiral",
+    "Imbued"
+  ]
+}
