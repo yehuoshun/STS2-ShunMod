@@ -3,7 +3,6 @@ using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
-using ShunMod.Tweaks.Patches.Enchantments;
 
 namespace ShunMod.Tweaks;
 
@@ -32,9 +31,6 @@ public static class ModEntry
         {
             _harmony.PatchAll(Assembly.GetExecutingAssembly());
             Log.Info($"[{ModId}] Harmony patches installed successfully");
-
-            // 运行时扫描所有附魔子类，解除限制
-            EnchantRestrictionRemover.ApplyAll(_harmony);
         }
         catch (Exception e)
         {

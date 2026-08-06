@@ -43,7 +43,6 @@
     <ItemGroup>
         <None Include="..\.gitignore"/>
         <None Include="ShunMod_Tweaks.json"/>
-        <None Include="enchant_whitelist.json"/>
     </ItemGroup>
 
     <Target Name="CheckDependencyPaths" BeforeTargets="CoreCompile">
@@ -54,6 +53,5 @@
         <Message Text="Copying .dll and manifest to mods folder." Importance="high"/>
         <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModsPath)$(AssemblyName)/"/>
         <Copy SourceFiles="ShunMod_Tweaks.json" DestinationFolder="$(ModsPath)$(AssemblyName)/"/>
-        <Copy SourceFiles="enchant_whitelist.json" DestinationFolder="$(ModsPath)$(AssemblyName)/"/>
     </Target>
 </Project>
