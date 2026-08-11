@@ -58,7 +58,6 @@ public static class PersistTracker
 
     public static void ClearOriginsFor(ulong netId)
     {
-        foreach (var key in Origins.Keys.Where(k => k.NetId == netId).ToList())
-            Origins.Remove(key);
+        Origins.Keys.Where(k => k.NetId == netId).ToList().ForEach(k => Origins.Remove(k));
     }
 }
