@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using MegaCrit.Sts2.Core.Models;
 
 namespace ShunMod.Tweaks.Patches.PowersPersist;
@@ -30,7 +29,7 @@ public static class PersistTracker
     ///     重连 Power 时设为 true，使 PowerCmd.Apply Postfix 跳过来源标记，
     ///     避免重连循环误将一切标记为 Event（此时 IsInProgress 仍为 false）。
     /// </summary>
-    [System.ThreadStatic]
+    [ThreadStatic]
     private static bool _isReapplying;
 
     public static bool IsReapplying
