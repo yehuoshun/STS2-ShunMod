@@ -141,7 +141,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-${{ matrix.module.name }}
-          path: ${{ matrix.module.asm }}.zip
+          path: publish/${{ matrix.module.asm }}/
           retention-days: 1
 
   # ── 汇总 + Release ──────────────────────────────────────────────────────
