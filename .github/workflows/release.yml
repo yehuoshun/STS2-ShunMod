@@ -178,6 +178,9 @@ jobs:
             fi
           done
           cd publish && zip -r "../STS2_ShunMod.zip" . && cd ..
+          for entry in "ShunMod_Core" "ShunMod_Shun" "ShunMod_Tweaks" "ShunMod_Compat"; do
+            cd publish && zip -r "../${entry}.zip" "${entry}/" && cd ..
+          done
 
       - name: Get release tag
         id: ver
