@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System;
 using System.Threading.Tasks;
 using HarmonyLib;
@@ -19,7 +20,7 @@ internal static class RemoveOnPlayPatch
     [HarmonyPatch(typeof(CardModel), nameof(CardModel.OnPlayWrapper))]
     internal static class RemovePowerCardOnPlay
     {
-        // ReSharper disable once UnusedMember.Local
+        [SuppressMessage("ReSharper", "UnusedMember.Local")]
         public static void Postfix(CardModel __instance, ref Task __result)
         {
             var original = __result;

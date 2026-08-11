@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using HarmonyLib;
@@ -21,7 +22,7 @@ internal static class PersistPowersPatch
     [HarmonyPatch(typeof(Player), nameof(Player.AfterCombatEnd))]
     internal static class SnapshotPowersOnCombatEnd
     {
-        // ReSharper disable once UnusedMember.Local
+        [SuppressMessage("ReSharper", "UnusedMember.Local")]
         public static void Prefix(Player __instance)
         {
             try
@@ -53,7 +54,7 @@ internal static class PersistPowersPatch
     [HarmonyPatch(typeof(CombatManager), nameof(CombatManager.SetUpCombat))]
     internal static class ReapplyPowersOnCombatStart
     {
-        // ReSharper disable once UnusedMember.Local
+        [SuppressMessage("ReSharper", "UnusedMember.Local")]
         public static void Postfix(CombatState state)
         {
             try

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Combat;
@@ -30,7 +31,7 @@ internal static class PowerOriginPatch
     })]
     internal static class TagOriginOnApply
     {
-        // ReSharper disable once UnusedMember.Local
+        [SuppressMessage("ReSharper", "UnusedMember.Local")]
         public static void Postfix(PowerModel power, Creature target)
         {
             try
