@@ -140,7 +140,7 @@ jobs:
       - name: Upload ${{ matrix.module.name }} artifact
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ matrix.module.name | lower }}
+          name: build-${{ matrix.module.name }}
           path: ${{ matrix.module.asm }}.zip
           retention-days: 1
 
