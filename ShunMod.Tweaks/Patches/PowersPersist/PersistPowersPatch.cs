@@ -5,7 +5,6 @@ using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
-using ShunMod.Tweaks.Patches.PowersPersist;
 
 namespace ShunMod.Tweaks.Patches.PowersPersist;
 
