@@ -29,14 +29,7 @@ public static class PersistTracker
     ///     重连 Power 时设为 true，使 PowerCmd.Apply Postfix 跳过来源标记，
     ///     避免重连循环误将一切标记为 Event（此时 IsInProgress 仍为 false）。
     /// </summary>
-    [ThreadStatic]
-    private static bool _isReapplying;
-
-    public static bool IsReapplying
-    {
-        get => _isReapplying;
-        set => _isReapplying = value;
-    }
+    public static bool IsReapplying { get; set; }
 
     public static void SetSnapshot(ulong netId, List<PersistedPower> powers)
     {
