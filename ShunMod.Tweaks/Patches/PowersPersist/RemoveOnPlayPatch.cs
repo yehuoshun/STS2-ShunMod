@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System;
 using System.Threading.Tasks;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Commands;
