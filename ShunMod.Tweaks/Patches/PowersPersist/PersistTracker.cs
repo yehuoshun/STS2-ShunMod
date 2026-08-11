@@ -38,10 +38,9 @@ public static class PersistTracker
 
     public static List<PersistedPower>? TakeSnapshot(ulong netId)
     {
-        if (!Snapshots.TryGetValue(netId, out var snap))
+        if (!Snapshots.Remove(netId, out var snap))
             return null;
 
-        Snapshots.Remove(netId);
         return snap;
     }
 
