@@ -25,19 +25,13 @@ internal static class PersistPowersPatch
         {
             try
             {
-                var snapshot = new List<PersistedPower>();
-                foreach (var power in __instance.Creature.Powers)
-                {
-                    if (PowersPersistConfig.SkipNegativePowers
-                        && power.TypeForCurrentAmount == PowerType.Debuff)
-                        continue;
-
-                    if (PowersPersistConfig.SkipNonCombatOriginPowers
-                        && PersistTracker.IsEventOrigin(__instance.NetId, power.Id))
-                        continue;
-
-                    snapshot.Add(new PersistedPower(power.Id, power.Amount));
-                }
+                var snapshot = __instance.Creature.Powers
+                .Where(power => !(PowersPersistConfig.SkipNegativePowers
+                                  && power.TypeForCurrentAmount == PowerType.Debuff))
+                .Where(power => !(PowersPersistConfig.SkipNonCombatOriginPowers
+                                  && PersistTracker.IsEventOrigin(__instance.NetId, power.Id)))
+                .Select(power => new PersistedPower(power.Id, power.Amount))
+                .ToList();
 
                 PersistTracker.SetSnapshot(__instance.NetId, snapshot);
                 PersistTracker.ClearOriginsFor(__instance.NetId);
