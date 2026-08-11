@@ -1,4 +1,7 @@
-using System.Diagnostics.CodeAnalysis;
+// ReSharper disable UnusedType.Global — Harmony 反射调用
+// ReSharper disable UnusedMember.Local — Harmony 反射调用
+// ReSharper disable InconsistentNaming — Harmony __instance 约定
+
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Entities.Players;
@@ -7,8 +10,6 @@ using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 
 namespace ShunMod.Tweaks.Patches.PowersPersist;
-
-// ReSharper disable UnusedType.Global — Harmony 反射调用
 
 /// <summary>
 ///     战斗结束时快照 Player.Creature.Powers（在清除之前），
@@ -21,8 +22,6 @@ internal static class PersistPowersPatch
     [HarmonyPatch(typeof(Player), nameof(Player.AfterCombatEnd))]
     internal static class SnapshotPowersOnCombatEnd
     {
-        [SuppressMessage("ReSharper", "InconsistentNaming")]
-        [SuppressMessage("ReSharper", "UnusedMember.Local")]
         public static void Prefix(Player __instance)
         {
             try
@@ -54,7 +53,6 @@ internal static class PersistPowersPatch
     [HarmonyPatch(typeof(CombatManager), nameof(CombatManager.SetUpCombat))]
     internal static class ReapplyPowersOnCombatStart
     {
-        [SuppressMessage("ReSharper", "UnusedMember.Local")]
         public static void Postfix(CombatState state)
         {
             try

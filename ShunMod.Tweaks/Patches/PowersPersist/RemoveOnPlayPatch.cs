@@ -1,6 +1,7 @@
-using System.Diagnostics.CodeAnalysis;
-
 // ReSharper disable UnusedType.Global — Harmony 反射调用
+// ReSharper disable UnusedMember.Local — Harmony 反射调用
+// ReSharper disable InconsistentNaming — Harmony __instance/__result 约定
+
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
@@ -19,9 +20,7 @@ internal static class RemoveOnPlayPatch
     [HarmonyPatch(typeof(CardModel), nameof(CardModel.OnPlayWrapper))]
     internal static class RemovePowerCardOnPlay
     {
-        [SuppressMessage("ReSharper", "InconsistentNaming")]
-        [SuppressMessage("ReSharper", "RedundantAssignment")]
-        [SuppressMessage("ReSharper", "UnusedMember.Local")]
+        // ReSharper disable once RedundantAssignment
         public static void Postfix(CardModel __instance, ref Task __result)
         {
             var original = __result;
