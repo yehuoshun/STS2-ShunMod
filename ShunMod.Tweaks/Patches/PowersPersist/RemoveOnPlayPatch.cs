@@ -20,7 +20,8 @@ internal static class RemoveOnPlayPatch
     [HarmonyPatch(typeof(CardModel), nameof(CardModel.OnPlayWrapper))]
     internal static class RemovePowerCardOnPlay
     {
-        [SuppressMessage("ReSharper", "UnusedMember.Local")]
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        [SuppressMessage("ReSharper", "RedundantAssignment")]
         public static void Postfix(CardModel __instance, ref Task __result)
         {
             var original = __result;

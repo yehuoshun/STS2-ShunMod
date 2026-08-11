@@ -31,7 +31,6 @@ internal static class PowerOriginPatch
     })]
     internal static class TagOriginOnApply
     {
-        [SuppressMessage("ReSharper", "UnusedMember.Local")]
         public static void Postfix(PowerModel power, Creature target)
         {
             try
