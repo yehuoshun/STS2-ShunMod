@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 
 // ReSharper disable UnusedType.Global — Harmony 反射调用
@@ -30,6 +31,7 @@ internal static class PowerOriginPatch
     })]
     internal static class TagOriginOnApply
     {
+        [SuppressMessage("ReSharper", "UnusedMember.Local")]
         public static void Postfix(PowerModel power, Creature target)
         {
             try

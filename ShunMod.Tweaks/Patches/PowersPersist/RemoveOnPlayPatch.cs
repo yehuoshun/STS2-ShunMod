@@ -21,6 +21,7 @@ internal static class RemoveOnPlayPatch
     {
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         [SuppressMessage("ReSharper", "RedundantAssignment")]
+        [SuppressMessage("ReSharper", "UnusedMember.Local")]
         public static void Postfix(CardModel __instance, ref Task __result)
         {
             var original = __result;
