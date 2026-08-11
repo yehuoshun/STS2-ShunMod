@@ -1,7 +1,4 @@
-// ReSharper disable UnusedType.Global — Harmony 反射调用
-// ReSharper disable UnusedMember.Local — Harmony 反射调用
-// ReSharper disable InconsistentNaming — Harmony __instance 约定
-
+using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Entities.Players;
@@ -22,6 +19,8 @@ internal static class PersistPowersPatch
     [HarmonyPatch(typeof(Player), nameof(Player.AfterCombatEnd))]
     internal static class SnapshotPowersOnCombatEnd
     {
+        [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony __instance 约定")]
+        [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Harmony 反射调用")]
         public static void Prefix(Player __instance)
         {
             try
@@ -53,6 +52,7 @@ internal static class PersistPowersPatch
     [HarmonyPatch(typeof(CombatManager), nameof(CombatManager.SetUpCombat))]
     internal static class ReapplyPowersOnCombatStart
     {
+        [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Harmony 反射调用")]
         public static void Postfix(CombatState state)
         {
             try

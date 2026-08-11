@@ -1,6 +1,4 @@
-// ReSharper disable UnusedType.Global — Harmony 反射调用
-// ReSharper disable UnusedMember.Local — Harmony 反射调用
-
+using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
@@ -31,6 +29,7 @@ internal static class PowerOriginPatch
     })]
     internal static class TagOriginOnApply
     {
+        [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Harmony 反射调用")]
         public static void Postfix(PowerModel power, Creature target)
         {
             try
