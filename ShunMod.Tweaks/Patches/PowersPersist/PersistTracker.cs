@@ -38,10 +38,7 @@ public static class PersistTracker
 
     public static List<PersistedPower>? TakeSnapshot(ulong netId)
     {
-        if (!Snapshots.Remove(netId, out var snap))
-            return null;
-
-        return snap;
+        return Snapshots.Remove(netId, out var snap) ? snap : null;
     }
 
     public static void TagOrigin(ulong netId, ModelId powerId, PowerOrigin origin)
