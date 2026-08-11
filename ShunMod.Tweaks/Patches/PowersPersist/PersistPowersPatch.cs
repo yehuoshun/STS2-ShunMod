@@ -6,18 +6,15 @@ using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
-using ShunMod.Tweaks.PowersPersist.Config;
-using ShunMod.Tweaks.PowersPersist.State;
+using ShunMod.Tweaks.Patches.PowersPersist;
 
-namespace ShunMod.Tweaks.PowersPersist.Patches;
+namespace ShunMod.Tweaks.Patches.PowersPersist;
 
 /// <summary>
-///     Snapshot Player.Creature.Powers right before the end-of-combat clear
-///     (Player.AfterCombatEnd -> Creature.RemoveAllPowersInternalExcept), and
-///     re-apply the snapshot for each player at the start of the next combat
-///     (CombatManager.SetUpCombat Postfix).
-///     Both filter toggles are applied at snapshot time, not reapply time, so
-///     that toggling the filter mid-run takes effect on the next end-of-combat.
+///     战斗结束时快照 Player.Creature.Powers（在清除之前），
+///     下一场战斗开始时重新应用快照。
+///     两个过滤器开关在快照时生效，而不是重连时，所以战斗中切换开关
+///     会在下一次战斗结束时生效。
 /// </summary>
 internal static class PersistPowersPatch
 {
@@ -48,7 +45,7 @@ internal static class PersistPowersPatch
             }
             catch (Exception ex)
             {
-                Log.Error($"[PowersPersist] failed to snapshot powers for player {__instance.NetId}: {ex}");
+                Log.Error($"[PowersPersist] 快照玩家 {__instance.NetId} 的 Power 失败: {ex}");
             }
         }
     }
@@ -72,7 +69,7 @@ internal static class PersistPowersPatch
             }
             catch (Exception ex)
             {
-                Log.Error($"[PowersPersist] failed to reapply powers: {ex}");
+                Log.Error($"[PowersPersist] 重连 Power 失败: {ex}");
             }
         }
 
@@ -89,35 +86,30 @@ internal static class PersistPowersPatch
                     var canonical = ModelDb.GetByIdOrNull<PowerModel>(snap.Id);
                     if (canonical == null)
                     {
-                        Log.Warn($"[PowersPersist] dropped persisted power {snap.Id}; not found in ModelDb (mod removed?).");
+                        Log.Warn($"[PowersPersist] 跳过持久化 Power {snap.Id}：ModelDb 中未找到（mod 被移除？）。");
                         continue;
                     }
 
                     if (player.Creature.HasPower(snap.Id))
                     {
-                        // Already on the creature (canonical player powers like
-                        // Crimson Mantle that re-apply themselves at combat start).
-                        // Don't double-stack.
+                        // 已在 Creature 上（如 Crimson Mantle 等战斗开始时自动重连的专属 Power），
+                        // 不要重复叠加。
                         continue;
                     }
 
                     var power = canonical.ToMutable();
                     try
                     {
-                        // Bypasses PowerCmd.Apply on purpose: re-applying from
-                        // persistence is not "gaining" the power, so we don't
-                        // want to retrigger Hook.Before/AfterPowerAmountChanged,
-                        // on-apply relic effects, or History.PowerReceived.
+                        // 有意绕过 PowerCmd.Apply：从持久化重连不算"获得"Power，
+                        // 不应触发 Hook.Before/AfterPowerAmountChanged、遗物效果或 History.PowerReceived。
                         power.ApplyInternal(player.Creature, snap.Amount, silent: true);
 
-                        // Re-tag as Battle origin so the next snapshot still
-                        // counts this power as combat-originated under the
-                        // SkipNonCombatOriginPowers filter.
+                        // 重新标记为 Battle 来源，使下次快照仍能正确过滤。
                         PersistTracker.TagOrigin(player.NetId, snap.Id, PowerOrigin.Battle);
                     }
                     catch (Exception ex)
                     {
-                        Log.Error($"[PowersPersist] failed to reapply {snap.Id} on player {player.NetId}: {ex}");
+                        Log.Error($"[PowersPersist] 重连 {snap.Id} 到玩家 {player.NetId} 失败: {ex}");
                     }
                 }
             }

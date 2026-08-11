@@ -1,20 +1,25 @@
 using System.Collections.Generic;
 using MegaCrit.Sts2.Core.Models;
 
-namespace ShunMod.Tweaks.PowersPersist.State;
+namespace ShunMod.Tweaks.Patches.PowersPersist;
 
+/// <summary>
+///     战斗内来源
+/// </summary>
 public enum PowerOrigin
 {
     Battle,
     Event,
 }
 
+/// <summary>
+///     持久化的 Power 快照条目
+/// </summary>
 public readonly record struct PersistedPower(ModelId Id, int Amount);
 
 /// <summary>
-///     In-memory only by design: snapshots and origin tags die with the
-///     process, which gives us the original mod's "doesn't survive save-and-quit"
-///     behaviour for free.
+///     纯内存设计：快照和来源标记随进程销毁，
+///     自然实现了"不保存到存档"的行为。
 /// </summary>
 public static class PersistTracker
 {
@@ -22,10 +27,8 @@ public static class PersistTracker
     private static readonly Dictionary<(ulong NetId, ModelId PowerId), PowerOrigin> Origins = new();
 
     /// <summary>
-    ///     Set true while we are re-applying persisted powers at start of combat,
-    ///     so PowerCmd.Apply Postfix knows to skip origin tagging (otherwise the
-    ///     reapply would re-tag everything as Event, since IsInProgress is still
-    ///     false at that point).
+    ///     重连 Power 时设为 true，使 PowerCmd.Apply Postfix 跳过来源标记，
+    ///     避免重连循环误将一切标记为 Event（此时 IsInProgress 仍为 false）。
     /// </summary>
     [System.ThreadStatic]
     private static bool _isReapplying;

@@ -5,19 +5,14 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
-using ShunMod.Tweaks.PowersPersist.Config;
+using ShunMod.Tweaks.Patches.PowersPersist;
 
-namespace ShunMod.Tweaks.PowersPersist.Patches;
+namespace ShunMod.Tweaks.Patches.PowersPersist;
 
 /// <summary>
-///     When the RemovePowerCardsOnPlay toggle is on, remove a played power
-///     card's deck version from the run deck after the play resolves. Uses the
-///     canonical CardPileCmd.RemoveFromDeck so the run-history "cards removed"
-///     log and any BeforeCardRemoved hooks fire normally.
-///     Patches the async OnPlayWrapper by chaining a continuation onto the
-///     returned Task; Harmony postfixes on async methods only run at task
-///     kickoff, so __result wrapping is the standard pattern for "after the
-///     async work actually completes".
+///     当 RemovePowerCardsOnPlay 开关开启时，打出 Power 卡后将其牌组版本从运行牌组中移除。
+///     使用 CardPileCmd.RemoveFromDeck，让运行历史记录和 BeforeCardRemoved 钩子正常触发。
+///     通过链式 continuation 在异步 OnPlayWrapper 完成后执行。
 /// </summary>
 internal static class RemoveOnPlayPatch
 {
@@ -45,8 +40,7 @@ internal static class RemoveOnPlayPatch
             if (deckVersion == null || deckVersion.Pile == null
                 || deckVersion.Pile.Type != PileType.Deck)
             {
-                // Card was generated mid-combat, or has already been removed
-                // from the deck by something else (e.g. SwipePower/Guilty).
+                // 战斗中生成的卡，或已被其他机制（如 SwipePower/Guilty）从牌组移除。
                 return;
             }
 
@@ -56,7 +50,7 @@ internal static class RemoveOnPlayPatch
             }
             catch (Exception ex)
             {
-                Log.Error($"[PowersPersist] failed to remove {card.Id} from deck after play: {ex}");
+                Log.Error($"[PowersPersist] 打出后从牌组移除 {card.Id} 失败: {ex}");
             }
         }
     }

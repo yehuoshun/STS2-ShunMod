@@ -6,17 +6,15 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
-using ShunMod.Tweaks.PowersPersist.State;
+using ShunMod.Tweaks.Patches.PowersPersist;
 
-namespace ShunMod.Tweaks.PowersPersist.Patches;
+namespace ShunMod.Tweaks.Patches.PowersPersist;
 
 /// <summary>
-///     Tag every power applied to a player with whether the application happened
-///     during an active combat (Battle) or outside one (Event), so the
-///     SkipNonCombatOriginPowers filter has something to filter on.
-///     Skips tagging while PersistTracker.IsReapplying is true, so the
-///     start-of-combat reapply loop doesn't accidentally tag everything as Event
-///     (it bypasses PowerCmd.Apply anyway, but this is belt-and-braces).
+///     给玩家施加的每个 Power 标记来源：战斗中（Battle）或战斗外（Event）。
+///     SkipNonCombatOriginPowers 过滤器靠这个标记来判断。
+///     重连期间跳过标记（PersistTracker.IsReapplying 为 true 时不标记），
+///     避免战斗开始的重连循环误把一切都标成 Event。
 /// </summary>
 internal static class PowerOriginPatch
 {
@@ -51,7 +49,7 @@ internal static class PowerOriginPatch
             }
             catch (Exception ex)
             {
-                Log.Error($"[PowersPersist] failed to tag power origin: {ex}");
+                Log.Error($"[PowersPersist] 标记 Power 来源失败: {ex}");
             }
         }
     }

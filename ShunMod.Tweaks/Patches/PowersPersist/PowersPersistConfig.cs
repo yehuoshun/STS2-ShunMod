@@ -1,29 +1,25 @@
-namespace ShunMod.Tweaks.PowersPersist.Config;
+namespace ShunMod.Tweaks.Patches.PowersPersist;
 
 /// <summary>
-///     PowersPersist configuration toggles.
-///     All properties are static so they can be toggled at runtime.
+///     PowersPersist 配置开关，全部为静态属性，运行时可直接切换。
 /// </summary>
 public static class PowersPersistConfig
 {
     /// <summary>
-    ///     When true, power cards are removed from the run deck after being played
-    ///     (in addition to their normal exhaust-on-play behaviour). Matches the
-    ///     optional setting in the original Slay the Spire 1 "Powers Persist" mod.
+    ///     开启后，打出 Power 卡后将其从运行牌组中移除（在正常的消耗行为之外）。
+    ///     对应 STS1 PowersPersist 模组的可选设置。
     /// </summary>
     public static bool RemovePowerCardsOnPlay { get; set; } = true;
 
     /// <summary>
-    ///     When true, debuff-type powers (and buffs whose current amount has gone
-    ///     negative, like Strength=-1 from Shrink) are NOT carried over to the
-    ///     next combat. Default off, so behaviour matches the original mod.
+    ///     开启后，减益型 Power（以及当前数值为负的增益，如力量=-1）不会带到下一场战斗。
+    ///     默认关闭，行为与原版模组一致。
     /// </summary>
     public static bool SkipNegativePowers { get; set; } = false;
 
     /// <summary>
-    ///     When true, powers gained outside an active combat (e.g. from
-    ///     non-combat events) are NOT carried over to the next combat. Default
-    ///     off, so behaviour matches the original mod.
+    ///     开启后，战斗外获得的 Power（如非战斗事件）不会带到下一场战斗。
+    ///     默认关闭，行为与原版模组一致。
     /// </summary>
     public static bool SkipNonCombatOriginPowers { get; set; } = false;
 }
