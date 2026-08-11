@@ -10,8 +10,8 @@ using MegaCrit.Sts2.Core.Models;
 namespace ShunMod.Tweaks.Patches.PowersPersist;
 
 /// <summary>
-///     给玩家施加的每个 Power 标记来源：战斗中（Battle）或战斗外（Event）。
-///     SkipNonCombatOriginPowers 过滤器靠这个标记来判断。
+///     给玩家施加的每个 Power 标记来源：战斗中（Battle）或战斗外（Event），
+///     供 SkipNonCombatOriginPowers 过滤器使用。
 ///     重连期间跳过标记（PersistTracker.IsReapplying 为 true 时不标记），
 ///     避免战斗开始的重连循环误把一切都标成 Event。
 /// </summary>

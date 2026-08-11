@@ -11,8 +11,7 @@ namespace ShunMod.Tweaks.Patches.PowersPersist;
 /// <summary>
 ///     战斗结束时快照 Player.Creature.Powers（在清除之前），
 ///     下一场战斗开始时重新应用快照。
-///     两个过滤器开关在快照时生效，而不是重连时，所以战斗中切换开关
-///     会在下一次战斗结束时生效。
+///     两个过滤器开关在快照时生效，而不是重连时。
 /// </summary>
 internal static class PersistPowersPatch
 {
@@ -25,9 +24,19 @@ internal static class PersistPowersPatch
         {
             try
             {
-                var snapshot = __instance.Creature.Powers
-                .Select(power => new PersistedPower(power.Id, power.Amount))
-                .ToList();
+                var snapshot = new List<PersistedPower>();
+                foreach (var power in __instance.Creature.Powers)
+                {
+                    if (PowersPersistConfig.SkipNegativePowers
+                        && power.TypeForCurrentAmount == PowerType.Debuff)
+                        continue;
+
+                    if (PowersPersistConfig.SkipNonCombatOriginPowers
+                        && PersistTracker.IsEventOrigin(__instance.NetId, power.Id))
+                        continue;
+
+                    snapshot.Add(new PersistedPower(power.Id, power.Amount));
+                }
 
                 PersistTracker.SetSnapshot(__instance.NetId, snapshot);
                 PersistTracker.ClearOriginsFor(__instance.NetId);

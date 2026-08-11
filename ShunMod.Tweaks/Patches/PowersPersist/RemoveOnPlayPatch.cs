@@ -9,8 +9,6 @@ namespace ShunMod.Tweaks.Patches.PowersPersist;
 
 /// <summary>
 ///     当 RemovePowerCardsOnPlay 开关开启时，打出 Power 卡后将其牌组版本从运行牌组中移除。
-///     使用 CardPileCmd.RemoveFromDeck，让运行历史记录和 BeforeCardRemoved 钩子正常触发。
-///     通过链式 continuation 在异步 OnPlayWrapper 完成后执行。
 /// </summary>
 internal static class RemoveOnPlayPatch
 {
@@ -40,7 +38,7 @@ internal static class RemoveOnPlayPatch
             if (deckVersion == null || deckVersion.Pile == null
                 || deckVersion.Pile.Type != PileType.Deck)
             {
-                // 战斗中生成的卡，或已被其他机制（如 SwipePower/Guilty）从牌组移除。
+                // 战斗中生成的卡，或已被其他机制从牌组移除。
                 return;
             }
 
