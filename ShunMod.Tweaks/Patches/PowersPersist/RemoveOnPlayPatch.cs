@@ -1,4 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
+
+// ReSharper disable UnusedType.Global — Harmony 反射调用
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;

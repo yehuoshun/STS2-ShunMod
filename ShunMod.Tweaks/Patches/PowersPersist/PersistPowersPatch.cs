@@ -8,6 +8,8 @@ using MegaCrit.Sts2.Core.Models;
 
 namespace ShunMod.Tweaks.Patches.PowersPersist;
 
+// ReSharper disable UnusedType.Global — Harmony 反射调用
+
 /// <summary>
 ///     战斗结束时快照 Player.Creature.Powers（在清除之前），
 ///     下一场战斗开始时重新应用快照。
