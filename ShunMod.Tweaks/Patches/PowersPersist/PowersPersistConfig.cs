@@ -1,3 +1,5 @@
+using MegaCrit.Sts2.Core.Models.Powers;
+
 namespace ShunMod.Tweaks.Patches.PowersPersist;
 
 /// <summary>
@@ -19,4 +21,14 @@ public static class PowersPersistConfig
     ///     开启后，战斗外获得的 Power（如非战斗事件）不会带到下一场战斗。
     /// </summary>
     public static bool SkipNonCombatOriginPowers { get; set; }
+
+    /// <summary>
+    ///     Power 黑名单：这些 Power 不会持久化到下一场战斗。
+    ///     用于隔离持有战斗内临时状态（如指定要复制的目标卡）的 Power——
+    ///     跨战斗重连后其内部引用失效，会导致空引用（例如 Nightmare 的 BeforeHandDraw）。
+    /// </summary>
+    public static HashSet<Type> PowerBlacklist { get; } = new()
+    {
+        typeof(NightmarePower),
+    };
 }

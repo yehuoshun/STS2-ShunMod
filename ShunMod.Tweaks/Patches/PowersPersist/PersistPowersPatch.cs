@@ -27,6 +27,9 @@ internal static class PersistPowersPatch
                 var snapshot = new List<PersistedPower>();
                 foreach (var power in __instance.Creature.Powers)
                 {
+                    if (PowersPersistConfig.PowerBlacklist.Contains(power.GetType()))
+                        continue;
+
                     if (PowersPersistConfig.SkipNegativePowers
                         && power.TypeForCurrentAmount == PowerType.Debuff)
                         continue;
