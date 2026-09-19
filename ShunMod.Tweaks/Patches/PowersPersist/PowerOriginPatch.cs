@@ -15,6 +15,7 @@ namespace ShunMod.Tweaks.Patches.PowersPersist;
 ///     重连期间跳过标记（PersistTracker.IsReapplying 为 true 时不标记），
 ///     避免战斗开始的重连循环误把一切都标成 Event。
 /// </summary>
+// ReSharper disable once UnusedType.Global — Harmony 反射扫描嵌套类
 internal static class PowerOriginPatch
 {
     [HarmonyPatch(typeof(PowerCmd), nameof(PowerCmd.Apply), new[]

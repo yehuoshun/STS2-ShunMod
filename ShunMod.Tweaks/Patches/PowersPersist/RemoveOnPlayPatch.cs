@@ -10,6 +10,7 @@ namespace ShunMod.Tweaks.Patches.PowersPersist;
 /// <summary>
 ///     当 RemovePowerCardsOnPlay 开关开启时，打出 Power 卡后将其牌组版本从运行牌组中移除。
 /// </summary>
+// ReSharper disable once UnusedType.Global — Harmony 反射扫描嵌套类
 internal static class RemoveOnPlayPatch
 {
     [HarmonyPatch(typeof(CardModel), nameof(CardModel.OnPlayWrapper))]

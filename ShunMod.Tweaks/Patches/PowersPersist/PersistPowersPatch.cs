@@ -13,6 +13,7 @@ namespace ShunMod.Tweaks.Patches.PowersPersist;
 ///     下一场战斗开始时重新应用快照。
 ///     两个过滤器开关在快照时生效，而不是重连时。
 /// </summary>
+// ReSharper disable once UnusedType.Global — Harmony 反射扫描嵌套类
 internal static class PersistPowersPatch
 {
     [HarmonyPatch(typeof(Player), nameof(Player.AfterCombatEnd))]
