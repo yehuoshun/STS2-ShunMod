@@ -30,7 +30,7 @@ internal static class PowerOriginPatch
     })]
     internal static class TagOriginOnApply
     {
-        [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Harmony 反射调用")]
+        [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "Harmony 反射调用")]
         public static void Postfix(PowerModel power, Creature target)
         {
             try
