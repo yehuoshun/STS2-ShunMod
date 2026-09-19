@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Entities.Players;
@@ -25,22 +26,14 @@ internal static class PersistPowersPatch
         {
             try
             {
-                var snapshot = new List<PersistedPower>();
-                foreach (var power in __instance.Creature.Powers)
-                {
-                    if (PowersPersistConfig.PowerBlacklist.Contains(power.GetType()))
-                        continue;
-
-                    if (PowersPersistConfig.SkipNegativePowers
-                        && power.TypeForCurrentAmount == PowerType.Debuff)
-                        continue;
-
-                    if (PowersPersistConfig.SkipNonCombatOriginPowers
-                        && PersistTracker.IsEventOrigin(__instance.NetId, power.Id))
-                        continue;
-
-                    snapshot.Add(new PersistedPower(power.Id, power.Amount));
-                }
+                var snapshot = __instance.Creature.Powers
+                .Where(power => !PowersPersistConfig.PowerBlacklist.Contains(power.GetType()))
+                .Where(power => !(PowersPersistConfig.SkipNegativePowers
+                    && power.TypeForCurrentAmount == PowerType.Debuff))
+                .Where(power => !(PowersPersistConfig.SkipNonCombatOriginPowers
+                    && PersistTracker.IsEventOrigin(__instance.NetId, power.Id)))
+                .Select(power => new PersistedPower(power.Id, power.Amount))
+                .ToList();
 
                 PersistTracker.SetSnapshot(__instance.NetId, snapshot);
                 PersistTracker.ClearOriginsFor(__instance.NetId);
