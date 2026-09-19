@@ -20,7 +20,7 @@ internal static class PersistPowersPatch
     internal static class SnapshotPowersOnCombatEnd
     {
         [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony __instance 约定")]
-        [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Harmony 反射调用")]
+        [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "Harmony 反射调用")]
         public static void Prefix(Player __instance)
         {
             try
@@ -55,7 +55,7 @@ internal static class PersistPowersPatch
     [HarmonyPatch(typeof(CombatManager), nameof(CombatManager.SetUpCombat))]
     internal static class ReapplyPowersOnCombatStart
     {
-        [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Harmony 反射调用")]
+        [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "Harmony 反射调用")]
         public static void Postfix(CombatState state)
         {
             try
