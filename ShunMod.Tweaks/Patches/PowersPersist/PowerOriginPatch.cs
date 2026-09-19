@@ -18,16 +18,14 @@ namespace ShunMod.Tweaks.Patches.PowersPersist;
 [SuppressMessage("ReSharper", "UnusedType.Global", Justification = "Harmony 反射扫描嵌套类")]
 internal static class PowerOriginPatch
 {
-    [HarmonyPatch(typeof(PowerCmd), nameof(PowerCmd.Apply), new[]
-    {
+    [HarmonyPatch(typeof(PowerCmd), nameof(PowerCmd.Apply),
         typeof(PlayerChoiceContext),
         typeof(PowerModel),
         typeof(Creature),
         typeof(decimal),
         typeof(Creature),
         typeof(CardModel),
-        typeof(bool)
-    })]
+        typeof(bool))]
     internal static class TagOriginOnApply
     {
         [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "Harmony 反射调用")]
