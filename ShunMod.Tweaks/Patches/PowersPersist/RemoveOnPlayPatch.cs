@@ -36,8 +36,7 @@ internal static class RemoveOnPlayPatch
                 return;
 
             var deckVersion = card.DeckVersion;
-            if (deckVersion == null || deckVersion.Pile == null
-                || deckVersion.Pile.Type != PileType.Deck)
+            if (deckVersion?.Pile?.Type != PileType.Deck)
             {
                 // 战斗中生成的卡，或已被其他机制从牌组移除。
                 return;
