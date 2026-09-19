@@ -8,7 +8,7 @@ namespace ShunMod.Tweaks.Patches.PowersPersist;
 public enum PowerOrigin
 {
     Battle,
-    Event,
+    Event
 }
 
 /// <summary>
