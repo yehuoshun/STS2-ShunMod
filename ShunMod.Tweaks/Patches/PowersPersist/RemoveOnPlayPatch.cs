@@ -18,7 +18,7 @@ internal static class RemoveOnPlayPatch
     {
         [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony __instance/__result 约定")]
         [SuppressMessage("ReSharper", "RedundantAssignment", Justification = "Harmony ref __result 覆盖")]
-        [SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "Harmony 反射调用")]
+        [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "Harmony 反射调用")]
         public static void Postfix(CardModel __instance, ref Task __result)
         {
             var original = __result;
