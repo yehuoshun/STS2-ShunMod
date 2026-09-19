@@ -26,7 +26,7 @@ internal static class PowerOriginPatch
         typeof(decimal),
         typeof(Creature),
         typeof(CardModel),
-        typeof(bool),
+        typeof(bool)
     })]
     internal static class TagOriginOnApply
     {
