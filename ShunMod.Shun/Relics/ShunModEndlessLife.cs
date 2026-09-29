@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using MegaCrit.Sts2.Core.CardSelection;
+using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Relics;
@@ -50,15 +51,29 @@ public sealed class ShunModEndlessLife : ShunRelicModel<ShunModEndlessLife>
             Cancelable = true
         };
 
-        var selected = (await CardSelectCmd.FromHand(
-            choiceContext,
-            Owner,
-            prefs,
-            _ => true,
-            this)).ToList();
+        // 用 FromSimpleGrid 替代 FromHand：同步走索引（FromIndexes）而非 NetCombatCard 序列化，
+        // 避免「选牌 UI 打开期间战斗结束 → 手牌卡实例被清回 Deck 堆 → 确认时 NetCombatCard.FromModel 抛异常」的竞态崩溃。
+        List<CardModel> selected;
+        try
+        {
+            selected = (await CardSelectCmd.FromSimpleGrid(
+                choiceContext,
+                hand,
+                Owner,
+                prefs)).ToList();
+        }
+        catch (OperationCanceledException)
+        {
+            // 玩家取消（Esc/界面销毁）→ 静默放弃
+            return;
+        }
 
         // 取消选择，不执行
         if (selected.Count == 0)
+            return;
+
+        // 选牌期间战斗可能已结束（联机队友收尾等），此时消耗/生成/回能无意义，直接放弃
+        if (CombatManager.Instance.IsOverOrEnding)
             return;
 
         var count = selected.Count;
