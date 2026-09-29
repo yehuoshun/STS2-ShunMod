@@ -63,42 +63,12 @@ jobs:
       - name: Restore
         run: dotnet restore STS2_ShunMod.sln
 
-      # ── Core 先构建，其余模块引用其产物 ──
-      - name: Build Core
+      # ── 一次构建整个 sln：MSBuild 自行调度（Core 先行，其余模块并行） ──
+      - name: Build all modules
         run: |
-          dotnet build ShunMod.Core/ShunMod.Core.csproj \
+          dotnet build STS2_ShunMod.sln \
             -c Release \
-            -p:Sts2DataDir="$(realpath deps)" \
-            --no-restore
-
-      # ── 剩余模块：先放 Core.dll 供引用，再逐个构建 ──
-      - name: Build Shun
-        run: |
-          mkdir -p ShunMod.Shun/.godot/mono/temp/bin/Release
-          cp ShunMod.Core/.godot/mono/temp/bin/Release/ShunMod_Core.dll ShunMod.Shun/.godot/mono/temp/bin/Release/
-          cp ShunMod.Core/ShunMod_Core.json ShunMod.Shun/.godot/mono/temp/bin/Release/
-          dotnet build ShunMod.Shun/ShunMod.Shun.csproj \
-            -c Release \
-            -p:Sts2DataDir="$(realpath deps)" \
-            --no-restore
-
-      - name: Build Tweaks
-        run: |
-          mkdir -p ShunMod.Tweaks/.godot/mono/temp/bin/Release
-          cp ShunMod.Core/.godot/mono/temp/bin/Release/ShunMod_Core.dll ShunMod.Tweaks/.godot/mono/temp/bin/Release/
-          cp ShunMod.Core/ShunMod_Core.json ShunMod.Tweaks/.godot/mono/temp/bin/Release/
-          dotnet build ShunMod.Tweaks/ShunMod.Tweaks.csproj \
-            -c Release \
-            -p:Sts2DataDir="$(realpath deps)" \
-            --no-restore
-
-      - name: Build Compat
-        run: |
-          mkdir -p ShunMod.Compat/.godot/mono/temp/bin/Release
-          cp ShunMod.Core/.godot/mono/temp/bin/Release/ShunMod_Core.dll ShunMod.Compat/.godot/mono/temp/bin/Release/
-          cp ShunMod.Core/ShunMod_Core.json ShunMod.Compat/.godot/mono/temp/bin/Release/
-          dotnet build ShunMod.Compat/ShunMod.Compat.csproj \
-            -c Release \
+            -m \
             -p:Sts2DataDir="$(realpath deps)" \
             --no-restore
 
