@@ -4,6 +4,7 @@
 > Shun's Slay the Spire 2 Mod — Native
 
 [![Version](https://img.shields.io/github/v/release/yehuoshun/STS2-ShunMod)](https://github.com/yehuoshun/STS2-ShunMod/releases)
+[![CI](https://github.com/yehuoshun/STS2-ShunMod/actions/workflows/ci.yml/badge.svg)](https://github.com/yehuoshun/STS2-ShunMod/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Framework](https://img.shields.io/badge/framework-.NET%209.0-purple)](STS2_ShunMod.sln)
 
@@ -11,12 +12,14 @@
 
 ## 模块说明
 
-| 模块 | 文件夹 | 说明 |
-|---|---|---|
-| `ShunMod_Core` | `Mods/ShunMod_Core/` | 共享基础框架（必需） |
-| `ShunMod_Shun` | `Mods/ShunMod_Shun/` | 舜角色内容（卡牌/遗物/事件） |
-| `ShunMod_Tweaks` | `Mods/ShunMod_Tweaks/` | 数值/机制修改 |
-| `ShunMod_Compat` | `Mods/ShunMod_Compat/` | 第三方模组兼容补丁 |
+| 模块 | 文件夹 | 版本 | 说明 |
+|---|---|---|---|
+| `ShunMod_Core` | `Mods/ShunMod_Core/` | v0.0.32 | 共享基础框架（必需） |
+| `ShunMod_Shun` | `Mods/ShunMod_Shun/` | v0.0.132 | 舜角色内容（卡牌/遗物/事件） |
+| `ShunMod_Tweaks` | `Mods/ShunMod_Tweaks/` | v0.0.102 | 数值/机制修改 |
+| `ShunMod_Compat` | `Mods/ShunMod_Compat/` | v0.0.71 | 第三方模组兼容补丁 |
+
+> 构建参考：StS2 deps `v0.107.1`（sts2.dll / 0Harmony.dll 取自仓库 Release `0.107.1`）。
 
 ---
 
@@ -24,7 +27,8 @@
 
 | 名称 | 费用 | 稀有度 | 类型 | 效果 |
 |---|---|---|---|---|
-| 超级神化 | 2→1 | 稀有·无色 | 技能 | 升级战斗中所有卡牌，同时升级牌组中所有可升级卡牌。
+| 超级神化 | 2→1 | 稀有·无色 | 技能 | 升级战斗中所有卡牌，同时升级牌组中所有可升级卡牌。 |
+| 添柴·改 | 1 | 稀有·无色 | 技能 | 消耗任意张手牌，每消耗 1 张获得 1 点能量并生成 1 张随机牌加入手牌（升级后生成的牌自动升级）。 |
 
 ---
 
@@ -49,9 +53,11 @@
 | 💥 显示总伤害 | Tweaks | 多段卡/X卡在卡牌描述末尾显示总伤害（单段伤害 × 段数）。 |
 | ⚔️ 锻造拉回 | Tweaks | 所有锻造行为自动将非手牌的君王之剑拉回手牌。 |
 | ⚡ 能量保留 | Tweaks | 回合开始时能量不清零，剩余能量累积（冰激凌逻辑）。 |
-| 🔓 附魔限制解除 | Tweaks | 运行时扫描所有附魔子类，自动解除 CanEnchant / CanEnchantCardType 限制，任意卡牌可接受任意附魔。 |
+| ♾️ 能力持久化 | Tweaks | 战斗结束快照玩家能力，下一场战斗重新施加；支持开关：打出 Power 牌后移出牌组、跳过减益/战斗外来源能力（含黑名单）。 |
+| 👑 永恒卡牌限制解除 | Tweaks | 永恒卡牌可被移除/可被变化（原版有 Eternal 关键字则不可移除、牌组中不可变化）。 |
+| 🔧 动态伤害变量修复 | Tweaks | 修复 `DynamicVarSet.Damage` 缺失 key 时抛 KeyNotFoundException 的崩溃（兜底 `CalculatedDamage`，规避第三方附魔在部分卡上的崩溃）。 |
 | 🖱️ 遗物右键交互 | Shun | 为 ShunMod 遗物添加右键点击支持（GuiInput 信号）。 |
-| ✨ 休息处附魔 | Shun | 休息处增加「附魔」选项，随机选一种附魔施加到牌组中的一张牌上。 |
+| ✨ 休息处附魔 | Shun | 休息处增加「附魔」选项：随机预选一种附魔，选牌施加 5 层（已附魔则替换/叠加）。 |
 
 ## 兼容性补丁
 
@@ -63,6 +69,7 @@
 | 📚 附魔叠加上限解除 | Compat | 解除 MoreEnchantmentsMod 单卡附魔叠加上限（CanApply 跳过上限检查）。 |
 | 📚 附魔已满拦截解除 | Compat | 解除 MoreEnchantmentsMod 附魔界面 UI 层上限检查，上限后仍可继续附魔。 |
 | ⏳ 凝固时间符文修改 | Compat | 海克斯模组 SolidTimeRune：打出能力卡时移除牌组中对应卡（取消 pile.Type == 6 限制），战斗开始时触发所有被移除牌效果。 |
+| 👻 噬魂回响之坠 100% | Compat | 噬魂模组（ABStS2Mod）EchoOfTheFallen 遗物：卡牌奖励概率 40% → 100%（Transpiler 常量替换，纯 IL）。 |
 
 ---
 
@@ -117,14 +124,19 @@ STS2-ShunMod/
 │   ├── Cards/
 │   │   ├── ShunModStokeModified.cs     # 添柴·改
 │   │   └── ShunModSuperApotheosis.cs   # 超级神化
+│   ├── Patches/
+│   │   ├── RelicRightClickPatch.cs      # 遗物右键交互
+│   │   └── EnchantLocalizationPatch.cs  # 附魔本地化注册
 │   ├── Relics/
-│   │   ├── ShunModBossTrophy.cs        # 首领奖杯
-│   ├── ShunModBountifulFrond.cs    # 丰饶叶
-│   ├── ShunModEndlessLife.cs       # 生生不息
-│   └── ShunModInfiniteGirya.cs     # 无限壶铃
+│   │   ├── ShunModBossTrophy.cs         # 首领奖杯
+│   │   ├── ShunModBountifulFrond.cs     # 丰饶叶
+│   │   ├── ShunModEndlessLife.cs        # 生生不息
+│   │   └── ShunModInfiniteGirya.cs      # 无限壶铃
 │   ├── RestSite/
-│   │   ├── EnchantRestSiteOption.cs    # 休息处附魔选项
-│   │   └── EnchantRestSitePatch.cs     # 注入 Generate 方法
+│   │   ├── EnchantRestSiteOption.cs     # 休息处附魔选项
+│   │   ├── EnchantRestSitePatch.cs      # 注入 Generate 方法
+│   │   ├── RestSiteOptionsPatch.cs      # 休息处选项汇总注入
+│   │   └── RestSiteLayoutHelper.cs      # 选项布局工具
 │   └── Events/
 │       └── （框架预留）
 │
@@ -133,17 +145,22 @@ STS2-ShunMod/
 │   ├── ShunMod_Tweaks.json             # 模组清单，依赖 ShunMod_Core
 │   ├── ModEntry.cs                     # Harmony.PatchAll
 │   └── Patches/
-│       ├── Combat/
-│       │   ├── BlockRetentionPatch.cs      # 格挡保留
-│       │   ├── EnergyRetentionPatch.cs     # 能量保留（冰激凌）
-│       │   ├── ForgePullBladesToHandPatch.cs  # 锻造拉回君王之剑
-│       │   ├── HardenedShellPatch.cs       # 硬化外壳修复
-│       │   └── ShowTotalDamage.cs          # 显示总伤害
 │       ├── Cards/
 │       │   ├── EternalRemovalPatch.cs      # 永恒卡牌移除/变化限制解除
 │       │   └── InfiniteUpgrade.cs          # 无限升级
-│       └── Enchantments/
-│           └── EnchantRestrictionRemover.cs  # 运行时扫描所有附魔子类，自动解除限制
+│       ├── Combat/
+│       │   ├── BlockRetentionPatch.cs          # 格挡保留
+│       │   ├── DynamicVarSetDamagePatch.cs     # 动态伤害变量崩溃修复
+│       │   ├── EnergyRetentionPatch.cs         # 能量保留（冰激凌）
+│       │   ├── ForgePullBladesToHandPatch.cs   # 锻造拉回君王之剑
+│       │   ├── HardenedShellPatch.cs           # 硬化外壳修复
+│       │   └── ShowTotalDamage.cs              # 显示总伤害
+│       └── PowersPersist/
+│           ├── PersistPowersPatch.cs       # 能力跨战斗持久化
+│           ├── PowerOriginPatch.cs         # 能力来源标记（战斗/事件）
+│           ├── RemoveOnPlayPatch.cs        # 打出 Power 牌移出牌组（开关）
+│           ├── PersistTracker.cs           # 快照存取
+│           └── PowersPersistConfig.cs      # 配置开关
 │
 ├── ShunMod.Compat/                     # 兼容性补丁
 │   ├── ShunMod.Compat.csproj           # AssemblyName: ShunMod_Compat → 引用 Core
@@ -151,15 +168,18 @@ STS2-ShunMod/
 │   ├── ModEntry.cs                     # Harmony.PatchAll + CompatibilityPatches
 │   └── Patches/Compatibility/
 │       ├── CompatibilityPatches.cs         # 统一入口
+│       ├── ABStS2Mod/
+│       │   └── EchoOfTheFallenPatch.cs     # 噬魂·回响之坠奖励 40%→100%
 │       ├── Shadowverse/
-│       │   ├── ShadowverseEvolutionPointPatch.cs  # 影之诗进化点解除
-│       │   ├── ShadowverseSkinLimitPatch.cs       # 影之诗皮肤限制解除
-│       │   └── ShadowverseBgLimitPatch.cs         # 影之诗背景包限制解除
+│       │   ├── LimitPatchHelper.cs                  # 限制补丁共享 Transpiler
+│       │   ├── ShadowverseEvolutionPointPatch.cs    # 影之诗进化点解除
+│       │   ├── ShadowverseSkinLimitPatch.cs         # 影之诗皮肤限制解除
+│       │   └── ShadowverseBgLimitPatch.cs           # 影之诗背景包限制解除
 │       ├── MoreEnchantments/
-│       │   ├── MoreEnchantStackPatch.cs           # 附魔叠加上限解除
-│       │   └── MoreEnchantPayCheckPatch.cs        # 附魔已满拦截解除
+│       │   ├── MoreEnchantStackPatch.cs             # 附魔叠加上限解除
+│       │   └── MoreEnchantPayCheckPatch.cs          # 附魔已满拦截解除
 │       └── Hextech/
-│           └── SolidTimeRunePatch.cs              # 凝固时间符文 pile.Type == 6 限制解除
+│           └── SolidTimeRunePatch.cs                # 凝固时间符文 pile.Type == 6 限制解除
 │
 │   └── assets/                         # Godot 资源（图片/本地化）
 │       ├── images/                     # 卡牌/遗物/事件美术
