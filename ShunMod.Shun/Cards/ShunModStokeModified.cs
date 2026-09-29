@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using MegaCrit.Sts2.Core.CardSelection;
+using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Factories;
@@ -34,8 +35,27 @@ public class ShunModStokeModified() : CardModel(1, CardType.Skill, CardRarity.Ra
         {
             Cancelable = true
         };
-        var selected = (await CardSelectCmd.FromHand(
-            choiceContext, owner, prefs, null, this)).ToList();
+
+        // 用 FromSimpleGrid 替代 FromHand：同步走索引（FromIndexes）而非 NetCombatCard 序列化，
+        // 与遗物右键保持一致，避免选牌期间战斗结束导致序列化崩溃。
+        List<CardModel> selected;
+        try
+        {
+            selected = (await CardSelectCmd.FromSimpleGrid(
+                choiceContext,
+                PileType.Hand.GetPile(owner).Cards.ToList(),
+                owner,
+                prefs)).ToList();
+        }
+        catch (OperationCanceledException)
+        {
+            // 玩家取消（Esc/界面销毁）→ 静默放弃
+            return;
+        }
+
+        // 选牌期间战斗可能已结束（联机队友收尾等），此时消耗/生成/回能无意义，直接放弃
+        if (CombatManager.Instance.IsOverOrEnding)
+            return;
 
         var exhaustCount = selected.Count;
         if (exhaustCount == 0) return;
