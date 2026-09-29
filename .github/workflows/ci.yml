@@ -12,13 +12,13 @@ env:
   GODOT_VERSION: "4.5.1-stable"
 
 jobs:
-  # ── 先构建 Core（其他模块依赖 Core） ────────────────────────────────────
-  build-core:
+  # ── 单 job 全流程：省掉 3 段流水线的重复环境开销（5 台 VM → 1 台） ──
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Setup .NET 9.0
         uses: actions/setup-dotnet@v4
@@ -63,6 +63,7 @@ jobs:
       - name: Restore
         run: dotnet restore STS2_ShunMod.sln
 
+      # ── Core 先构建，其余模块引用其产物 ──
       - name: Build Core
         run: |
           dotnet build ShunMod.Core/ShunMod.Core.csproj \
@@ -70,119 +71,38 @@ jobs:
             -p:Sts2DataDir="$(realpath deps)" \
             --no-restore
 
-      - name: Upload Core artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-core
-          path: |
-            ShunMod.Core/.godot/mono/temp/bin/Release/ShunMod_Core.dll
-            ShunMod.Core/ShunMod_Core.json
-          retention-days: 1
-
-  # ── 剩余模块并行构建 ────────────────────────────────────────────────────
-  build-modules:
-    needs: build-core
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        module:
-          - name: Shun
-            proj: ShunMod.Shun/ShunMod.Shun.csproj
-            dir: ShunMod.Shun
-            asm: ShunMod_Shun
-            has_pck: true
-          - name: Tweaks
-            proj: ShunMod.Tweaks/ShunMod.Tweaks.csproj
-            dir: ShunMod.Tweaks
-            asm: ShunMod_Tweaks
-            has_pck: false
-          - name: Compat
-            proj: ShunMod.Compat/ShunMod.Compat.csproj
-            dir: ShunMod.Compat
-            asm: ShunMod_Compat
-            has_pck: false
-      fail-fast: false
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup .NET 9.0
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 9.0.x
-
-      - name: Cache NuGet packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', '**/*.props') }}
-          restore-keys: |
-            nuget-${{ runner.os }}-
-
-      - name: Cache game references
-        id: cache-deps
-        uses: actions/cache@v4
-        with:
-          path: deps
-          key: deps-${{ env.DEPS_VERSION }}
-
-      - name: Download game references
-        if: steps.cache-deps.outputs.cache-hit != 'true'
+      # ── 剩余模块：先放 Core.dll 供引用，再逐个构建 ──
+      - name: Build Shun
         run: |
-          mkdir -p deps
-          DEPS_URL="https://github.com/${{ github.repository }}/releases/download/${{ env.DEPS_VERSION }}"
-          curl -sL "${DEPS_URL}/sts2.dll" -o deps/sts2.dll
-          curl -sL "${DEPS_URL}/0Harmony.dll" -o deps/0Harmony.dll
-          ls -la deps/
-
-      - name: Download Core artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: build-core
-          path: build-core/
-
-      - name: Restore
-        run: dotnet restore ${{ matrix.module.proj }}
-
-      - name: Place Core.dll for project reference
-        run: |
-          mkdir -p "${{ matrix.module.dir }}/.godot/mono/temp/bin/Release"
-          find build-core -name "ShunMod_Core.dll" -exec cp {} "${{ matrix.module.dir }}/.godot/mono/temp/bin/Release/" \;
-          find build-core -name "ShunMod_Core.json" -exec cp {} "${{ matrix.module.dir }}/.godot/mono/temp/bin/Release/" \;
-
-      - name: Build ${{ matrix.module.name }}
-        run: |
-          dotnet build ${{ matrix.module.proj }} \
+          mkdir -p ShunMod.Shun/.godot/mono/temp/bin/Release
+          cp ShunMod.Core/.godot/mono/temp/bin/Release/ShunMod_Core.dll ShunMod.Shun/.godot/mono/temp/bin/Release/
+          cp ShunMod.Core/ShunMod_Core.json ShunMod.Shun/.godot/mono/temp/bin/Release/
+          dotnet build ShunMod.Shun/ShunMod.Shun.csproj \
             -c Release \
             -p:Sts2DataDir="$(realpath deps)" \
             --no-restore
 
-      - name: Upload ${{ matrix.module.name }} artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-${{ matrix.module.name }}
-          path: |
-            ${{ matrix.module.dir }}/.godot/mono/temp/bin/Release/${{ matrix.module.asm }}.dll
-            ${{ matrix.module.dir }}/${{ matrix.module.asm }}.json
-          retention-days: 1
+      - name: Build Tweaks
+        run: |
+          mkdir -p ShunMod.Tweaks/.godot/mono/temp/bin/Release
+          cp ShunMod.Core/.godot/mono/temp/bin/Release/ShunMod_Core.dll ShunMod.Tweaks/.godot/mono/temp/bin/Release/
+          cp ShunMod.Core/ShunMod_Core.json ShunMod.Tweaks/.godot/mono/temp/bin/Release/
+          dotnet build ShunMod.Tweaks/ShunMod.Tweaks.csproj \
+            -c Release \
+            -p:Sts2DataDir="$(realpath deps)" \
+            --no-restore
 
-  # ── 汇总打包 ────────────────────────────────────────────────────────────
-  package:
-    needs: build-modules
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - name: Build Compat
+        run: |
+          mkdir -p ShunMod.Compat/.godot/mono/temp/bin/Release
+          cp ShunMod.Core/.godot/mono/temp/bin/Release/ShunMod_Core.dll ShunMod.Compat/.godot/mono/temp/bin/Release/
+          cp ShunMod.Core/ShunMod_Core.json ShunMod.Compat/.godot/mono/temp/bin/Release/
+          dotnet build ShunMod.Compat/ShunMod.Compat.csproj \
+            -c Release \
+            -p:Sts2DataDir="$(realpath deps)" \
+            --no-restore
 
-      - name: Download all build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          pattern: build-*
-          merge-multiple: true
-
+      # ── Godot .pck 导出（Shun 模块资源） ──
       - name: Cache Godot binary
         id: cache-godot
         uses: actions/cache@v4
@@ -208,6 +128,7 @@ jobs:
           "$GODOT" --headless --export-pack "BasicExport" ShunMod_Shun.pck
           ls -la ShunMod_Shun.pck 2>/dev/null || echo "Export failed"
 
+      # ── 汇总打包 ──
       - name: Package individual zips
         run: |
           for entry in "Core|ShunMod_Core" "Shun|ShunMod_Shun" "Tweaks|ShunMod_Tweaks" "Compat|ShunMod_Compat"; do
@@ -215,8 +136,8 @@ jobs:
             ASM="${entry##*|}"
             echo "=== Packaging ${ASM} ==="
             mkdir -p "publish/${ASM}"
-            cp "${ASM}.dll" "publish/${ASM}/" 2>/dev/null || echo "  No dll found for ${ASM}"
-            cp "${ASM}.json" "publish/${ASM}/" 2>/dev/null || echo "  No json found for ${ASM}"
+            cp "ShunMod.${NAME}/.godot/mono/temp/bin/Release/${ASM}.dll" "publish/${ASM}/" 2>/dev/null || echo "  No dll found for ${ASM}"
+            cp "ShunMod.${NAME}/${ASM}.json" "publish/${ASM}/" 2>/dev/null || echo "  No json found for ${ASM}"
             PCK=$(find . -maxdepth 1 -name "ShunMod_Shun.pck" -type f 2>/dev/null | head -1)
             if [ -n "$PCK" ] && [ "$ASM" = "ShunMod_Shun" ]; then
               cp "$PCK" "publish/${ASM}/"
@@ -231,8 +152,14 @@ jobs:
           mkdir -p publish
           for asm in ShunMod_Core ShunMod_Shun ShunMod_Tweaks ShunMod_Compat; do
             mkdir -p "publish/${asm}"
-            cp "${asm}.dll" "publish/${asm}/" 2>/dev/null || true
-            cp "${asm}.json" "publish/${asm}/" 2>/dev/null || true
+            case "$asm" in
+              ShunMod_Core)    DIR="ShunMod.Core";;
+              ShunMod_Shun)    DIR="ShunMod.Shun";;
+              ShunMod_Tweaks)  DIR="ShunMod.Tweaks";;
+              ShunMod_Compat)  DIR="ShunMod.Compat";;
+            esac
+            cp "$DIR/.godot/mono/temp/bin/Release/${asm}.dll" "publish/${asm}/" 2>/dev/null || true
+            cp "$DIR/${asm}.json" "publish/${asm}/" 2>/dev/null || true
           done
           PCK=$(find . -maxdepth 1 -name "ShunMod_Shun.pck" -type f 2>/dev/null | head -1)
           if [ -n "$PCK" ]; then
