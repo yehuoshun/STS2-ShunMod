@@ -34,15 +34,31 @@ public static class PowersPersistConfig
 
     /// <summary>
     ///     开启后，只持久化 PersistWhitelist 白名单中的 Power；
-    ///     关闭（默认）时持久化所有 Power（含数值堆叠型，跨战斗复利自担）。
+    ///     关闭时持久化所有 Power（含数值堆叠型，跨战斗复利自担）。
+    ///     默认开启：配合 DefaultExcludedStatPowers，默认只排除属性修正型，其余照旧保留。
     /// </summary>
-    public static bool UsePersistWhitelist { get; set; }
+    public static bool UsePersistWhitelist { get; set; } = true;
 
     /// <summary>
-    ///     Power 持久化白名单：仅当 UsePersistWhitelist 开启时生效。
-    ///     建议只放「永续型」Power（每回合触发/光环类，如每回合叠甲、每回合抽牌），
-    ///     纯数值堆叠型（力量/敏捷类）不放进来，避免跨战斗数值爆炸。
-    ///     默认空 = 开启开关后所有 Power 都不持久化，按需自行添加。
+    ///     Power 持久化白名单：UsePersistWhitelist 开启时，
+    ///     在白名单里的 Power 永远保留（即使同时命中 DefaultExcludedStatPowers）。
+    ///     不放任何内容的默认行为 = 只排除 DefaultExcludedStatPowers，其余全部照旧保留。
+    ///     想额外硬保留某些 Power（如每回合触发/光环型）时自行 Add。
     /// </summary>
     public static HashSet<Type> PersistWhitelist { get; } = new();
+
+    /// <summary>
+    ///     默认排除的「属性修正型」Power：跨战斗保留会永久叠加属性（力量/敏捷/专注），
+    ///     必然数值滚雪球，所以默认不持久化。
+    ///     需要保留时加进 PersistWhitelist 即可覆盖。
+    /// </summary>
+    public static HashSet<Type> DefaultExcludedStatPowers { get; } = new()
+    {
+        typeof(StrengthPower),
+        typeof(DexterityPower),
+        typeof(FocusPower),
+        typeof(TemporaryStrengthPower),
+        typeof(TemporaryDexterityPower),
+        typeof(TemporaryFocusPower),
+    };
 }
