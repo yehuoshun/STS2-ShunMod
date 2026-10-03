@@ -28,6 +28,8 @@ internal static class PersistPowersPatch
             {
                 var snapshot = __instance.Creature.Powers
                 .Where(power => !PowersPersistConfig.PowerBlacklist.Contains(power.GetType()))
+                .Where(power => !(PowersPersistConfig.UsePersistWhitelist
+                    && !PowersPersistConfig.PersistWhitelist.Contains(power.GetType())))
                 .Where(power => !(PowersPersistConfig.SkipNegativePowers
                     && power.TypeForCurrentAmount == PowerType.Debuff))
                 .Where(power => !(PowersPersistConfig.SkipNonCombatOriginPowers

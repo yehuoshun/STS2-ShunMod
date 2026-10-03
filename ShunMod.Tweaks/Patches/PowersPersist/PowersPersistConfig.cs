@@ -31,4 +31,18 @@ public static class PowersPersistConfig
     {
         typeof(NightmarePower),
     };
+
+    /// <summary>
+    ///     开启后，只持久化 PersistWhitelist 白名单中的 Power；
+    ///     关闭（默认）时持久化所有 Power（含数值堆叠型，跨战斗复利自担）。
+    /// </summary>
+    public static bool UsePersistWhitelist { get; set; }
+
+    /// <summary>
+    ///     Power 持久化白名单：仅当 UsePersistWhitelist 开启时生效。
+    ///     建议只放「永续型」Power（每回合触发/光环类，如每回合叠甲、每回合抽牌），
+    ///     纯数值堆叠型（力量/敏捷类）不放进来，避免跨战斗数值爆炸。
+    ///     默认空 = 开启开关后所有 Power 都不持久化，按需自行添加。
+    /// </summary>
+    public static HashSet<Type> PersistWhitelist { get; } = new();
 }
