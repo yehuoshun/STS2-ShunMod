@@ -11,6 +11,10 @@
         <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
         <PathMap>$(AppOutputBase)=\.\</PathMap>
         <GodotDisabledSourceGenerators>GodotPluginsInitializer</GodotDisabledSourceGenerators>
+        <!-- PckPacker: 只打包 assets/，排除 .cs 文件；ResPrefix 留空 → pck 内路径直接挂 res://（PowerModel 图标路径硬编码无前缀） -->
+        <PckPackerSourceDir>assets/</PckPackerSourceDir>
+        <PckPackerResPrefix></PckPackerResPrefix>
+        <PckPackerOutputPath>$(OutputPath)$(AssemblyName).pck</PckPackerOutputPath>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -34,10 +38,19 @@
 
     <ItemGroup>
         <PackageReference Include="Krafs.Publicizer" Version="2.3.0" PrivateAssets="All"/>
+        <PackageReference Include="BSchneppe.StS2.PckPacker" Version="0.1.1" PrivateAssets="All"/>
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\ShunMod.Core\ShunMod.Core.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="assets\**"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <GodotResourceFiles Include="assets\**"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -53,5 +66,10 @@
         <Message Text="Copying .dll and manifest to mods folder." Importance="high"/>
         <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModsPath)$(AssemblyName)/"/>
         <Copy SourceFiles="ShunMod_Tweaks.json" DestinationFolder="$(ModsPath)$(AssemblyName)/"/>
+    </Target>
+
+    <Target Name="CopyQuickPck" AfterTargets="PackPck" Condition="Exists('$(PckPackerOutputPath)') And '$(PckPackerSkipped)' != 'true'">
+        <Message Text="Copying quick .pck to mods folder." Importance="high"/>
+        <Copy SourceFiles="$(PckPackerOutputPath)" DestinationFolder="$(ModsPath)/$(AssemblyName)"/>
     </Target>
 </Project>
