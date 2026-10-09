@@ -45,7 +45,8 @@ public static class ModEntry
         try
         {
             ModelDb.Inject(typeof(OverflowPower));
-            Log.Info($"[{ModId}] OverflowPower registered");
+            ModelDb.Inject(typeof(OverflowLifePower));
+            Log.Info($"[{ModId}] OverflowPower / OverflowLifePower registered");
         }
         catch (Exception e)
         {
