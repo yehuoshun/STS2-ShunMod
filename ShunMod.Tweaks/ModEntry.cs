@@ -3,6 +3,8 @@ using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
+using MegaCrit.Sts2.Core.Models;
+using ShunMod.Tweaks.Patches.Overflow;
 
 namespace ShunMod.Tweaks;
 
@@ -37,6 +39,17 @@ public static class ModEntry
             Log.Error($"[{ModId}] Harmony patching failed: {e.GetType().Name}: {e.Message}");
             if (e.InnerException != null)
                 Log.Error($"[{ModId}]   \u2192 inner: {e.InnerException.GetType().Name}: {e.InnerException.Message}");
+        }
+
+        // 注册超限记账 Power：ModelDb.Init 可能早于 mod 加载执行，必须显式 Inject
+        try
+        {
+            ModelDb.Inject(typeof(OverflowPower));
+            Log.Info($"[{ModId}] OverflowPower registered");
+        }
+        catch (Exception e)
+        {
+            Log.Error($"[{ModId}] OverflowPower 注册失败: {e.GetType().Name}: {e.Message}");
         }
 
         Log.Info($"[{ModId}] Initialization complete");

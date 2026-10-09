@@ -1,4 +1,5 @@
 using MegaCrit.Sts2.Core.Models.Powers;
+using ShunMod.Tweaks.Patches.Overflow;
 
 namespace ShunMod.Tweaks.Patches.PowersPersist;
 
@@ -30,6 +31,9 @@ public static class PowersPersistConfig
     public static HashSet<Type> PowerBlacklist { get; } = new()
     {
         typeof(NightmarePower),
+        // 超限记账层：本质是战斗内护盾的另一种存放形式，跨战斗保留会导致
+        // 护盾值复利回魂（格挡本身就不跨战斗），故不持久化。
+        typeof(OverflowPower),
     };
 
     /// <summary>
