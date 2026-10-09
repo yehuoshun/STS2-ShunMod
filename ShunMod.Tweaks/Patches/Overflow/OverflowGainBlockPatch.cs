@@ -3,6 +3,7 @@ using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
+using ShunMod.Core.Core.Helpers;
 
 namespace ShunMod.Tweaks.Patches.Overflow;
 
@@ -49,7 +50,9 @@ internal static class OverflowGainBlockPatch
         int stacks = creature.Block / OverflowConfig.Threshold;
         if (stacks <= 0) return;
 
-        creature.Block %= OverflowConfig.Threshold;
+        // Block setter 不同版本可见性不同（0.107.1 public / 新版 private），
+        // 统一走反射写（同 BlockRetentionPatch 惯例）
+        CreatureReflection.SetBlock(creature, creature.Block % OverflowConfig.Threshold);
 
         OverflowPower? power = creature.GetPower<OverflowPower>();
         if (power != null)

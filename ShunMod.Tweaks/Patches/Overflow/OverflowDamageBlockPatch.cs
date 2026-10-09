@@ -3,6 +3,7 @@ using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.ValueProps;
+using ShunMod.Core.Core.Helpers;
 
 namespace ShunMod.Tweaks.Patches.Overflow;
 
@@ -35,7 +36,8 @@ internal static class OverflowDamageBlockPatch
             // 护盾不足就逐层兑回（1 层 = 阈值），直到够挡或层数耗尽
             while (__instance.Block < amount && power.Amount > 0)
             {
-                __instance.Block += OverflowConfig.Threshold;
+                // Block setter 版本差异，统一反射写（同 BlockRetentionPatch 惯例）
+                CreatureReflection.SetBlock(__instance, __instance.Block + OverflowConfig.Threshold);
                 power.SetAmount(power.Amount - 1, silent: true);
             }
         }
