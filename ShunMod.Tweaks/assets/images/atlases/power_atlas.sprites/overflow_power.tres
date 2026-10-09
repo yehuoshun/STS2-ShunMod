@@ -1,4 +1,4 @@
 [gd_resource type="CompressedTexture2D" load_steps=1 format=3]
 
 [resource]
-load_path = "res://images/powers/overflowpower.png"
+load_path = "res://images/powers/overflow_power.png"
