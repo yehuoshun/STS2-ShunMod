@@ -3,8 +3,6 @@ using System.Reflection;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Modding;
-using MegaCrit.Sts2.Core.Models;
-using ShunMod.Tweaks.Patches.Overflow;
 
 namespace ShunMod.Tweaks;
 
@@ -41,17 +39,10 @@ public static class ModEntry
                 Log.Error($"[{ModId}]   \u2192 inner: {e.InnerException.GetType().Name}: {e.InnerException.Message}");
         }
 
-        // 注册超限记账 Power：ModelDb.Init 可能早于 mod 加载执行，必须显式 Inject
-        try
-        {
-            ModelDb.Inject(typeof(OverflowPower));
-            ModelDb.Inject(typeof(OverflowLifePower));
-            Log.Info($"[{ModId}] OverflowPower / OverflowLifePower registered");
-        }
-        catch (Exception e)
-        {
-            Log.Error($"[{ModId}] OverflowPower 注册失败: {e.GetType().Name}: {e.Message}");
-        }
+        // 超限记账 Power 不显式 Inject：ModelDb.Init() 的 AllAbstractModelSubtypes 会通过
+        // ReflectionHelper.GetSubtypesInMods 自动扫描 mod 程序集中的 AbstractModel 子类并实例化注册。
+        // 显式 Inject 会抢先注册 → Init 再次实例化时 AbstractModel 构造器抛 DuplicateModelException（启动崩溃）。
+        Log.Info($"[{ModId}] OverflowPower / OverflowLifePower 由 ModelDb.Init 自动注册");
 
         Log.Info($"[{ModId}] Initialization complete");
         Log.Info($"[{ModId}] ============================================================");
