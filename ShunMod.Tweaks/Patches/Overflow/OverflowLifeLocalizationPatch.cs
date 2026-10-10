@@ -27,7 +27,7 @@ internal static class OverflowLifeLocalizationPatch
         _registered = true;
 
         const string description =
-            "生命上限顶格后继续增加、或满血时的溢出治疗，按每管血折成一条「命」。受到致命伤害时自动消耗一条命回满。跨战斗保留。";
+            "生命上限顶格后继续增加、或满血时的溢出治疗，按每管血折成一条「命」。濒死时自动消耗一条命回满复活。跨战斗保留。";
 
         LocManager.Instance.GetTable("powers").MergeWith(new Dictionary<string, string>
         {
