@@ -132,6 +132,12 @@ jobs:
           if [ -n "$PCK" ]; then
             cp "$PCK" "publish/${ASM}/"
           fi
+          # PckPacker 产物在模块 bin 输出目录（Godot export 的在仓库根，上面已处理）
+          MOD_PCK="${DIR}/.godot/mono/temp/bin/Release/${ASM}.pck"
+          if [ -f "$MOD_PCK" ]; then
+            cp "$MOD_PCK" "publish/${ASM}/"
+            echo "  Copied module pck: $MOD_PCK"
+          fi
           cd publish && zip -r "../${ASM}.zip" "${ASM}/" && cd ..
           echo "  Packaged: $(ls -lh ${ASM}.zip | awk '{print $5}')"
 
