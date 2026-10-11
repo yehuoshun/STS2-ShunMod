@@ -112,6 +112,15 @@ jobs:
             if [ -n "$PCK" ] && [ "$ASM" = "ShunMod_Shun" ]; then
               cp "$PCK" "publish/${ASM}/"
             fi
+            if [ "$ASM" = "ShunMod_Tweaks" ]; then
+              TWEAKS_PCK="ShunMod.Tweaks/.godot/mono/temp/bin/Release/ShunMod_Tweaks.pck"
+              if [ -f "$TWEAKS_PCK" ]; then
+                cp "$TWEAKS_PCK" "publish/${ASM}/"
+                echo "  Copied Tweaks pck: $TWEAKS_PCK"
+              else
+                echo "  ⚠️ Tweaks pck not found at $TWEAKS_PCK (PckPacker 可能被跳过)"
+              fi
+            fi
             ls -la "publish/${ASM}/"
             cd publish && zip -r "../${ASM}.zip" "${ASM}/" && cd ..
             echo "  Packaged: $(ls -lh ${ASM}.zip | awk '{print $5}')"
@@ -134,6 +143,11 @@ jobs:
           PCK=$(find . -maxdepth 1 -name "ShunMod_Shun.pck" -type f 2>/dev/null | head -1)
           if [ -n "$PCK" ]; then
             cp "$PCK" "publish/ShunMod_Shun/"
+          fi
+          TWEAKS_PCK="ShunMod.Tweaks/.godot/mono/temp/bin/Release/ShunMod_Tweaks.pck"
+          if [ -f "$TWEAKS_PCK" ]; then
+            cp "$TWEAKS_PCK" "publish/ShunMod_Tweaks/"
+            echo "  Copied Tweaks pck"
           fi
           ls -la publish/
           cd publish && zip -r "../STS2_ShunMod.zip" . && cd ..

@@ -32,7 +32,7 @@ internal static class OverflowLocalizationPatch
 
         LocManager.Instance.GetTable("powers").MergeWith(new Dictionary<string, string>
         {
-            ["OVERFLOW_POWER.title"] = "超限",
+            ["OVERFLOW_POWER.title"] = "超限护盾",
             ["OVERFLOW_POWER.description"] = description,
             ["OVERFLOW_POWER.smartDescription"] = description
         });
