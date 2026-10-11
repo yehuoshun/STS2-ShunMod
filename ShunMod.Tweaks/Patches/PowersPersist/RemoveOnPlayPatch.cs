@@ -27,18 +27,7 @@ internal static class RemoveOnPlayPatch
 
         private static async Task ChainRemoveFromDeck(Task original, CardModel card)
         {
-            try
-            {
-                await original;
-            }
-            catch (Exception ex)
-            {
-                // 第三方 mod 在卡牌打出流程（OnPlayWrapper → Hook.AfterCardPlayed 等）抛出的异常，
-                // 若不拦截会沿 task 链传播 → 回合流程等不到完成 → 整场战斗卡死。
-                // 这里隔离异常只记日志，保证替换后的 __result 永远正常完成。
-                Log.Error($"[PowersPersist] 卡牌打出流程异常（可能来自第三方 mod），已隔离防止战斗卡死: {ex}");
-                return;
-            }
+            await original;
 
             if (!PowersPersistConfig.RemovePowerCardsOnPlay)
                 return;

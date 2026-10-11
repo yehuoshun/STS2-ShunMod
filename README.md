@@ -16,7 +16,7 @@
 |---|---|---|---|
 | `ShunMod_Core` | `Mods/ShunMod_Core/` | v0.0.32 | 共享基础框架（必需） |
 | `ShunMod_Shun` | `Mods/ShunMod_Shun/` | v0.0.132 | 舜角色内容（卡牌/遗物/事件） |
-| `ShunMod_Tweaks` | `Mods/ShunMod_Tweaks/` | v0.0.108 | 数值/机制修改 |
+| `ShunMod_Tweaks` | `Mods/ShunMod_Tweaks/` | v0.0.102 | 数值/机制修改 |
 | `ShunMod_Compat` | `Mods/ShunMod_Compat/` | v0.0.71 | 第三方模组兼容补丁 |
 
 > 构建参考：StS2 deps `v0.107.1`（sts2.dll / 0Harmony.dll 取自仓库 Release `0.107.1`）。

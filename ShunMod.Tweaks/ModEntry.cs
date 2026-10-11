@@ -27,32 +27,16 @@ public static class ModEntry
         Log.Info($"[{ModId}] Initializing {ModId}");
 
         _harmony = new Harmony(ModId);
-        // 逐个 patch 容错安装：某个 patch 目标在当前游戏版本失效（方法被删/改签名）时
-        // 只跳过该 patch 并记日志，不再让 PatchAll 整体失败导致其余 patch 全部缺席。
-        var failedPatches = new List<string>();
-        foreach (var type in Assembly.GetExecutingAssembly().GetTypes()
-                     .SelectMany(t => t.GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic).Concat(new[] { t }))
-                     .Where(t => t.GetCustomAttributes<HarmonyPatch>(false).Any()))
+        try
         {
-            try
-            {
-                _harmony.CreateClassProcessor(type).Patch();
-            }
-            catch (Exception e)
-            {
-                failedPatches.Add($"{type.FullName}: {e.Message}");
-            }
-        }
-
-        if (failedPatches.Count == 0)
-        {
+            _harmony.PatchAll(Assembly.GetExecutingAssembly());
             Log.Info($"[{ModId}] Harmony patches installed successfully");
         }
-        else
+        catch (Exception e)
         {
-            Log.Error($"[{ModId}] {failedPatches.Count} patch(es) failed to install（其余 patch 不受影响）:");
-            foreach (var fail in failedPatches)
-                Log.Error($"[{ModId}]   \u2717 {fail}");
+            Log.Error($"[{ModId}] Harmony patching failed: {e.GetType().Name}: {e.Message}");
+            if (e.InnerException != null)
+                Log.Error($"[{ModId}]   \u2192 inner: {e.InnerException.GetType().Name}: {e.InnerException.Message}");
         }
 
         // 超限记账 Power 不显式 Inject：ModelDb.Init() 的 AllAbstractModelSubtypes 会通过
