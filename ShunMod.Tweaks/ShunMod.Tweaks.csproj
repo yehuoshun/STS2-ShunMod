@@ -11,9 +11,9 @@
         <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
         <PathMap>$(AppOutputBase)=\.\</PathMap>
         <GodotDisabledSourceGenerators>GodotPluginsInitializer</GodotDisabledSourceGenerators>
-        <!-- PckPacker: 只打包 assets/，排除 .cs 文件；ResPrefix 留空 → pck 内路径直接挂 res://（PowerModel 图标路径硬编码无前缀） -->
+        <!-- PckPacker: 只打包 assets/，排除 .cs 文件；ResPrefix 必须 = ShunMod.Tweaks（PowerModel 图标路径经 Harmony patch 指向带前缀路径，见 OverflowIconPathPatch） -->
         <PckPackerSourceDir>assets/</PckPackerSourceDir>
-        <PckPackerResPrefix></PckPackerResPrefix>
+        <PckPackerResPrefix>ShunMod.Tweaks</PckPackerResPrefix>
         <PckPackerOutputPath>$(OutputPath)$(AssemblyName).pck</PckPackerOutputPath>
     </PropertyGroup>
 
