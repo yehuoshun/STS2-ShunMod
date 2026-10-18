@@ -88,6 +88,13 @@ internal static class PersistPowersPatch
                         continue;
                     }
 
+                    // 临时类 Power（ITemporaryPower：游戏本体灵活药水/预见等 20 个临时能力，
+                    // 以及其他 mod 按官方接口实现的临时能力）不重连——
+                    // ApplyInternal 不触发 BeforeApplied，重挂只会产出「有图标无实际属性」的幻影，
+                    // 且第一回合结束 AfterSideTurnEnd 会按 -Sign*Amount 倒扣真实属性（力量/敏捷）。
+                    if (canonical is ITemporaryPower)
+                        continue;
+
                     if (player.Creature.HasPower(snap.Id))
                     {
                         // 已在 Creature 上（如 Crimson Mantle 等战斗开始时自动重连的专属 Power），
