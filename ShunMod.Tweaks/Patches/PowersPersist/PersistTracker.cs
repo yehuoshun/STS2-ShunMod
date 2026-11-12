@@ -17,8 +17,9 @@ public enum PowerOrigin
 public readonly record struct PersistedPower(ModelId Id, int Amount);
 
 /// <summary>
-///     纯内存设计：快照和来源标记随进程销毁，
-///     自然实现了"不保存到存档"的行为。
+///     快照在内存中按玩家 NetId 保存，由 <see cref="PowersPersistStore" /> 负责落盘/读盘，
+///     因此重进存档（乃至重启游戏）后仍能重连。
+///     来源标记只在当前战斗内有意义，随战斗结束清空。
 /// </summary>
 public static class PersistTracker
 {
@@ -36,9 +37,27 @@ public static class PersistTracker
         Snapshots[netId] = powers;
     }
 
-    public static List<PersistedPower>? TakeSnapshot(ulong netId)
+    /// <summary>
+    ///     非破坏性读取：快照保留到下一次战斗结束被覆盖，
+    ///     这样读档重开同一场战斗时还能再重连一次。
+    /// </summary>
+    public static List<PersistedPower>? PeekSnapshot(ulong netId)
     {
-        return Snapshots.Remove(netId, out var snap) ? snap : null;
+        return Snapshots.TryGetValue(netId, out var snap) ? snap : null;
+    }
+
+    /// <summary>
+    ///     当前全部快照（供落盘遍历）。
+    /// </summary>
+    public static IReadOnlyDictionary<ulong, List<PersistedPower>> AllSnapshots => Snapshots;
+
+    /// <summary>
+    ///     丢弃全部快照（换局 / 新开一局时调用，避免串档）。
+    /// </summary>
+    public static void ClearAll()
+    {
+        Snapshots.Clear();
+        Origins.Clear();
     }
 
     public static void TagOrigin(ulong netId, ModelId powerId, PowerOrigin origin)

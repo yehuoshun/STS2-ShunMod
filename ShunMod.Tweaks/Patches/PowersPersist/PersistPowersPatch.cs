@@ -6,6 +6,7 @@ using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Runs;
 
 namespace ShunMod.Tweaks.Patches.PowersPersist;
 
@@ -40,6 +41,10 @@ internal static class PersistPowersPatch
 
                 PersistTracker.SetSnapshot(__instance.NetId, snapshot);
                 PersistTracker.ClearOriginsFor(__instance.NetId);
+
+                // 落盘：游戏存档里没有 Power 字段，读档重进战斗只是按 encounter 重建新战斗，
+                // 只有自己存一份快照才能在重进存档（乃至重启游戏）后重连。
+                PowersPersistStore.Save(__instance.RunState);
             }
             catch (Exception ex)
             {
@@ -56,9 +61,13 @@ internal static class PersistPowersPatch
         {
             try
             {
+                // 读档重进战斗房等于按 encounter 重开一场战斗，会再次走到这里。
+                // 先确保快照属于当前 run：进程重启后内存已空，此时从磁盘恢复。
+                PowersPersistStore.EnsureRun(state.RunState);
+
                 foreach (var player in state.Players)
                 {
-                    var snapshot = PersistTracker.TakeSnapshot(player.NetId);
+                    var snapshot = PersistTracker.PeekSnapshot(player.NetId);
                     if (snapshot == null || snapshot.Count == 0)
                         continue;
 
@@ -122,6 +131,31 @@ internal static class PersistPowersPatch
             {
                 PersistTracker.IsReapplying = false;
             }
+        }
+    }
+
+    /// <summary>
+    ///     新开一局时清空快照（内存 + 磁盘）。
+    ///     快照按 run 种子校验，但同一副种子重开新局时种子会重复，故在开局入口显式清理。
+    ///     读档继续走 SetUpSavedSinglePlayer / SetUpSavedMultiPlayer，不受影响。
+    /// </summary>
+    [HarmonyPatch(typeof(RunManager), nameof(RunManager.SetUpNewSinglePlayer))]
+    internal static class ResetSnapshotOnNewSinglePlayerRun
+    {
+        [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "Harmony 反射调用")]
+        public static void Postfix()
+        {
+            PowersPersistStore.Reset();
+        }
+    }
+
+    [HarmonyPatch(typeof(RunManager), nameof(RunManager.SetUpNewMultiPlayer))]
+    internal static class ResetSnapshotOnNewMultiPlayerRun
+    {
+        [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "Harmony 反射调用")]
+        public static void Postfix()
+        {
+            PowersPersistStore.Reset();
         }
     }
 }
