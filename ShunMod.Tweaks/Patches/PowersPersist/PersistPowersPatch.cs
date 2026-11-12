@@ -137,9 +137,9 @@ internal static class PersistPowersPatch
     /// <summary>
     ///     新开一局时清空快照（内存 + 磁盘）。
     ///     快照按 run 种子校验，但同一副种子重开新局时种子会重复，故在开局入口显式清理。
-    ///     读档继续走 SetUpSavedSinglePlayer / SetUpSavedMultiPlayer，不受影响。
+    ///     读档继续走 SetUpSavedSingleplayer / SetUpSavedMultiplayer，不受影响。
     /// </summary>
-    [HarmonyPatch(typeof(RunManager), nameof(RunManager.SetUpNewSinglePlayer))]
+    [HarmonyPatch(typeof(RunManager), nameof(RunManager.SetUpNewSingleplayer))]
     internal static class ResetSnapshotOnNewSinglePlayerRun
     {
         [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "Harmony 反射调用")]
@@ -149,7 +149,7 @@ internal static class PersistPowersPatch
         }
     }
 
-    [HarmonyPatch(typeof(RunManager), nameof(RunManager.SetUpNewMultiPlayer))]
+    [HarmonyPatch(typeof(RunManager), nameof(RunManager.SetUpNewMultiplayer))]
     internal static class ResetSnapshotOnNewMultiPlayerRun
     {
         [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "Harmony 反射调用")]
